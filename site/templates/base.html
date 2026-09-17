@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="An open financial model of the AI build-out, built from SEC filings.">
+<title>$title</title>
+<link rel="stylesheet" href="${root}static/style.css">
+</head>
+<body>
+<header class="site-header">
+  <nav class="wrap" aria-label="Primary">
+    <a class="brand" href="${root}index.html">AI economics</a>
+    <a href="${root}index.html#companies">Companies</a>
+    <a href="${root}writeups/index.html">Writeups</a>
+    <a href="${root}index.html#calls">Calls</a>
+    <a href="$repo_url" rel="noopener">GitHub</a>
+  </nav>
+</header>
+<main id="main" class="wrap">
+$content
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Data: SEC EDGAR. Model and writeups: $owner. Last refresh: <time>$as_of</time>.</p>
+    <p><a href="$repo_url" rel="noopener">github.com/$owner/ai-economics</a></p>
+  </div>
+</footer>
+$scripts
+<script src="${root}static/dashboard.js" defer></script>
+</body>
+</html>

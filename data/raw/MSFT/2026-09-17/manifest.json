@@ -1,0 +1,84 @@
+{
+  "ticker": "MSFT",
+  "cik": "0000789019",
+  "pulled_at": "2026-09-17T13:43:25Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 4881196,
+      "sha256": "f8aae2965b20ad0df44bdf7ccbedf797d275b6b8dc030154a7a311361bb7246f",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000789019.json",
+      "fetched_at": "2026-09-17T13:39:14Z"
+    },
+    {
+      "path": "filings/0000950170-25-010491/msft-20241231.htm",
+      "bytes": 6297413,
+      "sha256": "c1b31817f52ab6828d40d1dd637c596a51947a5dee101c529b09027f63edb8f5",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025010491/msft-20241231.htm",
+      "fetched_at": "2026-09-17T13:39:15Z"
+    },
+    {
+      "path": "filings/0000950170-25-061046/msft-20250331.htm",
+      "bytes": 6995442,
+      "sha256": "4ff48b41c7867608aab12ff7af81adf29969917c819fc39c8e4ae106b0f8480e",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025061046/msft-20250331.htm",
+      "fetched_at": "2026-09-17T13:39:15Z"
+    },
+    {
+      "path": "filings/0000950170-25-100235/msft-20250630.htm",
+      "bytes": 8158067,
+      "sha256": "99d693f6c1544144ebeee92954f151a85bc62111837530a42855953bc01d0bbe",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm",
+      "fetched_at": "2026-09-17T13:39:15Z"
+    },
+    {
+      "path": "filings/0001193125-25-256321/msft-20250930.htm",
+      "bytes": 5597461,
+      "sha256": "c963d7503907384926e685a27064574fb9fbfa1adf9e2ececca4b2c3b7a35e12",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000119312525256321/msft-20250930.htm",
+      "fetched_at": "2026-09-17T13:39:15Z"
+    },
+    {
+      "path": "filings/0001193125-26-027207/msft-20251231.htm",
+      "bytes": 7483278,
+      "sha256": "a60bb6a0747938e4903d5b30f2c73fec2e58cb09edeb34dbacb2c84b19bc448d",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526027207/msft-20251231.htm",
+      "fetched_at": "2026-09-17T13:39:15Z"
+    },
+    {
+      "path": "filings/0001193125-26-191507/msft-20260331.htm",
+      "bytes": 7731948,
+      "sha256": "76945a2c148afb8521cff13adcd320e99a8c09bcb1a2541b5d0ed5a2b02adf2d",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526191507/msft-20260331.htm",
+      "fetched_at": "2026-09-17T13:39:14Z"
+    },
+    {
+      "path": "filings/0001193125-26-323660/msft-20260630.htm",
+      "bytes": 8585501,
+      "sha256": "4bcf2da2871acc19e32c5a62f36f6d83d6aae03cdc4aaa9a86a9a21ee8223f02",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm",
+      "fetched_at": "2026-09-17T13:39:14Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 307395,
+      "sha256": "d4e7e23dd6cbe67ecde52032d4c7ef8615a3b225dd36413f83b69cc08b9fdcee",
+      "source_url": "https://data.sec.gov/submissions/CIK0000789019-submissions-001.json",
+      "fetched_at": "2026-09-17T13:39:13Z"
+    },
+    {
+      "path": "submissions-002.json",
+      "bytes": 237593,
+      "sha256": "cb548e8833a23d2be8e9bfb6d8b9de3568b6208bedf86351228d263aa8b283cf",
+      "source_url": "https://data.sec.gov/submissions/CIK0000789019-submissions-002.json",
+      "fetched_at": "2026-09-17T13:39:14Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 184766,
+      "sha256": "14c55f17f1043b0ddfb47e57495567ddb5c042f8b1a987e69c488287e48fdd0c",
+      "source_url": "https://data.sec.gov/submissions/CIK0000789019.json",
+      "fetched_at": "2026-09-17T13:39:13Z"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "ticker": "GOOGL",
+  "cik": "0001652044",
+  "pulled_at": "2026-09-17T13:43:25Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 3164517,
+      "sha256": "a017f26ee88cb4a639d1c1ddb06d53b4afe22f0ac89cabec7cd67c88919fe1c5",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001652044.json",
+      "fetched_at": "2026-09-17T13:39:17Z"
+    },
+    {
+      "path": "filings/0001652044-25-000014/goog-20241231.htm",
+      "bytes": 2528344,
+      "sha256": "a70a2cc584744e7d678ec6c4fb669fa7c5c871861eb5820fb9de4357319db7d9",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000014/goog-20241231.htm",
+      "fetched_at": "2026-09-17T13:39:19Z"
+    },
+    {
+      "path": "filings/0001652044-25-000043/goog-20250331.htm",
+      "bytes": 1615481,
+      "sha256": "a7648d744f1503f28af30839ebca5872dcc1bcee16dd94a6700c8fc9843c710a",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000043/goog-20250331.htm",
+      "fetched_at": "2026-09-17T13:39:18Z"
+    },
+    {
+      "path": "filings/0001652044-25-000062/goog-20250630.htm",
+      "bytes": 2199722,
+      "sha256": "9d147bc0cd865420765cb1cff122df36ee8a34d0e1a289e7699f184e3385ed89",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000062/goog-20250630.htm",
+      "fetched_at": "2026-09-17T13:39:18Z"
+    },
+    {
+      "path": "filings/0001652044-25-000091/goog-20250930.htm",
+      "bytes": 2196990,
+      "sha256": "e68cbf35268433dd0f5e0dc4591c29b530af7369cfe685db16a1b65b5a19fcec",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204425000091/goog-20250930.htm",
+      "fetched_at": "2026-09-17T13:39:18Z"
+    },
+    {
+      "path": "filings/0001652044-26-000018/goog-20251231.htm",
+      "bytes": 2616499,
+      "sha256": "c2f6301004f35411a20611c14ff01d80a85c0bcbab6053c80d8cc7f6fc747161",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000018/goog-20251231.htm",
+      "fetched_at": "2026-09-17T13:39:18Z"
+    },
+    {
+      "path": "filings/0001652044-26-000048/goog-20260331.htm",
+      "bytes": 1714713,
+      "sha256": "2ff47ad277068104a8b165a86c897fa3f258546ee7c4a3aa354fa87d3cb0bd02",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000048/goog-20260331.htm",
+      "fetched_at": "2026-09-17T13:39:18Z"
+    },
+    {
+      "path": "filings/0001652044-26-000071/goog-20260630.htm",
+      "bytes": 2464133,
+      "sha256": "fecfbc2683f630380b17937278ce3745eca150eb90e21a945fd6b78fe19728c7",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm",
+      "fetched_at": "2026-09-17T13:39:17Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 265016,
+      "sha256": "acdc0c9988d350ecbd1aeac795d3f05f613bf551c3ae904d1f8f8d875b961c47",
+      "source_url": "https://data.sec.gov/submissions/CIK0001652044-submissions-001.json",
+      "fetched_at": "2026-09-17T13:39:17Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 154521,
+      "sha256": "9624fe558574d3c33ca6a6a0f9451a2fdba6e11e465de1d5a822d2e3d70042bc",
+      "source_url": "https://data.sec.gov/submissions/CIK0001652044.json",
+      "fetched_at": "2026-09-17T13:39:17Z"
+    }
+  ]
+}

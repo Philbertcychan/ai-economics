@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+
+# Raw EDGAR pulls are large (a 10-K is 10-20 MB) and fully reproducible from the manifest,
+# so only the manifests are versioned. `scripts/refresh.py` re-pulls whatever is missing.
+# With these rules `git add data/raw` stages manifest.json files and nothing else; the refresh
+# workflow does that on the runs that commit, i.e. when data/processed or models changed, so a
+# committed data change carries the record of the pull behind it.
+data/raw/**
+!data/raw/**/
+!data/raw/**/manifest.json
+!data/raw/.gitkeep
+
+# The site is regenerated on every refresh and deployed from the CI artifact, not from git.
+site/build/*
+!site/build/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

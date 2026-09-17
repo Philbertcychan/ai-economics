@@ -1,0 +1,572 @@
+/* AI economics — site stylesheet.
+   Phone-first, no framework, no build step. The palette is deliberately quiet: one accent for
+   links and charts, two status tones, everything else ink on paper. Dark mode follows the OS. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --ink: #1b1b1a;
+  --muted: #5d5c57;
+  --line: #dedbd2;
+  --grid: #ebe8df;
+  --accent: #2c5d8a;
+  --accent-soft: rgba(44, 93, 138, 0.28);
+  --ok: #2f6b4f;
+  --ok-soft: rgba(47, 107, 79, 0.14);
+  --warn: #8a5a12;
+  --warn-soft: rgba(138, 90, 18, 0.14);
+  --bad: #9b3b31;
+  --code-bg: #f1efe8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141513;
+    --surface: #1c1d1b;
+    --ink: #e7e5de;
+    --muted: #a29f97;
+    --line: #33342f;
+    --grid: #2a2b27;
+    --accent: #8fb5dd;
+    --accent-soft: rgba(143, 181, 221, 0.32);
+    --ok: #7fc39f;
+    --ok-soft: rgba(127, 195, 159, 0.16);
+    --warn: #d9a850;
+    --warn-soft: rgba(217, 168, 80, 0.16);
+    --bad: #e08a80;
+    --code-bg: #23241f;
+  }
+}
+
+/* ---- base ------------------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+code,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+code {
+  background: var(--code-bg);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+pre {
+  background: var(--code-bg);
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  border-radius: 4px;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+blockquote {
+  margin: 1em 0;
+  padding: 0.25em 0 0.25em 1em;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2rem 0;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@media (min-width: 40rem) {
+  .wrap {
+    padding: 0 1.5rem;
+  }
+}
+
+/* ---- type ------------------------------------------------------------------------------ */
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5em;
+  overflow-wrap: anywhere;
+}
+
+h1 {
+  font-size: 1.9rem;
+}
+
+h2 {
+  font-size: 1.35rem;
+  margin-top: 1.5em;
+}
+
+h3 {
+  font-size: 1.1rem;
+}
+
+@media (min-width: 40rem) {
+  h1 {
+    font-size: 2.4rem;
+  }
+}
+
+p,
+ul,
+ol {
+  margin: 0 0 1em;
+}
+
+/* A bare URL or a file path in inline code has no break point; without this it pushes a phone
+   page sideways. */
+.prose {
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+}
+
+.prose h2 {
+  margin-top: 2em;
+}
+
+.prose li {
+  margin-bottom: 0.35em;
+}
+
+.lede {
+  font-size: 1.15rem;
+}
+
+.eyebrow {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.note {
+  color: var(--muted);
+  border-left: 3px solid var(--line);
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.more {
+  margin-top: 1rem;
+}
+
+/* ---- header / nav ---------------------------------------------------------------------- */
+
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+/* One line at every width: on a 375px phone the five links do not fit, so the row scrolls
+   sideways inside the header instead of wrapping to a second line. */
+.site-header nav {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0 0.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.site-header nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* 44px tall targets: comfortable to tap with a thumb. */
+.site-header a {
+  display: inline-block;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 0.75rem 0.5rem;
+  min-height: 44px;
+  text-decoration: none;
+  color: var(--muted);
+}
+
+/* The scrolling nav clips anything drawn outside it, so the focus ring goes inside the link. */
+.site-header a:focus-visible {
+  outline-offset: -2px;
+}
+
+.site-header a:hover {
+  color: var(--ink);
+}
+
+.site-header .brand {
+  color: var(--ink);
+  font-weight: 600;
+  margin-right: auto;
+  padding-left: 0;
+}
+
+main {
+  padding: 1.5rem 0 3rem;
+  min-width: 0;
+}
+
+.section {
+  margin: 2.5rem 0;
+}
+
+.section > h2 {
+  margin-bottom: 0.75rem;
+}
+
+.hero {
+  padding-top: 1rem;
+}
+
+.hero h1 {
+  margin-bottom: 0.75rem;
+}
+
+/* ---- page header ----------------------------------------------------------------------- */
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header .meta,
+.page-header .links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  color: var(--muted);
+}
+
+.page-header .links a {
+  padding: 0.25rem 0;
+}
+
+.ticker {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.7em;
+}
+
+.layer {
+  text-transform: capitalize;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  vertical-align: middle;
+}
+
+.badge-built {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.badge-pending {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+/* Companies tracked for reported figures only (no model class yet): neutral, not a warning. */
+.badge-no-model {
+  color: var(--muted);
+  background: var(--code-bg);
+}
+
+/* ---- companies grid -------------------------------------------------------------------- */
+
+/* min(100%, 16rem) keeps a card from forcing horizontal scroll on a 375px screen. */
+.cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1rem 1.1rem;
+  min-width: 0;
+}
+
+.card h3 {
+  margin: 0 0 0.15rem;
+}
+
+.card h3 a {
+  text-decoration: none;
+  display: inline-block;
+  padding: 0.15rem 0;
+}
+
+.card p {
+  margin: 0.25rem 0;
+  overflow-wrap: anywhere;
+}
+
+.card-name {
+  font-weight: 500;
+}
+
+.card-meta,
+.card-filing {
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+/* ---- writeup lists --------------------------------------------------------------------- */
+
+.writeup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.writeup-list li {
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.writeup-list li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.writeup-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+  display: inline-block;
+  padding: 0.15rem 0;
+}
+
+.writeup-list .meta {
+  display: block;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.writeup-list .summary {
+  margin: 0.35rem 0 0;
+  max-width: 72ch;
+}
+
+.tags {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag {
+  font-size: 0.8rem;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.05rem 0.55rem;
+}
+
+.page-footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+/* ---- tables ---------------------------------------------------------------------------- */
+
+/* Wide tables scroll inside this box; the page itself never scrolls sideways. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  margin: 1rem 0 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+caption {
+  text-align: left;
+  padding: 0.6rem 0.75rem 0.2rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+th,
+td {
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+thead th {
+  border-top: none;
+  border-bottom: 1px solid var(--line);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+tbody th {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.unit {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.calls td {
+  min-width: 8rem;
+}
+
+.outcome {
+  font-weight: 600;
+}
+
+.outcome-open {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.outcome-right {
+  color: var(--ok);
+}
+
+.outcome-wrong {
+  color: var(--bad);
+}
+
+.outcome-partial {
+  color: var(--warn);
+}
+
+/* ---- charts ---------------------------------------------------------------------------- */
+
+.charts {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  margin: 1rem 0;
+}
+
+.charts:empty {
+  display: none;
+}
+
+.chart {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.75rem 0.75rem 0.5rem;
+  min-width: 0;
+}
+
+.chart figcaption {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+/* Chart.js needs a positioned, fixed-height box to size a responsive canvas. */
+.chart-box {
+  position: relative;
+  height: 260px;
+  width: 100%;
+}
+
+/* ---- footer ---------------------------------------------------------------------------- */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 1.5rem 0 2.5rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.site-footer p {
+  margin: 0 0 0.4em;
+  overflow-wrap: anywhere;
+}

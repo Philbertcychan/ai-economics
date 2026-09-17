@@ -1,0 +1,193 @@
+{
+ "cik": "0001513845",
+ "entityType": "other",
+ "sic": "7370",
+ "sicDescription": "Services-Computer Programming, Data Processing, Etc.",
+ "ownerOrg": "06 Technology",
+ "insiderTransactionForOwnerExists": 0,
+ "insiderTransactionForIssuerExists": 1,
+ "name": "Nebius Group N.V.",
+ "tickers": [
+  "NBIS"
+ ],
+ "exchanges": [
+  "Nasdaq"
+ ],
+ "ein": "000000000",
+ "lei": null,
+ "description": "",
+ "website": "",
+ "investorWebsite": "",
+ "category": "Large accelerated filer",
+ "fiscalYearEnd": null,
+ "stateOfIncorporation": "P7",
+ "stateOfIncorporationDescription": "Netherlands",
+ "addresses": {
+  "mailing": {
+   "street1": "SCHIPHOL BOULEVARD 165",
+   "street2": null,
+   "city": "SCHIPHOL",
+   "stateOrCountry": null,
+   "zipCode": null,
+   "stateOrCountryDescription": null,
+   "isForeignLocation": 1,
+   "foreignStateTerritory": null,
+   "country": "Netherlands",
+   "countryCode": "P7"
+  },
+  "business": {
+   "street1": "SCHIPHOL BOULEVARD 165",
+   "street2": null,
+   "city": "SCHIPHOL",
+   "stateOrCountry": null,
+   "zipCode": null,
+   "stateOrCountryDescription": null,
+   "isForeignLocation": 1,
+   "foreignStateTerritory": null,
+   "country": "Netherlands",
+   "countryCode": "P7"
+  }
+ },
+ "phone": "31202066970",
+ "flags": "",
+ "formerNames": [
+  {
+   "name": "Yandex N.V.",
+   "from": "2011-04-28T04:00:00.000Z",
+   "to": "2024-08-16T04:00:00.000Z"
+  }
+ ],
+ "filings": {
+  "recent": {
+   "accessionNumber": [
+    "0001104659-26-105749",
+    "0001513845-26-000110",
+    "0001104659-26-094844",
+    "0001104659-26-064092",
+    "0001104659-26-052948",
+    "0001558370-25-005991"
+   ],
+   "filingDate": [
+    "2026-09-08",
+    "2026-09-03",
+    "2026-08-12",
+    "2026-05-20",
+    "2026-04-30",
+    "2025-04-30"
+   ],
+   "reportDate": [
+    "2026-09-08",
+    "2026-09-01",
+    "2026-08-12",
+    "2026-03-31",
+    "2025-12-31",
+    "2024-12-31"
+   ],
+   "acceptanceDateTime": [
+    "2026-09-08T14:02:31.000Z",
+    "2026-09-03T16:43:44.000Z",
+    "2026-08-12T20:01:08.000Z",
+    "2026-05-20T10:28:13.000Z",
+    "2026-04-30T20:16:27.000Z",
+    "2025-04-30T20:08:09.000Z"
+   ],
+   "act": [
+    "34",
+    "",
+    "34",
+    "34",
+    "34",
+    "34"
+   ],
+   "form": [
+    "6-K",
+    "4",
+    "6-K",
+    "6-K",
+    "20-F",
+    "20-F"
+   ],
+   "fileNumber": [
+    "001-35173",
+    "",
+    "001-35173",
+    "001-35173",
+    "001-35173",
+    "001-35173"
+   ],
+   "filmNumber": [
+    "261363773",
+    "",
+    "261267321",
+    "261001334",
+    "26925635",
+    "25895063"
+   ],
+   "items": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "core_type": [
+    "6-K",
+    "4",
+    "6-K",
+    "6-K",
+    "XBRL",
+    "XBRL"
+   ],
+   "size": [
+    30387,
+    13075,
+    1887345,
+    1433677,
+    22388866,
+    18948341
+   ],
+   "isXBRL": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    1
+   ],
+   "isInlineXBRL": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    1
+   ],
+   "isXBRLNumeric": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    null
+   ],
+   "primaryDocument": [
+    "tm2624958d1_6k.htm",
+    "xslF345X06/form4.xml",
+    "nbis-20260812x6k.htm",
+    "nbis-20260331x6k.htm",
+    "nbis-20251231x20f.htm",
+    "nbis-20241231x20f.htm"
+   ],
+   "primaryDocDescription": [
+    "FORM 6-K",
+    "PRIMARY DOCUMENT",
+    "6-K",
+    "6-K",
+    "20-F",
+    "20-F"
+   ]
+  },
+  "files": []
+ }
+}

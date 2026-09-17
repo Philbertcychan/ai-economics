@@ -1,0 +1,232 @@
+{
+ "cik": "0001769628",
+ "entityType": "operating",
+ "sic": "7372",
+ "sicDescription": "Services-Prepackaged Software",
+ "ownerOrg": "06 Technology",
+ "insiderTransactionForOwnerExists": 0,
+ "insiderTransactionForIssuerExists": 1,
+ "name": "CoreWeave, Inc.",
+ "tickers": [
+  "CRWV"
+ ],
+ "exchanges": [
+  "Nasdaq"
+ ],
+ "ein": "823060021",
+ "lei": null,
+ "description": "",
+ "website": "",
+ "investorWebsite": "",
+ "category": "Non-accelerated filer",
+ "fiscalYearEnd": "1231",
+ "stateOfIncorporation": "DE",
+ "stateOfIncorporationDescription": "DE",
+ "addresses": {
+  "mailing": {
+   "street1": "290 W. MT. PLEASANT AVENUE, SUITE 4100",
+   "street2": null,
+   "city": "LIVINGSTON",
+   "stateOrCountry": "NJ",
+   "zipCode": "07039",
+   "stateOrCountryDescription": "NJ",
+   "isForeignLocation": 0,
+   "foreignStateTerritory": null,
+   "country": null,
+   "countryCode": null
+  },
+  "business": {
+   "street1": "290 W. MT. PLEASANT AVENUE, SUITE 4100",
+   "street2": null,
+   "city": "LIVINGSTON",
+   "stateOrCountry": "NJ",
+   "zipCode": "07039",
+   "stateOrCountryDescription": "NJ",
+   "isForeignLocation": null,
+   "foreignStateTerritory": null,
+   "country": null,
+   "countryCode": null
+  }
+ },
+ "phone": "(973) 270-9737",
+ "flags": "",
+ "formerNames": [
+  {
+   "name": "Atlantic Crypto Corp",
+   "from": "2019-03-11T04:00:00.000Z",
+   "to": "2019-10-03T04:00:00.000Z"
+  }
+ ],
+ "filings": {
+  "recent": {
+   "accessionNumber": [
+    "0001769628-26-000419",
+    "0001950047-26-009196",
+    "0001769628-26-000366",
+    "0001769628-26-000362",
+    "0001769628-26-000222",
+    "0001769628-26-000104",
+    "0001769628-25-000062",
+    "0001769628-25-000041"
+   ],
+   "filingDate": [
+    "2026-09-10",
+    "2026-09-08",
+    "2026-08-12",
+    "2026-08-11",
+    "2026-05-08",
+    "2026-03-02",
+    "2025-11-13",
+    "2025-08-13"
+   ],
+   "reportDate": [
+    "2026-09-08",
+    "",
+    "2026-06-30",
+    "2026-08-11",
+    "2026-03-31",
+    "2025-12-31",
+    "2025-09-30",
+    "2025-06-30"
+   ],
+   "acceptanceDateTime": [
+    "2026-09-10T23:21:02.000Z",
+    "2026-09-08T20:26:30.000Z",
+    "2026-08-11T23:24:42.000Z",
+    "2026-08-11T20:10:26.000Z",
+    "2026-05-07T23:21:42.000Z",
+    "2026-03-02T21:14:01.000Z",
+    "2025-11-13T21:19:11.000Z",
+    "2025-08-12T22:18:48.000Z"
+   ],
+   "act": [
+    "",
+    "33",
+    "34",
+    "34",
+    "34",
+    "34",
+    "34",
+    "34"
+   ],
+   "form": [
+    "4",
+    "144",
+    "10-Q",
+    "8-K",
+    "10-Q",
+    "10-K",
+    "10-Q",
+    "10-Q"
+   ],
+   "fileNumber": [
+    "",
+    "001-42563",
+    "001-42563",
+    "001-42563",
+    "001-42563",
+    "001-42563",
+    "001-42563",
+    "001-42563"
+   ],
+   "filmNumber": [
+    "",
+    "261365403",
+    "261264891",
+    "261263280",
+    "26955501",
+    "26707757",
+    "251478809",
+    "251208347"
+   ],
+   "items": [
+    "",
+    "",
+    "",
+    "2.02,9.01",
+    "",
+    "",
+    "",
+    ""
+   ],
+   "core_type": [
+    "4",
+    "144",
+    "XBRL",
+    "XBRL",
+    "XBRL",
+    "XBRL",
+    "XBRL",
+    "XBRL"
+   ],
+   "size": [
+    10856,
+    9318,
+    12588161,
+    530955,
+    10409193,
+    18802950,
+    15862434,
+    12552339
+   ],
+   "isXBRL": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "isInlineXBRL": [
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "isXBRLNumeric": [
+    0,
+    0,
+    1,
+    0,
+    1,
+    null,
+    null,
+    null
+   ],
+   "primaryDocument": [
+    "xslF345X06/form4.xml",
+    "xsl144X01/primary_doc.xml",
+    "crwv-20260630.htm",
+    "crwv-20260811.htm",
+    "crwv-20260331.htm",
+    "crwv-20251231.htm",
+    "crwv-20250930.htm",
+    "crwv-20250630.htm"
+   ],
+   "primaryDocDescription": [
+    "PRIMARY DOCUMENT",
+    "",
+    "10-Q",
+    "8-K",
+    "10-Q",
+    "10-K",
+    "10-Q",
+    "10-Q"
+   ]
+  },
+  "files": [
+   {
+    "name": "CIK0001769628-submissions-001.json",
+    "filingCount": 7,
+    "filingFrom": "2019-03-11",
+    "filingTo": "2025-07-28"
+   }
+  ]
+ }
+}

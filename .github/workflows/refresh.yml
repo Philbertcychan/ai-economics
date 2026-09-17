@@ -1,0 +1,144 @@
+# Daily data refresh and GitHub Pages deploy.
+#
+# One-time setup (repository owner):
+#   1. Settings -> Pages -> "Build and deployment" -> Source: "GitHub Actions".
+#   2. Settings -> Secrets and variables -> Actions -> "New repository secret":
+#        EDGAR_USER_AGENT = Your Name you@example.com
+#      SEC's fair-access policy asks for a real contact address in the User-Agent, so the job
+#      fails at its first step until the secret exists. (data/edgar.py has a placeholder
+#      fallback; that is for a one-off run on a laptop, never for a scheduled job.)
+#   3. Nothing to change under Settings -> Actions -> "Workflow permissions": the
+#      `permissions` blocks below grant each job exactly what it needs.
+#   4. Seed the data once by hand: Actions -> Refresh -> "Run workflow". The first run commits
+#      every tracked filing (long diff, once); later runs commit only on days when something
+#      under data/processed or models changed.
+#
+# What it does, daily at 11:17 UTC (after the previous US business day's filings are indexed)
+# or on demand:
+#   refresh  `uv run scripts/refresh.py --no-download` pulls the filing index and XBRL facts
+#            for every tracked company, re-exports the models whose frames changed, rebuilds
+#            site/build and writes data/last_refresh_diff.md. Raw filing documents are
+#            gitignored, so downloading them here would be wasted bandwidth (--no-download).
+#            The run report is shown in the job summary every time.
+#            A commit (as github-actions[bot]) is made only when data/processed or models
+#            changed. data/last_refresh_diff.md and site/data/companies.json carry the run
+#            time, so they differ on every run and would otherwise mean a commit a day with
+#            nothing in it. When there is a commit it also carries site/data, the report and
+#            the raw-pull manifests under data/raw (.gitignore lets nothing else through
+#            there), so a committed data change comes with the record of the pull behind it.
+#            The built site is uploaded as the Pages artifact on every run.
+#   deploy   publishes that artifact to GitHub Pages.
+#
+# refresh.py exits 1 when any per-company step failed but still writes everything it could,
+# so the commit and upload steps run regardless and the job is marked failed only at the
+# end: the failure is visible in the Actions tab without losing the partial refresh.
+
+name: Refresh
+
+on:
+  schedule:
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+
+# Jobs widen this to what they need; the default keeps any future job read-only.
+permissions:
+  contents: read
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      site_uploaded: ${{ steps.upload.outcome == 'success' }}
+    steps:
+      - name: Require the EDGAR_USER_AGENT secret
+        # An unset secret expands to an empty string, and refresh.py would then send SEC a
+        # placeholder contact address every day. Stop before anything is fetched.
+        env:
+          EDGAR_USER_AGENT: ${{ secrets.EDGAR_USER_AGENT }}
+        run: |
+          if [ -z "${EDGAR_USER_AGENT//[[:space:]]/}" ]; then
+            echo "::error::EDGAR_USER_AGENT secret is not set; see the setup notes in refresh.yml"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install
+        # --locked: fail when uv.lock is out of date instead of silently re-resolving it.
+        run: uv sync --locked
+
+      - name: Refresh data, models and site
+        id: refresh
+        # Exit code 1 means "some step failed"; the partial results are still committed
+        # below and the last step turns the job red.
+        continue-on-error: true
+        env:
+          EDGAR_USER_AGENT: ${{ secrets.EDGAR_USER_AGENT }}
+        run: uv run scripts/refresh.py --no-download
+
+      - name: Show the run report in the job summary
+        # On a day without a commit this is the only place the report can be read. Its first
+        # line is the run time, so a stale file left by an earlier commit is recognisable.
+        if: hashFiles('data/last_refresh_diff.md') != ''
+        run: cat data/last_refresh_diff.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(git status --porcelain -- data/processed models)" ]; then
+            echo "data/processed and models unchanged: nothing to commit"
+            exit 0
+          fi
+          # Stage only what exists: `git add` aborts, staging nothing, when one pathspec
+          # matches no file, and the report is missing if refresh.py died before writing it.
+          for path in data/processed models site/data data/raw data/last_refresh_diff.md; do
+            if [ -e "$path" ]; then git add -- "$path"; fi
+          done
+          git commit -m "refresh: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          # A human push since checkout would make ours non-fast-forward; rebase onto it.
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Upload site for Pages
+        id: upload
+        # Never publish an empty directory: if the build did not happen, keep the live site.
+        # !cancelled(): a failed commit or push must not keep a good build from deploying.
+        if: ${{ !cancelled() && hashFiles('site/build/index.html') != '' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/build
+
+      - name: Fail the job if the refresh reported errors
+        if: ${{ !cancelled() && steps.refresh.outcome == 'failure' }}
+        run: |
+          echo "::error::scripts/refresh.py reported errors; see the run report in the job summary"
+          exit 1
+
+  deploy:
+    needs: refresh
+    # Deploy whatever was built, even when the refresh job failed on one company, but not
+    # when no artifact was uploaded or the run was cancelled.
+    if: ${{ !cancelled() && needs.refresh.outputs.site_uploaded == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

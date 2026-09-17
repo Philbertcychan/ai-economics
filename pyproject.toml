@@ -1,0 +1,43 @@
+[project]
+name = "ai-economics"
+version = "0.1.0"
+description = "An open financial model of the AI build-out: what a dollar of GPU compute earns, who captures it, and whether the supply being built matches the demand being guided to."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "openpyxl>=3.1",
+    # Only used by scripts/build_site.py to turn writeups into HTML. Pure Python, no transitive deps.
+    "markdown>=3.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.6",
+]
+
+# The repo is installed into the venv in editable mode so that `uv run scripts/refresh.py`
+# can import `engine`, `companies` and `data` without sys.path hacks.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["engine", "companies", "data", "scripts"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["site/build", "data/raw", "notes"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -m 'not network'"
+markers = [
+    "network: hits live SEC EDGAR endpoints; deselected by default, run with `-m network`",
+]

@@ -1,0 +1,98 @@
+{
+  "ticker": "CRWV",
+  "cik": "0001769628",
+  "pulled_at": "2026-09-17T13:43:24Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 501063,
+      "sha256": "c0af16143fd615e9d4d3066226d81722fcbb49de9ee4125f038b1f47e285026f",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001769628.json",
+      "fetched_at": "2026-09-17T13:39:00Z"
+    },
+    {
+      "path": "filings/0001193125-25-044231/d899798ds1.htm",
+      "bytes": 3042326,
+      "sha256": "c41f61e627aee7a1d7f6d7f2c2b547a37257d166f5395261187ad38a28c165f1",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000119312525044231/d899798ds1.htm",
+      "fetched_at": "2026-09-17T13:39:01Z"
+    },
+    {
+      "path": "filings/0001193125-25-052207/d899798ds1a.htm",
+      "bytes": 3078493,
+      "sha256": "58b036f94674323d4543dc7166f2db79a7c8f27b7657837c71b2d0080416896a",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000119312525052207/d899798ds1a.htm",
+      "fetched_at": "2026-09-17T13:39:01Z"
+    },
+    {
+      "path": "filings/0001193125-25-058309/d899798ds1a.htm",
+      "bytes": 3259260,
+      "sha256": "e8ffdec23a3e27fbad74571419c9bc626b66a73862799256d0e244bf7f0d9ba2",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000119312525058309/d899798ds1a.htm",
+      "fetched_at": "2026-09-17T13:39:01Z"
+    },
+    {
+      "path": "filings/0001193125-25-067651/d899798d424b4.htm",
+      "bytes": 3526266,
+      "sha256": "8c12f6131e5d3e773fc3cb5114fc3b21240e83ae354ab32e291dee130276c220",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000119312525067651/d899798d424b4.htm",
+      "fetched_at": "2026-09-17T13:39:01Z"
+    },
+    {
+      "path": "filings/0001769628-25-000014/crwv-20250331.htm",
+      "bytes": 1694904,
+      "sha256": "6e2e33fc4d3366521095c7baf37e6b2dadfbfc56061d5c95a3cd0f3375171779",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962825000014/crwv-20250331.htm",
+      "fetched_at": "2026-09-17T13:39:00Z"
+    },
+    {
+      "path": "filings/0001769628-25-000041/crwv-20250630.htm",
+      "bytes": 2222853,
+      "sha256": "3eb2c9b5f7970f270c8e45b4dc7e2a4da88f29b8d1e928c13bb1443eb4ece509",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962825000041/crwv-20250630.htm",
+      "fetched_at": "2026-09-17T13:39:00Z"
+    },
+    {
+      "path": "filings/0001769628-25-000062/crwv-20250930.htm",
+      "bytes": 2365151,
+      "sha256": "4f3e64a0a3816b6868b568868f04821c2eacf9d764be875032881f2d12847674",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962825000062/crwv-20250930.htm",
+      "fetched_at": "2026-09-17T13:39:00Z"
+    },
+    {
+      "path": "filings/0001769628-26-000104/crwv-20251231.htm",
+      "bytes": 2792032,
+      "sha256": "c796cf3da3deaf213561a54b731af74526ff72fc854fde005591b0b1880ed1fc",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm",
+      "fetched_at": "2026-09-17T13:39:00Z"
+    },
+    {
+      "path": "filings/0001769628-26-000222/crwv-20260331.htm",
+      "bytes": 1741543,
+      "sha256": "0739f0ad6257a9ba80e108fc6b7c12ba9788c35d6967852b2dd7c627672a0d15",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000222/crwv-20260331.htm",
+      "fetched_at": "2026-09-17T13:39:00Z"
+    },
+    {
+      "path": "filings/0001769628-26-000366/crwv-20260630.htm",
+      "bytes": 2197519,
+      "sha256": "5ef1bddf52a356c5c8a77ebba2b53b35a7c35ac669b27e8fa7842f1f301124e7",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm",
+      "fetched_at": "2026-09-17T13:39:00Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 18716,
+      "sha256": "f4d989fef08861f4bbae774c10bc47a33cc44a10106ebc7da394223ea9a072ad",
+      "source_url": "https://data.sec.gov/submissions/CIK0001769628-submissions-001.json",
+      "fetched_at": "2026-09-17T13:38:59Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 157851,
+      "sha256": "2a0600688d4a80778ee7c06d7516eff4099cb0b848e9ef5b2b13f1038eb77495",
+      "source_url": "https://data.sec.gov/submissions/CIK0001769628.json",
+      "fetched_at": "2026-09-17T13:38:59Z"
+    }
+  ]
+}

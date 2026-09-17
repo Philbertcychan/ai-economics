@@ -1,0 +1,42 @@
+# Continuous integration: lint, format check and the offline test suite on every push and
+# pull request. Nothing here needs a secret or the network: no test contacts SEC EDGAR, and
+# the `network` marker reserved for future live tests is deselected by default (see
+# pyproject.toml).
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  # A newer push to the same branch supersedes the run in flight.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install
+        # --locked: fail when uv.lock is out of date instead of silently re-resolving it, so
+        # the tests run against the committed resolution and nothing else.
+        run: uv sync --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Format check
+        run: uv run ruff format --check .
+
+      - name: Test
+        run: uv run pytest

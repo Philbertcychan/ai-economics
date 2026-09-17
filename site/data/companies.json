@@ -1,0 +1,96 @@
+{
+  "as_of": "2026-09-17T13:43:24Z",
+  "companies": [
+    {
+      "ticker": "CRWV",
+      "name": "CoreWeave, Inc.",
+      "layer": "neocloud",
+      "cik": "0001769628",
+      "model_status": "pending",
+      "latest_filing": {
+        "form": "10-Q",
+        "date": "2026-08-12",
+        "url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm"
+      },
+      "has_data": true
+    },
+    {
+      "ticker": "NBIS",
+      "name": "Nebius Group N.V.",
+      "layer": "neocloud",
+      "cik": "0001513845",
+      "model_status": "pending",
+      "latest_filing": {
+        "form": "6-K",
+        "date": "2026-09-08",
+        "url": "https://www.sec.gov/Archives/edgar/data/1513845/000110465926105749/tm2624958d1_6k.htm"
+      },
+      "has_data": true
+    },
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA Corp",
+      "layer": "chip",
+      "cik": "0001045810",
+      "model_status": "no-model",
+      "latest_filing": {
+        "form": "10-Q",
+        "date": "2026-08-26",
+        "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm"
+      },
+      "has_data": true
+    },
+    {
+      "ticker": "MSFT",
+      "name": "Microsoft Corp",
+      "layer": "hyperscaler",
+      "cik": "0000789019",
+      "model_status": "no-model",
+      "latest_filing": {
+        "form": "10-K",
+        "date": "2026-07-29",
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm"
+      },
+      "has_data": true
+    },
+    {
+      "ticker": "GOOGL",
+      "name": "Alphabet Inc.",
+      "layer": "hyperscaler",
+      "cik": "0001652044",
+      "model_status": "no-model",
+      "latest_filing": {
+        "form": "10-Q",
+        "date": "2026-07-23",
+        "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204426000071/goog-20260630.htm"
+      },
+      "has_data": true
+    },
+    {
+      "ticker": "AMZN",
+      "name": "Amazon.com, Inc.",
+      "layer": "hyperscaler",
+      "cik": "0001018724",
+      "model_status": "no-model",
+      "latest_filing": {
+        "form": "10-Q",
+        "date": "2026-07-31",
+        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+      },
+      "has_data": true
+    },
+    {
+      "ticker": "META",
+      "name": "Meta Platforms, Inc.",
+      "layer": "hyperscaler",
+      "cik": "0001326801",
+      "model_status": "no-model",
+      "latest_filing": {
+        "form": "10-Q",
+        "date": "2026-07-30",
+        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+      },
+      "has_data": true
+    }
+  ]
+}

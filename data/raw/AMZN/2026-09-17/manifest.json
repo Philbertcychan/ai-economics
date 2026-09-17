@@ -1,0 +1,84 @@
+{
+  "ticker": "AMZN",
+  "cik": "0001018724",
+  "pulled_at": "2026-09-17T13:43:25Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 4478611,
+      "sha256": "7549fb68446eee40e1f50a166fa06b2d2ee6349e07c8553a4828757e032d3cd4",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+      "fetched_at": "2026-09-17T13:39:20Z"
+    },
+    {
+      "path": "filings/0001018724-25-000004/amzn-20241231.htm",
+      "bytes": 1922355,
+      "sha256": "094e0f2aa1d58203ed77340330e94ff5cb63f5168de5e08ed25a17681a1a53d9",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000004/amzn-20241231.htm",
+      "fetched_at": "2026-09-17T13:39:21Z"
+    },
+    {
+      "path": "filings/0001018724-25-000036/amzn-20250331.htm",
+      "bytes": 1139537,
+      "sha256": "343daf57ea75cf87da844a0e3e6924d6d24e924cf9e5ce18b44c1147c15d80dd",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000036/amzn-20250331.htm",
+      "fetched_at": "2026-09-17T13:39:21Z"
+    },
+    {
+      "path": "filings/0001018724-25-000086/amzn-20250630.htm",
+      "bytes": 1387163,
+      "sha256": "20ac2d1a3d933f444a3571f053e072aab804923b9bac4982cd382d23d9bb7be7",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000086/amzn-20250630.htm",
+      "fetched_at": "2026-09-17T13:39:21Z"
+    },
+    {
+      "path": "filings/0001018724-25-000123/amzn-20250930.htm",
+      "bytes": 1405879,
+      "sha256": "edd6f71c9881b674c11ac9fc31a95a6946533133af1fcb5a322af2a78db109d2",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872425000123/amzn-20250930.htm",
+      "fetched_at": "2026-09-17T13:39:21Z"
+    },
+    {
+      "path": "filings/0001018724-26-000004/amzn-20251231.htm",
+      "bytes": 1968342,
+      "sha256": "beb1bfc28558135e76882db0cf36ba72a1ab44e2144fe37534f4da1e120ddb57",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000004/amzn-20251231.htm",
+      "fetched_at": "2026-09-17T13:39:21Z"
+    },
+    {
+      "path": "filings/0001018724-26-000014/amzn-20260331.htm",
+      "bytes": 1241244,
+      "sha256": "bfc025c92bd7ed07daac4210020764854242103002ac7bb59ccb28bf058f04e3",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000014/amzn-20260331.htm",
+      "fetched_at": "2026-09-17T13:39:21Z"
+    },
+    {
+      "path": "filings/0001018724-26-000026/amzn-20260630.htm",
+      "bytes": 1591422,
+      "sha256": "d07b8a88fa442c2c55bd65b3f1d336ca16e7d1e9fda831e1063d24adea60e4eb",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm",
+      "fetched_at": "2026-09-17T13:39:20Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 316347,
+      "sha256": "d187d879c1e5b2fa716b2aa988392085db3c0a2e3d5e43416a31c83e6d936d21",
+      "source_url": "https://data.sec.gov/submissions/CIK0001018724-submissions-001.json",
+      "fetched_at": "2026-09-17T13:39:20Z"
+    },
+    {
+      "path": "submissions-002.json",
+      "bytes": 20784,
+      "sha256": "ccd4e8665334141d6f58836daaf2ca5117542d6ef831d104889e767b155954d1",
+      "source_url": "https://data.sec.gov/submissions/CIK0001018724-submissions-002.json",
+      "fetched_at": "2026-09-17T13:39:20Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 159857,
+      "sha256": "e12c1f29dc9deb9202456c28d81f77602a41e190c105d6364619fc35a9ec063d",
+      "source_url": "https://data.sec.gov/submissions/CIK0001018724.json",
+      "fetched_at": "2026-09-17T13:39:19Z"
+    }
+  ]
+}

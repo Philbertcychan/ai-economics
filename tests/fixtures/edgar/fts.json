@@ -1,0 +1,666 @@
+{
+ "took": 2170,
+ "timed_out": false,
+ "_shards": {
+  "total": 50,
+  "successful": 50,
+  "skipped": 0,
+  "failed": 0
+ },
+ "hits": {
+  "total": {
+   "value": 86,
+   "relation": "eq"
+  },
+  "max_score": 15.72879,
+  "hits": [
+   {
+    "_index": "edgar_file",
+    "_id": "0001193125-25-044231:d899798dex108.htm",
+    "_score": 15.72879,
+    "_source": {
+     "ciks": [
+      "0001769628"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-285512"
+     ],
+     "display_names": [
+      "CoreWeave, Inc.  (CIK 0001769628)"
+     ],
+     "xsl": null,
+     "sequence": "13",
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-03-03",
+     "biz_states": [
+      "NJ"
+     ],
+     "sics": [
+      "7372"
+     ],
+     "form": "S-1",
+     "adsh": "0001193125-25-044231",
+     "film_num": [
+      "25699166"
+     ],
+     "biz_locations": [
+      "Springfield, NJ"
+     ],
+     "file_type": "EX-10.8",
+     "file_description": "EX-10.8",
+     "inc_states": [
+      "DE"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001193125-25-044231:d899798dex109.htm",
+    "_score": 15.366083,
+    "_source": {
+     "ciks": [
+      "0001769628"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-285512"
+     ],
+     "display_names": [
+      "CoreWeave, Inc.  (CIK 0001769628)"
+     ],
+     "xsl": null,
+     "sequence": "14",
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-03-03",
+     "biz_states": [
+      "NJ"
+     ],
+     "sics": [
+      "7372"
+     ],
+     "form": "S-1",
+     "adsh": "0001193125-25-044231",
+     "film_num": [
+      "25699166"
+     ],
+     "biz_locations": [
+      "Springfield, NJ"
+     ],
+     "file_type": "EX-10.9",
+     "file_description": "EX-10.9",
+     "inc_states": [
+      "DE"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001193125-25-044231:d899798dex1015.htm",
+    "_score": 15.15786,
+    "_source": {
+     "ciks": [
+      "0001769628"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-285512"
+     ],
+     "display_names": [
+      "CoreWeave, Inc.  (CIK 0001769628)"
+     ],
+     "xsl": null,
+     "sequence": "20",
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-03-03",
+     "biz_states": [
+      "NJ"
+     ],
+     "sics": [
+      "7372"
+     ],
+     "form": "S-1",
+     "adsh": "0001193125-25-044231",
+     "film_num": [
+      "25699166"
+     ],
+     "biz_locations": [
+      "Springfield, NJ"
+     ],
+     "file_type": "EX-10.15",
+     "file_description": "EX-10.15",
+     "inc_states": [
+      "DE"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001193125-25-044231:d899798dex1013.htm",
+    "_score": 15.089626,
+    "_source": {
+     "ciks": [
+      "0001769628"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-285512"
+     ],
+     "display_names": [
+      "CoreWeave, Inc.  (CIK 0001769628)"
+     ],
+     "xsl": null,
+     "sequence": "18",
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-03-03",
+     "biz_states": [
+      "NJ"
+     ],
+     "sics": [
+      "7372"
+     ],
+     "form": "S-1",
+     "adsh": "0001193125-25-044231",
+     "film_num": [
+      "25699166"
+     ],
+     "biz_locations": [
+      "Springfield, NJ"
+     ],
+     "file_type": "EX-10.13",
+     "file_description": "EX-10.13",
+     "inc_states": [
+      "DE"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001193125-25-044231:d899798dex1014.htm",
+    "_score": 15.089626,
+    "_source": {
+     "ciks": [
+      "0001769628"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-285512"
+     ],
+     "display_names": [
+      "CoreWeave, Inc.  (CIK 0001769628)"
+     ],
+     "xsl": null,
+     "sequence": "19",
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-03-03",
+     "biz_states": [
+      "NJ"
+     ],
+     "sics": [
+      "7372"
+     ],
+     "form": "S-1",
+     "adsh": "0001193125-25-044231",
+     "film_num": [
+      "25699166"
+     ],
+     "biz_locations": [
+      "Springfield, NJ"
+     ],
+     "file_type": "EX-10.14",
+     "file_description": "EX-10.14",
+     "inc_states": [
+      "DE"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001213900-25-066839:ea0249945-s1a1_white.htm",
+    "_score": 14.442831,
+    "_source": {
+     "ciks": [
+      "0002042022"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-288650"
+     ],
+     "display_names": [
+      "WhiteFiber, Inc.  (CIK 0002042022)"
+     ],
+     "xsl": null,
+     "sequence": 1,
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-07-23",
+     "biz_states": [
+      "NY"
+     ],
+     "sics": [
+      "6199"
+     ],
+     "form": "S-1/A",
+     "adsh": "0001213900-25-066839",
+     "film_num": [
+      "251141941"
+     ],
+     "biz_locations": [
+      "New York, NY"
+     ],
+     "file_type": "S-1/A",
+     "file_description": "AMENDMENT NO. 1 TO FORM S-1",
+     "inc_states": [
+      "E9"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001213900-25-068434:ea0249945-03.htm",
+    "_score": 14.395251,
+    "_source": {
+     "ciks": [
+      "0002042022"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-288650"
+     ],
+     "display_names": [
+      "WhiteFiber, Inc.  (WYFI)  (CIK 0002042022)"
+     ],
+     "xsl": null,
+     "sequence": 1,
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-07-29",
+     "biz_states": [
+      "NY"
+     ],
+     "sics": [
+      "6199"
+     ],
+     "form": "S-1/A",
+     "adsh": "0001213900-25-068434",
+     "film_num": [
+      "251157633"
+     ],
+     "biz_locations": [
+      "New York, NY"
+     ],
+     "file_type": "S-1/A",
+     "file_description": "REGISTRATION STATEMENT",
+     "inc_states": [
+      "E9"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001213900-25-070709:ea0249945-04.htm",
+    "_score": 14.395251,
+    "_source": {
+     "ciks": [
+      "0002042022"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-288650"
+     ],
+     "display_names": [
+      "WhiteFiber, Inc.  (WYFI)  (CIK 0002042022)"
+     ],
+     "xsl": null,
+     "sequence": 1,
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-08-01",
+     "biz_states": [
+      "NY"
+     ],
+     "sics": [
+      "6199"
+     ],
+     "form": "S-1/A",
+     "adsh": "0001213900-25-070709",
+     "film_num": [
+      "251177144"
+     ],
+     "biz_locations": [
+      "New York, NY"
+     ],
+     "file_type": "S-1/A",
+     "file_description": "REGISTRATION STATEMENT",
+     "inc_states": [
+      "E9"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001193125-25-044231:d899798dex1010.htm",
+    "_score": 14.228506,
+    "_source": {
+     "ciks": [
+      "0001769628"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-285512"
+     ],
+     "display_names": [
+      "CoreWeave, Inc.  (CIK 0001769628)"
+     ],
+     "xsl": null,
+     "sequence": "15",
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-03-03",
+     "biz_states": [
+      "NJ"
+     ],
+     "sics": [
+      "7372"
+     ],
+     "form": "S-1",
+     "adsh": "0001193125-25-044231",
+     "film_num": [
+      "25699166"
+     ],
+     "biz_locations": [
+      "Springfield, NJ"
+     ],
+     "file_type": "EX-10.10",
+     "file_description": "EX-10.10",
+     "inc_states": [
+      "DE"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001213900-25-063338:ea0248382-s1_white.htm",
+    "_score": 14.172412,
+    "_source": {
+     "ciks": [
+      "0002042022"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-288650"
+     ],
+     "display_names": [
+      "White Fiber, Inc.  (WYFI)  (CIK 0002042022)"
+     ],
+     "xsl": null,
+     "sequence": 1,
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-07-11",
+     "biz_states": [
+      "NY"
+     ],
+     "sics": [
+      "6199"
+     ],
+     "form": "S-1",
+     "adsh": "0001213900-25-063338",
+     "film_num": [
+      "251119629"
+     ],
+     "biz_locations": [
+      "New York, NY"
+     ],
+     "file_type": "S-1",
+     "file_description": "REGISTRATION STATEMENT",
+     "inc_states": [
+      "E9"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001193125-25-052207:d899798ds1a.htm",
+    "_score": 13.753108,
+    "_source": {
+     "ciks": [
+      "0001769628"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-285512"
+     ],
+     "display_names": [
+      "CoreWeave, Inc.  (CRWV)  (CIK 0001769628)"
+     ],
+     "xsl": null,
+     "sequence": 1,
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-03-12",
+     "biz_states": [
+      "NJ"
+     ],
+     "sics": [
+      "7372"
+     ],
+     "form": "S-1/A",
+     "adsh": "0001193125-25-052207",
+     "film_num": [
+      "25729908"
+     ],
+     "biz_locations": [
+      "Springfield, NJ"
+     ],
+     "file_type": "S-1/A",
+     "file_description": "S-1/A",
+     "inc_states": [
+      "DE"
+     ],
+     "items": []
+    }
+   },
+   {
+    "_index": "edgar_file",
+    "_id": "0001193125-25-044231:d899798ds1.htm",
+    "_score": 13.7505,
+    "_source": {
+     "ciks": [
+      "0001769628"
+     ],
+     "period_ending": null,
+     "file_num": [
+      "333-285512"
+     ],
+     "display_names": [
+      "CoreWeave, Inc.  (CIK 0001769628)"
+     ],
+     "xsl": null,
+     "sequence": 1,
+     "root_forms": [
+      "S-1"
+     ],
+     "file_date": "2025-03-03",
+     "biz_states": [
+      "NJ"
+     ],
+     "sics": [
+      "7372"
+     ],
+     "form": "S-1",
+     "adsh": "0001193125-25-044231",
+     "film_num": [
+      "25699166"
+     ],
+     "biz_locations": [
+      "Springfield, NJ"
+     ],
+     "file_type": "S-1",
+     "file_description": "S-1",
+     "inc_states": [
+      "DE"
+     ],
+     "items": []
+    }
+   }
+  ]
+ },
+ "aggregations": {
+  "entity_filter": {
+   "doc_count_error_upper_bound": 0,
+   "sum_other_doc_count": 9,
+   "buckets": [
+    {
+     "key": "CoreWeave, Inc.  (CIK 0001769628)",
+     "doc_count": 10
+    },
+    {
+     "key": "Vertical Data Inc.  (CIK 0002033264)",
+     "doc_count": 6
+    },
+    {
+     "key": "Blaize Holdings, Inc.  (BZAI, BZAIW)  (CIK 0001871638)",
+     "doc_count": 5
+    }
+   ]
+  },
+  "sic_filter": {
+   "doc_count_error_upper_bound": 0,
+   "sum_other_doc_count": 0,
+   "buckets": [
+    {
+     "key": "7372",
+     "doc_count": 24
+    },
+    {
+     "key": "6199",
+     "doc_count": 15
+    },
+    {
+     "key": "6770",
+     "doc_count": 12
+    }
+   ]
+  },
+  "biz_states_filter": {
+   "doc_count_error_upper_bound": 0,
+   "sum_other_doc_count": 0,
+   "buckets": [
+    {
+     "key": "CA",
+     "doc_count": 23
+    },
+    {
+     "key": "NY",
+     "doc_count": 14
+    },
+    {
+     "key": "NJ",
+     "doc_count": 13
+    }
+   ]
+  },
+  "form_filter": {
+   "doc_count_error_upper_bound": 0,
+   "sum_other_doc_count": 0,
+   "buckets": [
+    {
+     "key": "S-1",
+     "doc_count": 86
+    }
+   ]
+  }
+ },
+ "query": {
+  "_source": {
+   "exclude": [
+    "doc_text"
+   ]
+  },
+  "query": {
+   "bool": {
+    "must": [
+     {
+      "match_phrase": {
+       "doc_text": "GPU"
+      }
+     }
+    ],
+    "must_not": [],
+    "should": [],
+    "filter": [
+     {
+      "terms": {
+       "root_forms": [
+        "S-1"
+       ]
+      }
+     },
+     {
+      "range": {
+       "file_date": {
+        "gte": "2025-01-01",
+        "lte": "2025-12-31"
+       }
+      }
+     }
+    ]
+   }
+  },
+  "from": 0,
+  "size": 100,
+  "aggregations": {
+   "form_filter": {
+    "terms": {
+     "field": "root_forms",
+     "size": 30
+    }
+   },
+   "entity_filter": {
+    "terms": {
+     "field": "display_names.raw",
+     "size": 30
+    }
+   },
+   "sic_filter": {
+    "terms": {
+     "field": "sics",
+     "size": 30
+    }
+   },
+   "biz_states_filter": {
+    "terms": {
+     "field": "biz_states",
+     "size": 30
+    }
+   }
+  }
+ }
+}
