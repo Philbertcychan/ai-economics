@@ -91,8 +91,8 @@ FIRST_PERIOD_COLUMN = 3
 
 # openpyxl stamps now() into the file otherwise; a fixed date keeps committed binaries stable.
 FIXED_TIMESTAMP = datetime(2000, 1, 1)
-# TODO(philbert): set REPO_URL to the real repository URL (same value as scripts/build_site.py).
-REPO_URL = "https://github.com/<owner>/ai-economics"
+# Same value as REPO_URL in scripts/build_site.py; printed on every workbook's README sheet.
+REPO_URL = "https://github.com/Philbertcychan/ai-economics"
 
 # The colour convention every finance reader already knows.
 COLOUR_INPUT = "0000FF"

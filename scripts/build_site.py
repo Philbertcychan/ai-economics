@@ -50,8 +50,7 @@ from data import CALLS_MD, SITE_BUILD_DIR, SITE_DIR, SITE_STATIC_DIR, SITE_TEMPL
 
 log = logging.getLogger(__name__)
 
-# TODO(philbert): set REPO_OWNER to your GitHub handle so the repo and workbook links resolve.
-REPO_OWNER = "<owner>"
+REPO_OWNER = "Philbertcychan"
 REPO_URL = f"https://github.com/{REPO_OWNER}/ai-economics"
 CHART_JS_URL = "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"
 SITE_NAME = "AI economics"

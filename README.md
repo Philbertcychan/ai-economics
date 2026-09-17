@@ -248,8 +248,8 @@ company and an index, `companies.json`, shaped
   commits on days when `data/processed` or `models` changed (the commit also carries `site/data`,
   `data/last_refresh_diff.md` and that day's `data/raw` manifests; on other days the run report is
   in the job summary only), and on every run deploys `site/build/` to GitHub Pages at
-  `https://<owner>.github.io/ai-economics/`. One-time setup: Settings -> Pages -> Source: GitHub
+  `https://philbertcychan.github.io/ai-economics/`. One-time setup: Settings -> Pages -> Source: GitHub
   Actions, and the `EDGAR_USER_AGENT` secret, without which the workflow stops before it contacts
   the SEC.
 
-Repository: `https://github.com/<owner>/ai-economics`.
+Repository: <https://github.com/Philbertcychan/ai-economics>.

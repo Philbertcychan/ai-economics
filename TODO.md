@@ -9,7 +9,7 @@ they land and add a line to `log.md` per session.
       the same name. The SEC asks for a real contact, and the scheduled refresh refuses to run
       without the secret.
 - [ ] GitHub: Settings -> Pages -> Source: GitHub Actions (`refresh.yml` deploys `site/build/`).
-- [ ] Replace the `<owner>` placeholders with the real GitHub handle: `README.md`,
+- [x] Replace the `<owner>` placeholders with the real GitHub handle: `README.md`,
       `REPO_OWNER` in `scripts/build_site.py`, `REPO_URL` in `scripts/export_xlsx.py`, and
       `site/content/_template.md`.
 - [ ] Run `uv run scripts/refresh.py --dry-run`, then a real refresh; read

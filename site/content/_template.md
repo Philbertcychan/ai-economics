@@ -24,7 +24,7 @@ How to use this file
 ## What the model says
 
 <!-- The headline result with its period and unit, then the one chart or table that carries it.
-     Link the workbook: https://github.com/<owner>/ai-economics/blob/main/models/<TICKER>.xlsx -->
+     Link the workbook: https://github.com/Philbertcychan/ai-economics/blob/main/models/<TICKER>.xlsx -->
 
 ## Key drivers
 
