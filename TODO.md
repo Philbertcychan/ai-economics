@@ -5,17 +5,20 @@ they land and add a line to `log.md` per session.
 
 ## Setup (before Sept 21)
 
-- [ ] Set `EDGAR_USER_AGENT` locally (`Your Name you@example.com`) and as a repository secret of
+- [x] Set `EDGAR_USER_AGENT` locally (`Your Name you@example.com`) and as a repository secret of
       the same name. The SEC asks for a real contact, and the scheduled refresh refuses to run
       without the secret.
-- [ ] GitHub: Settings -> Pages -> Source: GitHub Actions (`refresh.yml` deploys `site/build/`).
+- [x] GitHub: Settings -> Pages -> Source: GitHub Actions (`refresh.yml` deploys `site/build/`).
+      Live at <https://philbertcychan.github.io/ai-economics/>.
 - [x] Replace the `<owner>` placeholders with the real GitHub handle: `README.md`,
       `REPO_OWNER` in `scripts/build_site.py`, `REPO_URL` in `scripts/export_xlsx.py`, and
       `site/content/_template.md`.
-- [ ] Run `uv run scripts/refresh.py --dry-run`, then a real refresh; read
+- [x] Run `uv run scripts/refresh.py --dry-run`, then a real refresh; read
       `data/last_refresh_diff.md` and open `site/build/index.html`.
-- [ ] Read the CoreWeave S-1 with `notes/coreweave-s1.md` open and fill its tables from the filing,
-      page numbers included.
+- [x] Fill the tables in `notes/coreweave-s1.md` from the filing, page numbers included (done
+      2026-09-19: every figure was machine-checked against a verbatim snippet on its cited page).
+- [ ] Read the CoreWeave S-1 yourself with `notes/coreweave-s1.md` open. Start with its "Read this
+      first" section, and confirm the figures the model will rely on against the page.
 
 ## Stage 1 — Sept 21–27, 2026: unit economics and CoreWeave
 
