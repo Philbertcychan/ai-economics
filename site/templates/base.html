@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="An open financial model of the AI build-out, built from SEC filings.">
+<meta name="description" content="Revenue, capex and cash flow of AI infrastructure companies, from SEC filings.">
 <title>$title</title>
 <link rel="stylesheet" href="${root}static/style.css">
 </head>
@@ -12,9 +12,7 @@
 <header class="site-header">
   <nav class="wrap" aria-label="Primary">
     <a class="brand" href="${root}index.html">AI economics</a>
-    <a href="${root}index.html#companies">Companies</a>
-    <a href="${root}writeups/index.html">Writeups</a>
-    <a href="${root}index.html#calls">Calls</a>
+$nav_links
     <a href="$repo_url" rel="noopener">GitHub</a>
   </nav>
 </header>
@@ -22,10 +20,7 @@
 $content
 </main>
 <footer class="site-footer">
-  <div class="wrap">
-    <p>Data: SEC EDGAR. Model and writeups: $owner. Last refresh: <time>$as_of</time>.</p>
-    <p><a href="$repo_url" rel="noopener">github.com/$owner/ai-economics</a></p>
-  </div>
+  <p class="wrap">Source: SEC EDGAR · $updated · <a href="$repo_url" rel="noopener">GitHub</a></p>
 </footer>
 $scripts
 <script src="${root}static/dashboard.js" defer></script>

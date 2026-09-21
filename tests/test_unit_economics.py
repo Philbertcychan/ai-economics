@@ -1,30 +1,21 @@
 """Tests for ``engine/unit_economics.py``.
 
-Two kinds of test live here and they behave differently on purpose:
+Three kinds of test:
 
-1. Plumbing tests (``TestInputs``) cover validation, unit labels, descriptions and
-   ``to_dict``. They pass today and must keep passing.
-2. Engine tests (``TestReferenceCase``, ``TestInvariants``) pin the reference definitions
-   written in the engine docstrings. Each is decorated with ``pending(...)`` naming the engine
-   functions it calls. While any of those still raises ``NotImplementedError`` the test is a
-   strict xfail, so CI stays green; once all of them are written the marker switches itself
-   off and the test runs for real. The three functions can therefore land one at a time, in
-   any order, with nothing to delete by hand in between.
+1. ``TestInputs``: validation, unit labels, descriptions, ``to_dict``.
+2. ``TestReferenceCases``: two worked cases whose expected numbers were computed by hand, with
+   plain arithmetic, outside the engine. They are literals on purpose: a test that recomputes
+   the formula it is testing can never fail.
+3. ``TestBehaviour``: properties that must hold for any inputs (more utilisation never raises
+   unit cost, a GPU that loses cash never pays back, and so on). These protect the meaning of
+   the model rather than one number.
 
-Philbert: to see the real failures while implementing the engine, run
-
-    uv run pytest tests/test_unit_economics.py --runxfail
-
-Once all three functions are written, ``pending`` and ``_is_stub`` below are dead code and can
-be deleted together with the decorators. The numbers in ``EXPECTED`` come from the reference
-definitions, and the engine docstrings repeat them as a worked "Reference case". If you revise
-a definition, revise the pinned number here and the worked example in that function's
-docstring in the same commit, and say why in ``log.md``.
+The two cases use round, synthetic values. They are not estimates for any real GPU; real values
+live in ``assumptions/*.csv``.
 """
 
 import dataclasses
 import math
-from collections.abc import Callable
 from dataclasses import replace
 
 import pytest
@@ -35,15 +26,26 @@ from engine.unit_economics import (
     INPUT_DESCRIPTIONS,
     INPUT_FIELDS,
     INPUT_UNITS,
+    MODES,
     GPUEconomicsInputs,
+    breakdown,
+    breakeven_price_per_gpu_hour,
+    capital_cost_per_gpu_hour,
+    capital_recovery_factor,
+    cash_cost_per_gpu_hour,
+    cash_margin_per_gpu_hour,
+    cost_per_gpu_hour,
     cost_per_m_tokens,
+    energy_cost_per_gpu_hour,
+    facility_cost_per_gpu_hour,
     margin_per_gpu_hour,
     payback_months,
+    revenue_per_gpu_hour,
+    tokens_per_gpu_hour,
 )
 
-# The reference case the engine docstrings work through. Synthetic values chosen so the
-# reference definitions are easy to check by hand; they are not estimates for any real GPU.
-REFERENCE = GPUEconomicsInputs(
+# Case 1: the nine required inputs only, selling tokens.
+TOKENS_CASE = GPUEconomicsInputs(
     chip_cost=32_000,
     power_draw_kw=1.0,
     pue=1.25,
@@ -55,250 +57,250 @@ REFERENCE = GPUEconomicsInputs(
     financing_rate=0.08,
 )
 
-# Hand-checked outputs of the reference definitions for REFERENCE. Intermediate quantities are
-# listed too so the invariant tests can pin identities without re-deriving any formula.
-EXPECTED = {
-    "energy_cost_per_hour": 0.10,
-    "capital_cost_per_hour": 1.0228311,
-    "tokens_per_hour": 5_400_000,
-    "cost_per_m_tokens": 0.2079317,
-    "revenue_per_hour": 2.70,
-    "margin_per_gpu_hour": 1.5771690,
-    "cash_contribution_per_hour": 2.3077626,
-    "payback_months": 18.99485,
-}
-REL = 1e-4
+# Case 2: every refinement switched on, renting the hour out.
+RENTAL_CASE = replace(
+    TOKENS_CASE,
+    utilization=0.9,
+    price_per_gpu_hour=2.50,
+    facility_cost_per_kw_month=150.0,
+    other_opex_per_gpu_hour=0.10,
+    idle_power_share=0.3,
+    residual_value_share=0.10,
+)
 
-EngineFunction = Callable[[GPUEconomicsInputs], float]
-
-
-def _is_stub(func: EngineFunction) -> bool:
-    """True while ``func`` is still the scaffold stub that raises ``NotImplementedError``."""
-    try:
-        func(REFERENCE)
-    except NotImplementedError:
-        return True
-    except Exception:
-        # A half-written body is not a stub. Swallowing its error keeps collection alive (the
-        # plumbing tests must still run) and leaves the unmarked test to report the failure.
-        return False
-    return False
-
-
-def pending(*funcs: EngineFunction) -> pytest.MarkDecorator:
-    """Strict xfail for a test that calls ``funcs``, active only while one of them is a stub.
-
-    Decided per test, not per class or module, so the engine functions can be implemented one
-    at a time: a test starts running for real as soon as everything it calls exists. A strict
-    marker that stayed on after that would turn every newly passing test into a red XPASS.
-    """
-    return pytest.mark.xfail(
-        condition=any(_is_stub(func) for func in funcs),
-        raises=NotImplementedError,
-        strict=True,
-        reason="TODO(philbert): implement engine/unit_economics.py",
-    )
+REL = 1e-9
 
 
 class TestInputs:
-    """Validation, labels and serialisation of ``GPUEconomicsInputs`` - complete plumbing."""
+    def test_field_order_and_tables_agree(self) -> None:
+        assert tuple(INPUT_UNITS) == INPUT_FIELDS == tuple(INPUT_DESCRIPTIONS)
+        assert INPUT_FIELDS[:9] == (
+            "chip_cost",
+            "power_draw_kw",
+            "pue",
+            "electricity_price_kwh",
+            "utilization",
+            "tokens_per_sec",
+            "price_per_m_tokens",
+            "depreciation_years",
+            "financing_rate",
+        )
+        assert all(text.strip() for text in INPUT_DESCRIPTIONS.values())
 
-    def test_hour_constants(self) -> None:
-        # Both peers and the payback definition assume these exact conventions.
-        assert HOURS_PER_YEAR == 8760
-        assert HOURS_PER_MONTH == 730
+    def test_units_the_exporter_formats_by(self) -> None:
+        # scripts/export_xlsx.py keys number formats off these exact strings.
+        assert INPUT_UNITS["chip_cost"] == "USD"
+        assert INPUT_UNITS["utilization"] == INPUT_UNITS["idle_power_share"] == "share"
+        assert INPUT_UNITS["financing_rate"] == "decimal"
+        assert INPUT_UNITS["price_per_gpu_hour"] == "USD/GPU-hour"
 
-    def test_reference_case_is_valid(self) -> None:
-        assert REFERENCE.chip_cost == 32_000
-        assert REFERENCE.utilization == 0.6
+    def test_refinements_default_to_off(self) -> None:
+        assert TOKENS_CASE.price_per_gpu_hour == 0.0
+        assert TOKENS_CASE.facility_cost_per_kw_month == 0.0
+        assert TOKENS_CASE.other_opex_per_gpu_hour == 0.0
+        assert TOKENS_CASE.idle_power_share == 1.0
+        assert TOKENS_CASE.residual_value_share == 0.0
 
-    def test_to_dict_round_trips_in_field_order(self) -> None:
-        as_dict = REFERENCE.to_dict()
-        assert list(as_dict) == list(INPUT_FIELDS)
-        assert GPUEconomicsInputs(**as_dict) == REFERENCE
+    def test_to_dict_round_trips(self) -> None:
+        as_dict = RENTAL_CASE.to_dict()
+        assert tuple(as_dict) == INPUT_FIELDS
+        assert GPUEconomicsInputs(**as_dict) == RENTAL_CASE
 
-    def test_units_and_descriptions_cover_every_field_in_order(self) -> None:
-        # The xlsx Inputs sheet zips fields, units and descriptions row by row, so the three
-        # sequences must agree exactly, including order.
-        assert list(INPUT_UNITS) == list(INPUT_FIELDS)
-        assert list(INPUT_DESCRIPTIONS) == list(INPUT_FIELDS)
-        assert all(isinstance(text, str) and text.strip() for text in INPUT_DESCRIPTIONS.values())
-
-    def test_unit_labels_are_pinned_verbatim(self) -> None:
-        # Pinned verbatim: the exporter's number formats key off "USD", "share" and "decimal".
-        assert INPUT_UNITS == {
-            "chip_cost": "USD",
-            "power_draw_kw": "kW",
-            "pue": "ratio",
-            "electricity_price_kwh": "USD/kWh",
-            "utilization": "share",
-            "tokens_per_sec": "tokens/s",
-            "price_per_m_tokens": "USD/M tokens",
-            "depreciation_years": "years",
-            "financing_rate": "decimal",
-        }
-
-    def test_inputs_are_frozen(self) -> None:
+    def test_frozen(self) -> None:
         with pytest.raises(dataclasses.FrozenInstanceError):
-            REFERENCE.chip_cost = 1.0  # type: ignore[misc]
-
-    @pytest.mark.parametrize("field", INPUT_FIELDS)
-    def test_negative_value_is_rejected_and_names_the_field(self, field: str) -> None:
-        with pytest.raises(ValueError, match=field):
-            replace(REFERENCE, **{field: -1.0})
-
-    @pytest.mark.parametrize("field", INPUT_FIELDS)
-    def test_nan_is_rejected(self, field: str) -> None:
-        # NaN passes naive `x < 0` checks and would silently poison every output.
-        with pytest.raises(ValueError, match=field):
-            replace(REFERENCE, **{field: math.nan})
+            TOKENS_CASE.utilization = 0.9  # type: ignore[misc]
 
     @pytest.mark.parametrize(
         ("field", "value"),
         [
-            ("utilization", 1.01),  # a share of hours cannot exceed 100%
             ("utilization", -0.01),
-            ("pue", 0.99),  # facility power cannot be less than IT power
-            ("depreciation_years", 0.0),  # divides the capital charge
-            ("tokens_per_sec", 0.0),  # divides the cost per token
+            ("utilization", 1.01),
+            ("idle_power_share", 1.5),
+            ("residual_value_share", -0.1),
+            ("pue", 0.99),
+            ("depreciation_years", 0),
+            ("tokens_per_sec", -1),
+            ("chip_cost", -1),
+            ("power_draw_kw", -0.1),
+            ("electricity_price_kwh", -0.01),
+            ("price_per_m_tokens", -1),
+            ("financing_rate", -0.01),
+            ("price_per_gpu_hour", -1),
+            ("facility_cost_per_kw_month", -1),
+            ("other_opex_per_gpu_hour", -0.5),
         ],
     )
-    def test_out_of_range_value_is_rejected(self, field: str, value: float) -> None:
+    def test_rejects_out_of_range(self, field: str, value: float) -> None:
         with pytest.raises(ValueError, match=field):
-            replace(REFERENCE, **{field: value})
+            replace(TOKENS_CASE, **{field: value})
+
+    @pytest.mark.parametrize("field", INPUT_FIELDS)
+    def test_rejects_nan(self, field: str) -> None:
+        with pytest.raises(ValueError, match=field):
+            replace(TOKENS_CASE, **{field: math.nan})
+
+    def test_boundaries_are_allowed(self) -> None:
+        replace(TOKENS_CASE, utilization=0.0)
+        rental_only = replace(RENTAL_CASE, tokens_per_sec=0.0, price_per_m_tokens=0.0)
+        assert math.isinf(cost_per_m_tokens(rental_only))
+        assert margin_per_gpu_hour(rental_only, "rental") == pytest.approx(
+            margin_per_gpu_hour(RENTAL_CASE, "rental")
+        )
+        replace(TOKENS_CASE, utilization=1.0, pue=1.0, financing_rate=0.0, chip_cost=0.0)
+
+
+class TestCapitalRecoveryFactor:
+    def test_mortgage_formula(self) -> None:
+        assert capital_recovery_factor(0.08, 5) == pytest.approx(0.2504564545668364, rel=REL)
+
+    def test_zero_rate_is_straight_line(self) -> None:
+        assert capital_recovery_factor(0.0, 5) == pytest.approx(0.2, rel=REL)
+
+    def test_cheaper_than_interest_on_the_full_price(self) -> None:
+        # The alternative convention, depreciation plus interest on the whole price, charges
+        # 1/5 + 0.08 = 0.28. The annuity is lower because the balance owed falls over time.
+        assert capital_recovery_factor(0.08, 5) < 1 / 5 + 0.08
+
+    def test_level_payments_repay_the_loan_exactly(self) -> None:
+        balance, rate, payment = 1.0, 0.08, capital_recovery_factor(0.08, 5)
+        for _ in range(5):
+            balance = balance * (1 + rate) - payment
+        assert balance == pytest.approx(0.0, abs=1e-12)
+
+    @pytest.mark.parametrize(("rate", "years"), [(-0.01, 5), (0.08, 0), (0.08, -1)])
+    def test_rejects_bad_arguments(self, rate: float, years: float) -> None:
+        with pytest.raises(ValueError):
+            capital_recovery_factor(rate, years)
+
+
+class TestReferenceCases:
+    def test_tokens_case(self) -> None:
+        i = TOKENS_CASE
+        assert capital_cost_per_gpu_hour(i) == pytest.approx(0.9149094230752015, rel=REL)
+        assert energy_cost_per_gpu_hour(i) == pytest.approx(0.10, rel=REL)
+        assert facility_cost_per_gpu_hour(i) == 0.0
+        assert cash_cost_per_gpu_hour(i) == pytest.approx(0.10, rel=REL)
+        assert cost_per_gpu_hour(i) == pytest.approx(1.0149094230752016, rel=REL)
+        assert tokens_per_gpu_hour(i) == pytest.approx(5_400_000, rel=REL)
+        assert cost_per_m_tokens(i) == pytest.approx(0.18794618945837066, rel=REL)
+        assert revenue_per_gpu_hour(i) == pytest.approx(2.70, rel=REL)
+        assert cash_margin_per_gpu_hour(i) == pytest.approx(2.60, rel=REL)
+        assert margin_per_gpu_hour(i) == pytest.approx(1.6850905769247986, rel=REL)
+        assert payback_months(i) == pytest.approx(16.859852476290833, rel=REL)
+
+    def test_rental_case(self) -> None:
+        i = RENTAL_CASE
+        assert capital_cost_per_gpu_hour(i) == pytest.approx(0.8526422250599188, rel=REL)
+        assert energy_cost_per_gpu_hour(i) == pytest.approx(0.093, rel=REL)
+        assert facility_cost_per_gpu_hour(i) == pytest.approx(0.2054794520547945, rel=REL)
+        assert cash_cost_per_gpu_hour(i) == pytest.approx(0.3984794520547945, rel=REL)
+        assert cost_per_gpu_hour(i) == pytest.approx(1.2511216771147133, rel=REL)
+        assert revenue_per_gpu_hour(i, "rental") == pytest.approx(2.25, rel=REL)
+        assert cash_margin_per_gpu_hour(i, "rental") == pytest.approx(1.8515205479452055, rel=REL)
+        assert margin_per_gpu_hour(i, "rental") == pytest.approx(0.9988783228852867, rel=REL)
+        assert breakeven_price_per_gpu_hour(i) == pytest.approx(1.390135196794126, rel=REL)
+        assert payback_months(i, "rental") == pytest.approx(23.67546851532617, rel=REL)
+
+    def test_constants(self) -> None:
+        assert HOURS_PER_YEAR == 8760
+        assert HOURS_PER_MONTH * 12 == HOURS_PER_YEAR
+        assert MODES == ("tokens", "rental")
+
+
+class TestBehaviour:
+    def test_more_utilisation_lowers_token_cost(self) -> None:
+        low, high = replace(TOKENS_CASE, utilization=0.4), replace(TOKENS_CASE, utilization=0.8)
+        assert cost_per_m_tokens(high) < cost_per_m_tokens(low)
 
     @pytest.mark.parametrize(
-        ("field", "value"),
+        "field",
         [
-            ("utilization", 0.0),
-            ("utilization", 1.0),
-            ("pue", 1.0),
-            ("chip_cost", 0.0),
-            ("electricity_price_kwh", 0.0),
-            ("price_per_m_tokens", 0.0),
-            ("financing_rate", 0.0),
+            "electricity_price_kwh",
+            "pue",
+            "chip_cost",
+            "financing_rate",
+            "facility_cost_per_kw_month",
+            "other_opex_per_gpu_hour",
+            "power_draw_kw",
         ],
     )
-    def test_boundary_values_are_accepted(self, field: str, value: float) -> None:
-        # Zeros and the edges of the ranges are legitimate scenarios (free power, unfinanced
-        # chips, an idle fleet), not input errors.
-        assert getattr(replace(REFERENCE, **{field: value}), field) == value
+    def test_each_cost_input_raises_cost(self, field: str) -> None:
+        base = RENTAL_CASE
+        higher = replace(base, **{field: getattr(base, field) * 1.5 + 0.01})
+        assert cost_per_gpu_hour(higher) > cost_per_gpu_hour(base)
 
+    def test_longer_life_and_residual_value_lower_the_capital_charge(self) -> None:
+        base = capital_cost_per_gpu_hour(TOKENS_CASE)
+        assert capital_cost_per_gpu_hour(replace(TOKENS_CASE, depreciation_years=6)) < base
+        assert capital_cost_per_gpu_hour(replace(TOKENS_CASE, residual_value_share=0.2)) < base
 
-class TestPendingMarker:
-    """``pending`` decides which engine tests count, so it is pinned like any other plumbing."""
+    def test_idle_power_only_matters_when_idle(self) -> None:
+        busy = replace(RENTAL_CASE, utilization=1.0)
+        assert energy_cost_per_gpu_hour(busy) == pytest.approx(
+            energy_cost_per_gpu_hour(replace(busy, idle_power_share=1.0)), rel=REL
+        )
+        idle_cheap = replace(RENTAL_CASE, utilization=0.5, idle_power_share=0.2)
+        idle_full = replace(idle_cheap, idle_power_share=1.0)
+        assert energy_cost_per_gpu_hour(idle_cheap) < energy_cost_per_gpu_hour(idle_full)
 
-    @staticmethod
-    def _stub(inputs: GPUEconomicsInputs) -> float:
-        raise NotImplementedError
-
-    @staticmethod
-    def _written(inputs: GPUEconomicsInputs) -> float:
-        return 1.0
-
-    @staticmethod
-    def _half_written(inputs: GPUEconomicsInputs) -> float:
-        raise ZeroDivisionError
-
-    def test_only_not_implemented_counts_as_a_stub(self) -> None:
-        assert _is_stub(self._stub)
-        assert not _is_stub(self._written)
-        assert not _is_stub(self._half_written)
-
-    def test_marker_is_active_only_while_a_function_is_a_stub(self) -> None:
-        waiting = pending(self._written, self._stub)
-        assert waiting.name == "xfail" and waiting.kwargs["condition"] is True
-        assert waiting.kwargs["strict"] is True
-        assert waiting.kwargs["raises"] is NotImplementedError
-        assert pending(self._written, self._half_written).kwargs["condition"] is False
-
-
-class TestReferenceCase:
-    """The three headline numbers for REFERENCE, pinned to the reference definitions."""
-
-    @pending(cost_per_m_tokens)
-    def test_cost_per_m_tokens(self) -> None:
-        assert cost_per_m_tokens(REFERENCE) == pytest.approx(EXPECTED["cost_per_m_tokens"], rel=REL)
-
-    @pending(margin_per_gpu_hour)
-    def test_margin_per_gpu_hour(self) -> None:
-        assert margin_per_gpu_hour(REFERENCE) == pytest.approx(
-            EXPECTED["margin_per_gpu_hour"], rel=REL
+    def test_margin_is_token_spread_times_volume(self) -> None:
+        i = TOKENS_CASE
+        spread = i.price_per_m_tokens - cost_per_m_tokens(i)
+        assert margin_per_gpu_hour(i) == pytest.approx(
+            spread * tokens_per_gpu_hour(i) / 1e6, rel=1e-9
         )
 
-    @pending(payback_months)
-    def test_payback_months(self) -> None:
-        assert payback_months(REFERENCE) == pytest.approx(EXPECTED["payback_months"], rel=REL)
-
-
-class TestInvariants:
-    """Directional and structural properties any sane revision of the definitions must keep."""
-
-    @pending(cost_per_m_tokens)
-    def test_higher_utilization_lowers_cost(self) -> None:
-        busier = replace(REFERENCE, utilization=0.9)
-        assert cost_per_m_tokens(busier) < cost_per_m_tokens(REFERENCE)
-
-    @pending(cost_per_m_tokens)
-    def test_higher_electricity_price_raises_cost(self) -> None:
-        dearer_power = replace(REFERENCE, electricity_price_kwh=0.16)
-        assert cost_per_m_tokens(dearer_power) > cost_per_m_tokens(REFERENCE)
-
-    @pending(cost_per_m_tokens)
-    def test_higher_pue_raises_cost(self) -> None:
-        leakier_facility = replace(REFERENCE, pue=1.6)
-        assert cost_per_m_tokens(leakier_facility) > cost_per_m_tokens(REFERENCE)
-
-    @pending(cost_per_m_tokens, payback_months)
-    def test_higher_chip_cost_raises_cost_and_payback(self) -> None:
-        dearer_chip = replace(REFERENCE, chip_cost=64_000)
-        assert cost_per_m_tokens(dearer_chip) > cost_per_m_tokens(REFERENCE)
-        assert payback_months(dearer_chip) > payback_months(REFERENCE)
-
-    @pending(payback_months)
-    def test_zero_price_means_infinite_payback(self) -> None:
-        # Giving tokens away never repays the chip; the payback_months docstring asks for
-        # inf, not an error.
-        result = payback_months(replace(REFERENCE, price_per_m_tokens=0.0))
-        assert math.isinf(result) and result > 0
-
-    @pending(payback_months)
-    def test_zero_cash_contribution_means_infinite_payback(self) -> None:
-        # The boundary itself: no revenue, free power and no interest make the contribution
-        # exactly 0.0, where a `< 0` guard would fall through to a division by zero. The
-        # payback_months docstring puts the cut-off at `<= 0`.
-        idle = replace(
-            REFERENCE, price_per_m_tokens=0.0, electricity_price_kwh=0.0, financing_rate=0.0
+    def test_breakeven_price_gives_zero_margin(self) -> None:
+        at_breakeven = replace(
+            RENTAL_CASE, price_per_gpu_hour=breakeven_price_per_gpu_hour(RENTAL_CASE)
         )
-        result = payback_months(idle)
-        assert math.isinf(result) and result > 0
+        assert margin_per_gpu_hour(at_breakeven, "rental") == pytest.approx(0.0, abs=1e-12)
 
-    @pending(cost_per_m_tokens, margin_per_gpu_hour)
-    def test_price_below_cost_gives_negative_margin(self) -> None:
-        # Half the fully loaded cost per token, whatever that turns out to be.
-        underpriced = replace(REFERENCE, price_per_m_tokens=0.5 * cost_per_m_tokens(REFERENCE))
-        assert margin_per_gpu_hour(underpriced) < 0
+    def test_nothing_sold_means_infinite_cost_and_no_payback(self) -> None:
+        unsold = replace(RENTAL_CASE, utilization=0.0)
+        assert math.isinf(cost_per_m_tokens(unsold))
+        assert math.isinf(breakeven_price_per_gpu_hour(unsold))
+        assert math.isinf(payback_months(unsold, "rental"))
 
-    @pending(cost_per_m_tokens, margin_per_gpu_hour)
-    @pytest.mark.parametrize(
-        ("inputs", "tokens_per_hour"),
-        [
-            (REFERENCE, EXPECTED["tokens_per_hour"]),
-            (replace(REFERENCE, utilization=0.3), 2_700_000),  # half the busy hours
-        ],
-    )
-    def test_margin_equals_per_token_spread_times_volume(
-        self, inputs: GPUEconomicsInputs, tokens_per_hour: float
-    ) -> None:
-        # Margin per GPU-hour and cost per million tokens are two views of one number: the
-        # margin must equal (price - cost) per million tokens times the millions produced.
-        spread = inputs.price_per_m_tokens - cost_per_m_tokens(inputs)
-        assert margin_per_gpu_hour(inputs) == pytest.approx(spread * tokens_per_hour / 1e6, rel=REL)
+    def test_zero_or_negative_cash_margin_never_pays_back(self) -> None:
+        free = replace(TOKENS_CASE, price_per_m_tokens=0.0)
+        assert math.isinf(payback_months(free))
+        exactly_zero = replace(TOKENS_CASE, price_per_m_tokens=0.0, electricity_price_kwh=0.0)
+        assert cash_margin_per_gpu_hour(exactly_zero) == 0.0
+        assert math.isinf(payback_months(exactly_zero))
 
-    @pending(cost_per_m_tokens)
-    def test_zero_chip_cost_leaves_only_energy_cost(self) -> None:
-        # With no chip to depreciate or finance, the only cost is 0.10 USD/h of electricity
-        # spread over 5.4 million tokens an hour.
-        free_chip = replace(REFERENCE, chip_cost=0.0)
-        energy_only = EXPECTED["energy_cost_per_hour"] / (EXPECTED["tokens_per_hour"] / 1e6)
-        assert cost_per_m_tokens(free_chip) == pytest.approx(energy_only, rel=REL)
+    def test_price_below_cost_gives_negative_margin_but_can_still_pay_back(self) -> None:
+        # Covers its running costs, not its capital: pays back eventually, never earns its keep.
+        thin = replace(TOKENS_CASE, price_per_m_tokens=0.10)
+        assert margin_per_gpu_hour(thin) < 0 < cash_margin_per_gpu_hour(thin)
+        assert math.isfinite(payback_months(thin))
+
+    def test_payback_ignores_financing_by_design(self) -> None:
+        # Operators quote payback before financing; the cost of money is in the margin instead.
+        assert payback_months(replace(TOKENS_CASE, financing_rate=0.20)) == pytest.approx(
+            payback_months(TOKENS_CASE), rel=REL
+        )
+        assert margin_per_gpu_hour(replace(TOKENS_CASE, financing_rate=0.20)) < (
+            margin_per_gpu_hour(TOKENS_CASE)
+        )
+
+    def test_unknown_mode_is_an_error(self) -> None:
+        with pytest.raises(ValueError, match="mode"):
+            revenue_per_gpu_hour(TOKENS_CASE, "subscriptions")
+
+    @pytest.mark.parametrize("mode", MODES)
+    def test_breakdown_matches_the_functions_and_adds_up(self, mode: str) -> None:
+        b = breakdown(RENTAL_CASE, mode)
+        assert b["cost_per_gpu_hour"] == pytest.approx(
+            b["capital_cost_per_gpu_hour"] + b["cash_cost_per_gpu_hour"], rel=REL
+        )
+        assert b["cash_cost_per_gpu_hour"] == pytest.approx(
+            b["energy_cost_per_gpu_hour"]
+            + b["facility_cost_per_gpu_hour"]
+            + b["other_opex_per_gpu_hour"],
+            rel=REL,
+        )
+        assert b["margin_per_gpu_hour"] == pytest.approx(
+            b["revenue_per_gpu_hour"] - b["cost_per_gpu_hour"], rel=REL
+        )
+        assert b["payback_months"] == payback_months(RENTAL_CASE, mode)

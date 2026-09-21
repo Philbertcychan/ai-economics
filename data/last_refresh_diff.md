@@ -1,11 +1,11 @@
-# Refresh 2026-09-17T13:43:24Z
+# Refresh 2026-09-21T21:37:36Z
 
-7 companies: no new filings, 0 documents downloaded, models: 5 no-model, 2 pending, 0 errors. Finished 2026-09-17T13:43:26Z.
+7 companies: no new filings, 0 documents downloaded, models: 5 no-model, 1 pending, 1 unchanged, 0 errors. Finished 2026-09-21T21:37:46Z.
 
 ## CRWV
 
 - New filings: none (10 tracked)
-- Model: pending
+- Model: unchanged
 
 ## NBIS
 

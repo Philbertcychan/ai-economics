@@ -499,6 +499,183 @@
       ]
     }
   },
-  "outputs": null,
-  "inputs": null
+  "outputs": {
+    "cash_margin_per_gpu_hour": {
+      "label": "Cash margin",
+      "unit": "USD/GPU-hour",
+      "points": [
+        [
+          "2024Q4",
+          0.8806
+        ]
+      ]
+    },
+    "cash_margin_share": {
+      "label": "Cash margin, share of revenue",
+      "unit": "%",
+      "points": [
+        [
+          "2024Q4",
+          0.6503692762186115
+        ]
+      ]
+    },
+    "margin_per_gpu_hour": {
+      "label": "Fully loaded margin",
+      "unit": "USD/GPU-hour",
+      "points": [
+        [
+          "2024Q4",
+          -0.10662294012198559
+        ]
+      ]
+    },
+    "breakeven_price_per_gpu_hour": {
+      "label": "Break-even rental price",
+      "unit": "USD/GPU-hour",
+      "points": [
+        [
+          "2024Q4",
+          1.4606229401219857
+        ]
+      ]
+    },
+    "payback_years": {
+      "label": "Payback, model",
+      "unit": "years",
+      "points": [
+        [
+          "2024Q4",
+          4.742770858806313
+        ]
+      ]
+    },
+    "disclosed_payback_years": {
+      "label": "Payback, as disclosed by the company",
+      "unit": "years",
+      "points": [
+        [
+          "2024Q4",
+          2.5
+        ]
+      ]
+    },
+    "payback_gap_years": {
+      "label": "Payback gap, model less disclosed",
+      "unit": "years",
+      "points": [
+        [
+          "2024Q4",
+          2.2427708588063133
+        ]
+      ]
+    }
+  },
+  "inputs": [
+    {
+      "name": "chip_cost",
+      "value": 36586.0,
+      "unit": "USD",
+      "source": "S-1 p.F-29, p.2",
+      "note": "[derived; proposed] Technology equipment, gross 9,146,575 thousand divided by more than 250,000 GPUs at Dec 31, 2024. A fleet average that includes servers and networking and excludes construction in progress. Newer GPU generations cost more than this average."
+    },
+    {
+      "name": "power_draw_kw",
+      "value": 1.44,
+      "unit": "kW",
+      "source": "S-1 p.2",
+      "note": "[derived; proposed] More than 360 MW of active power divided by more than 250,000 GPUs at Dec 31, 2024. Facility-level power per GPU, so cooling and non-GPU load are already inside it."
+    },
+    {
+      "name": "pue",
+      "value": 1.0,
+      "unit": "ratio",
+      "source": "",
+      "note": "[judgment; proposed] Set to 1.0 because power_draw_kw is measured at the facility meter. Using a PUE above 1 on top of it would count cooling twice."
+    },
+    {
+      "name": "electricity_price_kwh",
+      "value": 0.0,
+      "unit": "USD/kWh",
+      "source": "",
+      "note": "[judgment; proposed] Zero on purpose. Energy is inside other_opex_per_gpu_hour until an external source lets it be split out."
+    },
+    {
+      "name": "utilization",
+      "value": 1.0,
+      "unit": "share",
+      "source": "",
+      "note": "[judgment; proposed] Set to 1.0 because price_per_gpu_hour below is revenue per INSTALLED hour. Idle and not-yet-billing GPUs are already inside that price."
+    },
+    {
+      "name": "tokens_per_sec",
+      "value": 0.0,
+      "unit": "tokens/s",
+      "source": "",
+      "note": "[judgment; proposed] Not applicable. CoreWeave sells GPU-hours and not tokens (S-1 p.95)."
+    },
+    {
+      "name": "price_per_m_tokens",
+      "value": 0.0,
+      "unit": "USD/M tokens",
+      "source": "",
+      "note": "[judgment; proposed] Not applicable. See tokens_per_sec."
+    },
+    {
+      "name": "depreciation_years",
+      "value": 6.0,
+      "unit": "years",
+      "source": "S-1 p.F-16, p.F-15",
+      "note": "[disclosed; proposed; range 4 to 6] Accounting life of technology equipment. It was raised from five to six years on Jan 1, 2023. The economic life may be shorter if new GPU generations push rental prices down (risk factors p.33, p.44), which is why the low end is 4."
+    },
+    {
+      "name": "financing_rate",
+      "value": 0.11,
+      "unit": "decimal",
+      "source": "S-1 p.F-34, p.F-41, p.F-39",
+      "note": "[disclosed; proposed; range 0.105 to 0.15] Effective rate on DDTL 2.0, the facility that funds new GPUs. Low is the actual average rate charged on DDTL 2.0 (10.53%). High is the effective rate on the older DDTL 1.0 (15%). Debt only; equity would want more."
+    },
+    {
+      "name": "price_per_gpu_hour",
+      "value": 1.354,
+      "unit": "USD/GPU-hour",
+      "source": "S-1 p.113, p.2",
+      "note": "[derived; proposed] Q4 2024 revenue 747,430 thousand divided by 250,000 GPUs times 2,208 hours. Realised revenue per installed GPU-hour across the whole fleet. It is NOT a contract price, and it is understated because the year-end GPU count is applied to the whole quarter."
+    },
+    {
+      "name": "facility_cost_per_kw_month",
+      "value": 0.0,
+      "unit": "USD/kW-month",
+      "source": "",
+      "note": "[judgment; proposed] Zero on purpose. Data-centre leases are inside other_opex_per_gpu_hour until they can be split out."
+    },
+    {
+      "name": "other_opex_per_gpu_hour",
+      "value": 0.4734,
+      "unit": "USD/GPU-hour",
+      "source": "S-1 p.113, p.115, p.2",
+      "note": "[derived; proposed] Q4 2024 revenue less adjusted EBITDA (747,430 less 486,114 thousand) per installed GPU-hour. Lumps energy, data-centre leases, staff and everything else above adjusted EBITDA into one number."
+    },
+    {
+      "name": "idle_power_share",
+      "value": 1.0,
+      "unit": "share",
+      "source": "",
+      "note": "[judgment; proposed] No effect while electricity_price_kwh is zero."
+    },
+    {
+      "name": "residual_value_share",
+      "value": 0.0,
+      "unit": "share",
+      "source": "",
+      "note": "[judgment; proposed; range 0 to 0.2] Cautious default. The S-1 gives no resale or redeployment value for retired GPUs."
+    },
+    {
+      "name": "disclosed_cash_payback_years",
+      "value": 2.5,
+      "unit": "years",
+      "source": "S-1 p.97",
+      "note": "[disclosed; proposed] Not an input. The company's own average cash payback on committed contracts at Dec 31, 2024, measured per GPU through adjusted EBITDA and net of customer prepayments. Shown beside the model's payback as a check."
+    }
+  ]
 }

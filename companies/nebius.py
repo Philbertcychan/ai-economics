@@ -20,12 +20,12 @@ class Nebius(BaseCompanyModel):
     ticker = "NBIS"
     # name, cik and layer are copied from data.edgar.COMPANIES["NBIS"] by BaseCompanyModel.
 
-    # TODO(philbert): set engine_defaults = GPUEconomicsInputs(...) with Nebius's assumptions.
+    # Assumptions are read from assumptions/NBIS.csv when that file exists.
     engine_defaults = None
 
     def build(self) -> None:
         """Turn reported facts and assumptions into ``self.drivers`` and ``self.outputs``."""
-        # TODO(philbert): write the Nebius driver structure here, one column per period.
+        # TODO: Nebius operating model (see TODO.md, Stage 2), one column per period.
         #
         #   What is available after load_data():
         #     self.reported                     tidy SEC facts (same columns as CoreWeave);

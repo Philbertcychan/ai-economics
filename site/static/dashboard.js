@@ -1,12 +1,14 @@
 /* dashboard.js — draws the charts on company pages.
 
-   Progressive enhancement only: the tables in the HTML already carry the same numbers, so any
-   failure here degrades to a one-line note and never to a console exception.
+   Progressive enhancement only: every charted number is already in a server-rendered table, so
+   a failure here degrades to a two-word status and never to a console exception.
 
    What this script expects of the page (scripts/build_site.py and site/templates/company.html
    provide it):
    - an element with [data-src] points at that company's JSON, relative to the page;
-   - inside it, [data-charts="reported"] and [data-charts="outputs"] are the chart hosts;
+   - inside it, [data-charts="reported"] is the chart host for the filings, and
+     [data-charts="outputs"] the one for the model, present only when a built model has
+     outputs over more than one period (a single-period snapshot is a table, not a chart);
    - an optional <script type="application/json" data-company> holds the same JSON inline, used
      when fetch cannot run (file:// preview) or the data file is missing.
    Pages without a [data-src] element (index, writeups) do nothing.
@@ -22,7 +24,7 @@
     { key: 'cash', label: 'Cash', kind: 'line' }
   ];
 
-  var FALLBACK_NOTE = 'Charts could not be drawn; the tables carry the same numbers.';
+  var FALLBACK_NOTE = 'Charts unavailable';
 
   function ready(fn) {
     if (document.readyState === 'loading') {
@@ -189,7 +191,7 @@
     box.className = 'chart-box';
     var canvas = document.createElement('canvas');
     canvas.setAttribute('role', 'img');
-    canvas.setAttribute('aria-label', title + '; the same values are in the table below');
+    canvas.setAttribute('aria-label', title + ' by period, chart');
     box.appendChild(canvas);
     fig.appendChild(cap);
     fig.appendChild(box);
@@ -248,12 +250,10 @@
   function render(root, data) {
     var reportedHost = root.querySelector('[data-charts="reported"]');
     var outputsHost = root.querySelector('[data-charts="outputs"]');
-    if (!data) {
-      note(reportedHost || root, 'No data file for this company yet; run scripts/refresh.py.');
-      return;
-    }
+    // Without data the server-rendered page already says "No data"; a second note would repeat it.
+    if (!data) { return; }
     if (typeof Chart === 'undefined') {
-      note(reportedHost || root, 'Charts did not load (Chart.js unavailable); the tables carry the same numbers.');
+      note(reportedHost || root, FALLBACK_NOTE);
       return;
     }
 

@@ -1,10 +1,12 @@
 """Tests for scripts/build_site.py.
 
-Self-contained: ``make_site`` writes a small fixture site (two fictional companies, two published
-writeups, a draft, an underscore-prefixed template, a calls.md with an escaped pipe and a blank
-placeholder row) into ``tmp_path`` and the tests build it and inspect the output. Templates and
-static assets come from the real ``site/templates`` and ``site/static``, so the tests also
-exercise the shipped HTML. No network.
+Self-contained: ``make_site`` writes a small fixture site (two fictional companies, one quarterly
+filer without a model and one annual filer with a built one, two published writeups, a draft, an
+underscore-prefixed template, a calls.md with an escaped pipe and a blank placeholder row) into
+``tmp_path`` and the tests build it and inspect the output. Templates and static assets come from
+the real ``site/templates`` and ``site/static``, so the tests also exercise the shipped HTML and
+hold it to the site's voice: labels, numbers, source lines and statuses, no explanatory prose.
+No network.
 """
 
 from __future__ import annotations
@@ -20,19 +22,32 @@ import pytest
 from data import REPO_ROOT, SITE_CONTENT_DIR, SITE_DIR, SITE_STATIC_DIR
 from scripts.build_site import (
     CHART_JS_URL,
+    MISSING,
     REPO_URL,
     SOURCE_SUBDIRS,
     BuildReport,
+    Figure,
     _check_out_dir,
     audit_html,
     build,
+    capex_to_revenue,
+    change_direction,
+    fmt_change,
     fmt_money,
+    fmt_timestamp,
     fmt_value,
+    headline_figures,
+    latest_point,
     load_writeups,
     main,
     parse_calls,
     parse_frontmatter,
+    prior_year_period,
+    series_figure,
     slugify,
+    split_basis,
+    value_at,
+    yoy_change,
 )
 
 # --------------------------------------------------------------------------------------------
@@ -69,6 +84,9 @@ COMPANIES_JSON = {
 
 # Fictional companies and round toy values throughout: the builder only formats what it is given,
 # and the repo must not carry invented figures, forecasts or graded calls about real companies.
+# AAA is a quarterly filer: revenue and capex end in 2025Q3 with a 2024Q3 point to compare with,
+# cash from operations and cash end a quarter earlier, and the year-earlier cash from operations
+# is negative, so that tile has no percentage. It has no debt or PP&E series (no tile for those).
 AAA_JSON = {
     "ticker": "AAA",
     "name": "Alpha Cloud, Inc.",
@@ -79,25 +97,42 @@ AAA_JSON = {
             "unit": "USD",
             "freq": "Q",
             "tag": "us-gaap:Revenues",
-            "points": [["2025Q1", 982000000], ["2025Q2", 1200000000], ["2025Q3", 1400000000]],
+            "points": [
+                ["2024Q3", 1.0e9],
+                ["2025Q1", 982000000],
+                ["2025Q2", 1200000000],
+                ["2025Q3", 1400000000],
+            ],
         },
-        "capex": {"unit": "USD", "freq": "Q", "points": [["2025Q1", 1.9e9], ["2025Q2", 2.9e9]]},
-        "cfo": {"unit": "USD", "freq": "Q", "points": [["2025Q1", -100000000], ["2025Q2", 2.5e8]]},
-        "cash": {"unit": "USD", "freq": "Q", "points": [["2025Q1", 1.3e9], ["2025Q2", 1.15e9]]},
+        "capex": {
+            "unit": "USD",
+            "freq": "Q",
+            "points": [["2024Q3", 3.5e9], ["2025Q1", 1.9e9], ["2025Q2", 2.9e9], ["2025Q3", 2.8e9]],
+        },
+        "cfo": {
+            "unit": "USD",
+            "freq": "Q",
+            "points": [["2024Q2", -5.0e7], ["2025Q1", -100000000], ["2025Q2", 2.5e8]],
+        },
+        "cash": {
+            "unit": "USD",
+            "freq": "Q",
+            "points": [["2024Q2", 1.0e9], ["2025Q1", 1.3e9], ["2025Q2", 1.15e9]],
+        },
     },
     "outputs": None,
     "inputs": None,
 }
 
+# BBB is an annual filer: what refresh.py publishes for a company without quarterly frames.
 BBB_JSON = {
     "ticker": "BBB",
     "name": "Beta Compute N.V.",
     "layer": "neocloud",
     "as_of": "2026-08-07",
     "reported": {
-        "revenue": {"unit": "USD", "freq": "Q", "points": [["2025Q2", 100000000]]},
-        "shares_outstanding": {"unit": "shares", "freq": "Q", "points": [["2025Q2", 240000000]]},
-        # Annual series: what refresh.py publishes for a filer without quarterly frames.
+        "revenue": {"unit": "USD", "freq": "A", "points": [["2024", 8.0e7], ["2025", 100000000]]},
+        "shares_outstanding": {"unit": "shares", "freq": "A", "points": [["2025", 240000000]]},
         "capex": {"unit": "USD", "freq": "A", "points": [["2024", 300000000], ["2025", 4.0e8]]},
     },
     "outputs": {
@@ -118,9 +153,17 @@ BBB_JSON = {
             "value": 32000,
             "unit": "USD",
             "source": "example source",
-            "note": "example note",
+            # The register's note opens with a bracketed tag; the page shows it as its own column.
+            "note": "[derived; proposed; range 4 to 6] example note & <caveat>",
         },
         {"name": "toy_share", "value": 0.6, "unit": "share", "source": "assumption", "note": ""},
+        {
+            "name": "toy_life",
+            "value": 6,
+            "unit": "years",
+            "source": "",
+            "note": "plain note [not a tag]",
+        },
     ],
 }
 
@@ -243,6 +286,47 @@ class LinkCollector(HTMLParser):
                 self.links.append(value)
 
 
+class TableReader(HTMLParser):
+    """Rows of the first ``<table class="...">`` with the wanted class, as lists of cell text."""
+
+    def __init__(self, table_class: str) -> None:
+        super().__init__()
+        self.table_class = table_class
+        self.rows: list[list[str]] = []
+        self._inside = False
+        self._done = False
+        self._cell: list[str] | None = None
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "table" and not self._done:
+            self._inside = self.table_class in (dict(attrs).get("class") or "").split()
+        elif self._inside and tag == "tr":
+            self.rows.append([])
+        elif self._inside and tag in {"td", "th"}:
+            self._cell = []
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "table" and self._inside:
+            self._inside, self._done = False, True
+        elif self._inside and tag in {"td", "th"} and self._cell is not None:
+            self.rows[-1].append(" ".join("".join(self._cell).split()))
+            self._cell = None
+
+    def handle_data(self, data: str) -> None:
+        if self._cell is not None:
+            self._cell.append(data)
+
+
+def table_rows(page: str, table_class: str) -> list[list[str]]:
+    reader = TableReader(table_class)
+    reader.feed(page)
+    return reader.rows
+
+
+def without_noscript(page: str) -> str:
+    return re.sub(r"<noscript>.*?</noscript>", "", page, flags=re.DOTALL)
+
+
 # --------------------------------------------------------------------------------------------
 # Build output
 # --------------------------------------------------------------------------------------------
@@ -267,24 +351,117 @@ def test_build_creates_expected_files(built: tuple[Path, BuildReport]) -> None:
     assert not report.warnings, report.warnings
 
 
-def test_index_lists_companies_writeups_and_calls(built: tuple[Path, BuildReport]) -> None:
+COMPANIES_HEADER = [
+    "Company",
+    "Layer",
+    "Period",
+    "Revenue",
+    "Revenue YoY",
+    "Capex",
+    "Capex YoY",
+    "Capex / revenue",
+    "Model",
+]
+
+
+def test_index_header_question_and_one_line_footer(built: tuple[Path, BuildReport]) -> None:
     out, _ = built
     index = read(out / "index.html")
-    # Project question and footer text.
-    assert "What does a dollar of GPU compute earn" in index
-    # The hero must not claim more than the design delivers: assumptions are not SEC figures.
-    assert "Every reported figure traces to an SEC filing; every assumption is listed" in index
-    assert "Every number traces" not in index
-    assert "Data: SEC EDGAR. Model and writeups:" in index
-    assert "Last refresh: <time>2026-09-12T11:00:00Z</time>" in index
-    # Companies grid with badges and the EDGAR-linked latest filing.
-    for text in ("AAA", "Alpha Cloud, Inc.", "BBB", "Beta Compute N.V.", "neocloud"):
-        assert text in index
-    assert 'href="companies/AAA.html"' in index
-    assert "model pending" in index and "model built" in index
-    assert 'href="https://www.sec.gov/Archives/edgar/data/1/example/' in index
-    assert "10-Q · 2026-08-12" in index
-    assert "no filing pulled yet" in index  # BBB has latest_filing: null
+    assert "<h1>AI economics</h1>" in index
+    question = (
+        "What does a dollar of GPU compute earn, who captures it, "
+        "and does supply match guided demand?"
+    )
+    assert f'<p class="question">{question}</p>' in index
+    footer = index.split('<footer class="site-footer">', 1)[1].split("</footer>", 1)[0]
+    assert footer.count("<p") == 1
+    assert (
+        "Source: SEC EDGAR · Updated "
+        '<time datetime="2026-09-12T11:00:00Z">2026-09-12 11:00 UTC</time> · '
+        f'<a href="{REPO_URL}" rel="noopener">GitHub</a>'
+    ) in footer
+
+
+def test_index_is_one_table_of_companies(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    index = read(out / "index.html")
+    assert 'class="card"' not in index and "<article" not in index
+    rows = table_rows(index, "companies")
+    assert rows[0] == COMPANIES_HEADER
+    # AAA: 2025Q3 against 2024Q3 (1.4bn / 1.0bn, 2.8bn / 3.5bn), capex / revenue = 2.8 / 1.4.
+    # BBB: calendar 2025 against 2024 (100m / 80m, 400m / 300m), capex / revenue = 400 / 100.
+    assert rows[1:] == [
+        [
+            "AAA Alpha Cloud, Inc.",
+            "neocloud",
+            "2025Q3",
+            "$1.4bn",
+            "+40.0%",
+            "$2.8bn",
+            "-20.0%",
+            "200.0%",
+            "model in progress",
+        ],
+        [
+            "BBB Beta Compute N.V.",
+            "neocloud",
+            "2025",
+            "$100m",
+            "+25.0%",
+            "$400m",
+            "+33.3%",
+            "400.0%",
+            "model",
+        ],
+    ]
+    assert 'href="companies/AAA.html"' in index and 'href="companies/BBB.html"' in index
+    # The sign of a change is carried by a class, so the stylesheet can colour it.
+    assert '<td class="num chg pos">+40.0%</td>' in index
+    assert '<td class="num chg neg">-20.0%</td>' in index
+
+
+def test_index_rows_sort_by_layer_then_ticker_and_blank_out_missing_figures(
+    tmp_path: Path,
+) -> None:
+    site = tmp_path / "site"
+    (site / "data").mkdir(parents=True)
+    layers = {
+        "HYB": "hyperscaler",
+        "CHP": "chip",
+        "ZNC": "neocloud",
+        "PWR": "power",  # not a layer the site knows: after the known ones
+        "HYA": "hyperscaler",
+        "ANC": "neocloud",
+    }
+    companies = [
+        {"ticker": t, "name": f"{t} Corp", "layer": layer, "model_status": "no-model"}
+        for t, layer in layers.items()
+    ]
+    (site / "data" / "companies.json").write_text(
+        json.dumps({"as_of": "2026-09-12T11:00:00Z", "companies": companies}), encoding="utf-8"
+    )
+    # Revenue only, with no year-earlier quarter and no capex series at all.
+    (site / "data" / "ANC.json").write_text(
+        json.dumps({"reported": {"revenue": {"unit": "USD", "points": [["2025Q2", 5.0e8]]}}}),
+        encoding="utf-8",
+    )
+    out = tmp_path / "build"
+    build(site_dir=site, out_dir=out, calls_md=tmp_path / "missing-calls.md")
+    rows = table_rows(read(out / "index.html"), "companies")[1:]
+    assert [row[0].split()[0] for row in rows] == ["ANC", "ZNC", "CHP", "HYA", "HYB", "PWR"]
+    assert rows[0][2:8] == ["2025Q2", "$500m", MISSING, MISSING, MISSING, MISSING]
+    assert rows[1][2:8] == [MISSING] * 6  # no data file
+    assert MISSING == "–"
+
+
+def test_index_lists_writeups_and_calls_when_they_exist(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    index = read(out / "index.html")
+    assert '<section id="calls" class="section"><h2>Calls</h2>' in index
+    assert '<section id="writeups" class="section"><h2>Writeups</h2>' in index
+    assert index.index('id="companies"') < index.index('id="calls"') < index.index('id="writeups"')
+    assert 'href="index.html#calls">Calls</a>' in index  # nav
+    assert 'href="writeups/index.html">Writeups</a>' in index
     # Writeups newest first, escaped titles and summaries.
     newest = index.index("Depreciation &amp; the GPU-hour")
     older = index.index("What an Alpha Cloud GPU-hour earns")
@@ -294,8 +471,28 @@ def test_index_lists_companies_writeups_and_calls(built: tuple[Path, BuildReport
     assert "example claim: toy &gt; $5bn" in index
     assert "toy &lt; $4bn | example cut" in index
     assert 'class="outcome outcome-wrong"' in index
-    assert index.count("<tr>") == 3  # header + two calls
+    calls = table_rows(index, "calls")
+    assert calls[0] == ["Date", "Claim", "Falsifying number", "Deadline", "Outcome"]
+    assert [row[0] for row in calls[1:]] == ["2026-09-21", "2026-09-22"]
     assert "outcome-untitled" not in index
+
+
+def test_empty_sections_and_their_nav_links_are_left_out(tmp_path: Path) -> None:
+    """No calls and no published writeups: no heading, no "none yet" line, no dead nav link."""
+    site, out, _ = make_site(tmp_path)
+    for path in (site / "content").glob("*.md"):
+        path.unlink()
+    no_calls = tmp_path / "no-calls.md"
+    no_calls.write_text(CALLS_MD.split("| 2026-09-21", 1)[0], encoding="utf-8")
+    report = build(site_dir=site, out_dir=out, calls_md=no_calls)
+    assert (report.writeups, report.calls) == (0, 0) and not report.warnings
+    for page in ("index.html", "companies/AAA.html", "companies/BBB.html"):
+        text = read(out / page)
+        for gone in ('id="calls"', 'id="writeups"', 'id="company-writeups"', "<h2>Writeups</h2>"):
+            assert gone not in text, (page, gone)
+        assert "#calls" not in text and "writeups/index.html" not in text, page
+        assert "Companies</a>" in text and "GitHub</a>" in text
+    assert "<li>" not in read(out / "writeups" / "index.html")
 
 
 def test_index_shows_only_newest_five_writeups(tmp_path: Path) -> None:
@@ -364,57 +561,227 @@ def test_data_is_copied_and_calls_json_written(built: tuple[Path, BuildReport]) 
     ]
 
 
-def test_company_page_pending_model(built: tuple[Path, BuildReport]) -> None:
+def test_company_page_without_a_built_model(built: tuple[Path, BuildReport]) -> None:
     out, _ = built
     page = read(out / "companies" / "AAA.html")
     assert "<title>Alpha Cloud, Inc. (AAA) · AI economics</title>" in page
-    # No workbook exists until the model is built, so a link would be a 404 on GitHub.
-    assert "models/AAA.xlsx" not in page and "Workbook: not exported yet" in page
-    # The element behind a series is named, and only for series that carry one.
-    assert "<li>Revenue: <code>us-gaap:Revenues</code></li>" in page
-    assert page.count("<li>") - page.count("<li class=") >= 1 and "Capex: <code>" not in page
+    # Header: layer, CIK, status badge, latest filing and EDGAR. No workbook exists until the
+    # model is built, so a link would be a 404 on GitHub.
+    assert '<p class="eyebrow"><span class="layer">neocloud</span> · CIK 0000000001</p>' in page
+    assert '<span class="badge badge-pending">model in progress</span>' in page
     assert 'href="https://www.sec.gov/Archives/edgar/data/1/example/' in page
-    assert "Reported (SEC XBRL)" in page and "Model pending" in page
+    assert "10-Q · 2026-08-12" in page
+    assert "CIK=0000000001" in page and 'rel="noopener">EDGAR</a>' in page
+    assert "xlsx" not in page and "Workbook" not in page
+    # The badge is the whole model status: no model section, no chart host for outputs.
+    assert 'id="model"' not in page and "<h2>Model</h2>" not in page
+    assert 'data-charts="outputs"' not in page
+    assert "Assumptions" not in page and "Outputs" not in page
+    # The element behind a series is named, and only for series that carry one.
+    assert "<summary>XBRL elements</summary>" in page
+    assert "<li>Revenue: <code>us-gaap:Revenues</code></li>" in page
+    assert "Capex: <code>" not in page
     # Server-side table of reported values, formatted bn/m, with negatives.
+    assert "<h2>Reported</h2>" in page
     for cell in ("$1.2bn", "$982m", "$1.4bn", "-$100m", "$2.9bn"):
         assert cell in page, cell
     assert "2025Q1" in page and "2025Q3" in page
-    assert "<caption>Latest quarters</caption>" in page
+    assert "<caption>Quarters</caption>" in page
     # Hooks for dashboard.js: relative data-src, inline JSON copy, Chart.js from cdnjs.
     assert 'data-src="../data/AAA.json"' in page
-    assert 'data-charts="reported"' in page and 'data-charts="outputs"' in page
+    assert 'data-charts="reported"' in page
     assert '<script type="application/json" data-company>{"ticker":"AAA"' in page
     assert CHART_JS_URL in page
     assert 'href="../static/style.css"' in page
     # Only this company's writeups are listed.
+    assert '<section id="company-writeups" class="section"><h2>Writeups</h2>' in page
     assert "What an Alpha Cloud GPU-hour earns" in page
     assert "Depreciation &amp; the GPU-hour" not in page
+
+
+def kpi_tiles(page: str) -> list[str]:
+    return re.findall(r'<div class="kpi">(.*?)</div>', page)
+
+
+def test_key_figures_tiles_show_latest_value_change_and_period(
+    built: tuple[Path, BuildReport],
+) -> None:
+    out, _ = built
+    page = read(out / "companies" / "AAA.html")
+    assert '<section id="key-figures" class="section"><h2>Key figures</h2><dl class="kpis">' in page
+    assert kpi_tiles(page) == [
+        '<dt>Revenue</dt><dd class="kpi-value">$1.4bn</dd>'
+        '<dd class="kpi-note"><span class="chg pos">+40.0% YoY</span> · 2025Q3</dd>',
+        '<dt>Capex</dt><dd class="kpi-value">$2.8bn</dd>'
+        '<dd class="kpi-note"><span class="chg neg">-20.0% YoY</span> · 2025Q3</dd>',
+        # The year-earlier quarter was an outflow, so there is no percentage, only the period.
+        '<dt>Cash from operations</dt><dd class="kpi-value">$250m</dd>'
+        '<dd class="kpi-note">2025Q2</dd>',
+        '<dt>Cash</dt><dd class="kpi-value">$1.1bn</dd>'
+        '<dd class="kpi-note"><span class="chg pos">+15.0% YoY</span> · 2025Q2</dd>',
+    ]  # no long-term debt or PP&E series, so no tile for either
+    # An annual filer compares calendar years.
+    assert kpi_tiles(read(out / "companies" / "BBB.html")) == [
+        '<dt>Revenue</dt><dd class="kpi-value">$100m</dd>'
+        '<dd class="kpi-note"><span class="chg pos">+25.0% YoY</span> · 2025</dd>',
+        '<dt>Capex</dt><dd class="kpi-value">$400m</dd>'
+        '<dd class="kpi-note"><span class="chg pos">+33.3% YoY</span> · 2025</dd>',
+    ]
 
 
 def test_company_page_built_model(built: tuple[Path, BuildReport]) -> None:
     out, _ = built
     page = read(out / "companies" / "BBB.html")
-    assert "model built" in page and "Model pending" not in page
+    assert '<span class="badge badge-built">model</span>' in page
     workbook_url = html.escape(f"{REPO_URL}/blob/main/models/BBB.xlsx")
-    assert f'<a href="{workbook_url}" rel="noopener">Workbook: models/BBB.xlsx</a>' in page
-    assert "Model outputs by period" in page
+    assert f'<a href="{workbook_url}" rel="noopener">Workbook</a>' in page
+    # Key figures, then the model (charts, outputs, assumptions), then the filings.
+    order = [
+        page.index(marker)
+        for marker in (
+            'id="key-figures"',
+            '<section id="model" class="section"><h2>Model</h2>',
+            'data-charts="outputs"',
+            "<caption>Outputs</caption>",
+            "<caption>Assumptions</caption>",
+            '<section id="reported"',
+        )
+    ]
+    assert order == sorted(order)
     for cell in ("$500m", "$1.5bn", "55.0%", "60.0%", "2025A", "2026E"):
         assert cell in page, cell
-    # Assumptions table shows exact input values, not abbreviated ones.
-    assert "Assumptions" in page and "<code>toy_price</code>" in page
-    assert "$32,000" in page and "example source" in page
+    # Assumptions register: exact input values (not abbreviated), and the bracketed tag that
+    # opens a note split off into the Basis column.
+    assert "<code>toy_price</code>" in page
+    assert table_rows(page, "inputs") == [
+        ["Assumption", "Value", "Unit", "Basis", "Source", "Note"],
+        [
+            "toy_price",
+            "$32,000",
+            "USD",
+            "derived; proposed; range 4 to 6",
+            "example source",
+            "example note & <caveat>",
+        ],
+        ["toy_share", "60.0%", "share", "", "assumption", ""],
+        ["toy_life", "6", "years", "", "", "plain note [not a tag]"],
+    ]
+    assert '<td class="basis">derived; proposed; range 4 to 6</td>' in page
+    assert "example note &amp; &lt;caveat&gt;" in page.split("<script", 1)[0]
+    assert "<caveat>" not in page and "[derived" not in page.split("<script", 1)[0]
     assert "Shares outstanding" in page and "240m" in page
-    assert "no filing pulled yet" in page
-    assert "No writeups on BBB yet." in page
+    assert '<span class="muted">no filing</span>' in page  # latest_filing is null
+    assert 'id="company-writeups"' not in page  # none about BBB
+
+
+def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    snapshot = json.loads(json.dumps(BBB_JSON))
+    snapshot["outputs"]["toy_output"]["points"] = [["2024Q4", 500.0]]
+    snapshot["outputs"]["toy_ratio"]["points"] = [["2024Q4", 0.55]]
+    (site / "data" / "BBB.json").write_text(json.dumps(snapshot), encoding="utf-8")
+    build(site_dir=site, out_dir=out, calls_md=calls)
+    page = read(out / "companies" / "BBB.html")
+    model = page.split('<section id="model"', 1)[1].split("</section>", 1)[0]
+    assert 'data-charts="outputs"' not in page and 'class="charts"' not in model
+    assert "<caption>Outputs · 2024Q4</caption>" in model
+    assert table_rows(page, "outputs") == [
+        ["Output", "Value", "Unit"],
+        ["Toy output", "$500m", "USD m"],
+        ["Toy ratio", "55.0%", "%"],
+    ]
+    assert 'class="series"' not in model  # no table by period beside it
+    # The assumptions follow, and the model section holds the two tables and nothing else.
+    assert model.index('class="outputs"') < model.index("<caption>Assumptions</caption>")
+    assert "<p" not in model
+    assert 'data-charts="reported"' in page  # the filings are still charted
+
+    # Outputs that end in different periods: a Period column, not one period in the caption.
+    snapshot["outputs"]["toy_ratio"]["points"] = [["2025Q1", 0.55]]
+    (site / "data" / "BBB.json").write_text(json.dumps(snapshot), encoding="utf-8")
+    build(site_dir=site, out_dir=out, calls_md=calls)
+    page = read(out / "companies" / "BBB.html")
+    assert "<caption>Outputs</caption>" in page and 'data-charts="outputs"' not in page
+    assert table_rows(page, "outputs") == [
+        ["Output", "Period", "Value", "Unit"],
+        ["Toy output", "2024Q4", "$500m", "USD m"],
+        ["Toy ratio", "2025Q1", "55.0%", "%"],
+    ]
+
+
+def test_outputs_over_several_periods_keep_charts_and_the_table_by_period(
+    built: tuple[Path, BuildReport],
+) -> None:
+    out, _ = built
+    page = read(out / "companies" / "BBB.html")
+    model = page.split('<section id="model"', 1)[1].split("</section>", 1)[0]
+    assert '<div class="charts" data-charts="outputs"></div>' in model
+    assert 'class="outputs"' not in model
+    rows = table_rows(model, "series")
+    assert rows[0] == ["Item", "Unit", "2025A", "2026E"]
+    assert rows[1] == ["Toy output", "USD m", "$500m", "$1.5bn"]
+    assert "<p" not in model
+
+
+def test_model_content_is_hidden_until_the_status_says_built(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    companies = json.loads(json.dumps(COMPANIES_JSON))
+    companies["companies"][1]["model_status"] = "pending"
+    (site / "data" / "companies.json").write_text(json.dumps(companies), encoding="utf-8")
+    report = build(site_dir=site, out_dir=out, calls_md=calls)
+    page = read(out / "companies" / "BBB.html")
+    assert 'id="model"' not in page and "toy_price" not in page.split("<script", 1)[0]
+    assert "Toy output" not in page.split("<script", 1)[0]
+    assert [w for w in report.warnings if w.startswith("BBB.json carries model outputs")]
+
+
+def test_status_labels_shown_to_readers(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    companies = json.loads(json.dumps(COMPANIES_JSON))
+    companies["companies"].append(
+        {"ticker": "CCC", "name": "Gamma Chips Corp", "layer": "chip", "model_status": "no-model"}
+    )
+    (site / "data" / "companies.json").write_text(json.dumps(companies), encoding="utf-8")
+    build(site_dir=site, out_dir=out, calls_md=calls)
+    rows = table_rows(read(out / "index.html"), "companies")[1:]
+    assert {row[0].split()[0]: row[-1] for row in rows} == {
+        "AAA": "model in progress",
+        "BBB": "model",
+        "CCC": "reported data",
+    }
+    # The vocabulary in the JSON is unchanged; only the label a reader sees differs.
+    published = json.loads(read(out / "data" / "companies.json"))
+    assert [c["model_status"] for c in published["companies"]] == ["pending", "built", "no-model"]
+
+
+SOURCE_LINE = (
+    '<p class="source">SEC XBRL, calendar periods. '
+    "Cash-flow quarters derived from year-to-date filings.</p>"
+)
+
+
+def test_reported_section_has_one_source_line_and_a_noscript_note(
+    built: tuple[Path, BuildReport],
+) -> None:
+    out, _ = built
+    for ticker in ("AAA", "BBB"):
+        page = read(out / "companies" / f"{ticker}.html")
+        reported = page.split('<section id="reported"', 1)[1].split("</section>", 1)[0]
+        assert reported.count(SOURCE_LINE) == 1
+        assert "<noscript>" in reported and "Charts need JavaScript" in reported
+        assert "Charts need JavaScript" not in without_noscript(page)
+        # Nothing but the source line between the heading and the chart host.
+        lead = reported.split("<h2>Reported</h2>", 1)[1].split('<div class="charts"', 1)[0]
+        assert without_noscript(lead).strip() == SOURCE_LINE
 
 
 def test_annual_table_is_captioned_as_calendar_years(built: tuple[Path, BuildReport]) -> None:
     """Annual points are SEC ``CYyyyy`` frames, so "fiscal years" would mislabel a January FYE."""
     out, _ = built
     page = read(out / "companies" / "BBB.html")
-    assert "<caption>Latest calendar years (SEC frames)</caption>" in page
-    assert "fiscal years" not in page
-    assert "shown under the nearest calendar period" in page
+    assert "<caption>Calendar years</caption>" in page
+    assert "<caption>Quarters</caption>" not in page
+    assert "fiscal" not in page.lower()
     assert "$300m" in page and "$400m" in page
 
 
@@ -445,13 +812,17 @@ def test_company_page_data_only(tmp_path: Path) -> None:
     build(site_dir=site, out_dir=out, calls_md=tmp_path / "missing-calls.md")
     index = read(out / "index.html")
     page = read(out / "companies" / "CCC.html")
-    assert 'class="badge badge-no-model">data only</span>' in index
-    assert "data only" in page and "No model for CCC" in page
+    assert 'class="badge badge-no-model">reported data</span>' in index
+    assert 'class="badge badge-no-model">reported data</span>' in page
     for text in (index, page):
-        assert "model pending" not in text and "Model pending" not in text
-    # A data-only company never gets a workbook, so the page does not mention one at all.
+        assert "model in progress" not in text
+    # A data-only company never gets a workbook or a model section.
     assert "xlsx" not in page and "Workbook" not in page
-    assert "All filings on EDGAR" in page
+    assert 'id="model"' not in page and 'data-charts="outputs"' not in page
+    assert 'rel="noopener">EDGAR</a>' in page
+    # No series yet: no tiles, and the reported section carries a status, not a sentence.
+    assert 'id="key-figures"' not in page
+    assert '<p class="note">No data</p>' in page
 
 
 def test_index_page_has_no_chart_library(built: tuple[Path, BuildReport]) -> None:
@@ -494,12 +865,77 @@ def test_empty_state_build_succeeds_with_warning(tmp_path: Path) -> None:
     assert any("companies.json" in w for w in report.warnings), report.warnings
     assert any("missing-calls.md" in w for w in report.warnings), report.warnings
     index = read(out / "index.html")
-    assert "No company data yet" in index
-    assert "No writeups published yet" in index
-    assert "No calls logged yet" in index
-    assert "Last refresh: <time>not yet refreshed</time>" in index
+    # A minimal page: the header, the table with its columns and no rows, the footer.
+    assert "<h1>AI economics</h1>" in index
+    assert table_rows(index, "companies") == [COMPANIES_HEADER]
+    assert "<tbody></tbody>" in index
+    assert 'id="calls"' not in index and 'id="writeups"' not in index
+    assert '<p class="note">' not in index and "<code>" not in index
+    assert "Source: SEC EDGAR · Not refreshed · " in index and "<time" not in index
+    assert "<li>" not in read(out / "writeups" / "index.html")
     assert (out / ".nojekyll").exists() and (out / "static" / "style.css").exists()
     assert json.loads(read(out / "data" / "calls.json")) == []
+
+
+# Sentences the redesign removed. The pages carry labels, numbers, source lines and statuses; the
+# project and the method are described in the README, not on the site.
+BANNED_PHRASES = (
+    "three layers",
+    "Every reported figure",
+    "Every writeup",
+    "Every number",
+    "Hits and misses",
+    "An open financial model",
+    "Each one asks",
+    "Each writeup",
+    "blue cells",
+    "Model pending",
+    "model pending",
+    "model built",
+    "data only",
+    "No model for",
+    "TODO.md",
+    "company-facts API",
+    "carry the same numbers",
+    "none yet",
+    "not exported yet",
+    "No writeups",
+    "No calls",
+    "No company data",
+    "No reported data yet",
+    "pulled yet",
+    "refresh.py",
+    "uv run",
+    "Last refresh",
+)
+
+
+def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
+    """Every page of three builds: the full fixture, a data-only company, and no data at all."""
+    site, full, calls = make_site(tmp_path)
+    build(site_dir=site, out_dir=full, calls_md=calls)
+
+    bare = tmp_path / "bare-site"
+    (bare / "data").mkdir(parents=True)
+    company = {"ticker": "CCC", "name": "Gamma Chips Corp", "layer": "chip"}
+    (bare / "data" / "companies.json").write_text(
+        json.dumps({"companies": [company | {"model_status": "no-model", "has_data": True}]}),
+        encoding="utf-8",
+    )
+    build(site_dir=bare, out_dir=tmp_path / "bare", calls_md=tmp_path / "missing-calls.md")
+    build(site_dir=tmp_path / "nothing", out_dir=tmp_path / "empty", calls_md=tmp_path / "x.md")
+
+    pages = [p for d in ("build", "bare", "empty") for p in (tmp_path / d).rglob("*.html")]
+    assert len(pages) == 6 + 3 + 2
+    for page in pages:
+        text = read(page)
+        for phrase in BANNED_PHRASES:
+            assert phrase not in text, f"{page.relative_to(tmp_path)}: {phrase!r}"
+        assert "Charts need JavaScript" not in without_noscript(text), page
+    # dashboard.js writes status notes into the page, so its strings are held to the same rule.
+    script = read(SITE_STATIC_DIR / "dashboard.js")
+    for phrase in ("carry the same numbers", "refresh.py", "Charts did not load"):
+        assert phrase not in script, phrase
 
 
 def test_rebuild_is_byte_identical(tmp_path: Path) -> None:
@@ -829,6 +1265,164 @@ def test_format_vectors_are_documented_identically_in_python_and_javascript() ->
     assert documented_vectors(SITE_STATIC_DIR / "dashboard.js") == expected
 
 
+# --------------------------------------------------------------------------------------------
+# Display arithmetic: latest point, the same period a year earlier, YoY, capex / revenue
+# --------------------------------------------------------------------------------------------
+
+QUARTERLY = {
+    "unit": "USD",
+    "freq": "Q",
+    "points": [["2025Q1", 90.0], ["2025Q2", 100.0], ["2026Q1", 120.0], ["2026Q2", 125.0]],
+}
+ANNUAL = {"unit": "USD", "freq": "A", "points": [["2023", 50.0], ["2024", 80.0], ["2025", 60.0]]}
+
+
+def test_latest_point_is_the_last_numeric_period() -> None:
+    assert latest_point([("2025Q4", 1.0), ("2026Q1", 2.0)]) == ("2026Q1", 2.0)
+    assert latest_point([("2026Q1", 2.0), ("2025Q4", 1.0)]) == ("2026Q1", 2.0)  # by label
+    # A null, NaN or text placeholder for the newest period is not a figure.
+    assert latest_point([("2025", 7), ("2026", None)]) == ("2025", 7.0)
+    assert latest_point([("2025", 7), ("2026", float("nan")), ("2027", "n/a")]) == ("2025", 7.0)
+    assert latest_point([]) is None and latest_point([("2026", None)]) is None
+
+
+def test_value_at() -> None:
+    points = [("2025Q2", 100), ("2026Q2", None)]
+    assert value_at(points, "2025Q2") == 100.0
+    assert value_at(points, "2026Q2") is None and value_at(points, "2024Q2") is None
+
+
+@pytest.mark.parametrize(
+    ("period", "expected"),
+    [
+        ("2026Q2", "2025Q2"),  # the same quarter, not the previous one
+        ("2026Q1", "2025Q1"),
+        ("2025", "2024"),
+        ("2026E", None),  # model labels are not calendar periods
+        ("2025A", None),
+        ("2026Q5", None),
+        ("Q2", None),
+        ("", None),
+    ],
+)
+def test_prior_year_period(period: str, expected: str | None) -> None:
+    assert prior_year_period(period) == expected
+
+
+@pytest.mark.parametrize(
+    ("current", "prior", "expected"),
+    [
+        (125.0, 100.0, 0.25),
+        (80.0, 100.0, -0.2),
+        (-100.0, 250.0, -1.4),  # a positive base is a base, whatever the sign of the new figure
+        (100.0, 0.0, None),
+        (100.0, -50.0, None),  # an outflow of 50 turning into an inflow of 100 is not "-300%"
+        (-20.0, -50.0, None),
+        (100.0, None, None),
+        (None, 100.0, None),
+    ],
+)
+def test_yoy_change(current: float | None, prior: float | None, expected: float | None) -> None:
+    assert yoy_change(current, prior) == pytest.approx(expected)
+
+
+def test_capex_to_revenue() -> None:
+    assert capex_to_revenue(2.8e9, 1.4e9) == pytest.approx(2.0)
+    assert capex_to_revenue(0.0, 1.4e9) == 0.0
+    for capex, revenue in ((1.0, 0.0), (1.0, -5.0), (None, 1.0), (1.0, None)):
+        assert capex_to_revenue(capex, revenue) is None
+
+
+@pytest.mark.parametrize(
+    ("change", "text", "direction"),
+    [
+        (0.177, "+17.7%", "pos"),
+        (-0.2, "-20.0%", "neg"),
+        (12.345, "+1,234.5%", "pos"),
+        (0.0, "0.0%", "flat"),
+        (-0.0004, "0.0%", "flat"),  # shown as zero, so neither signed nor coloured
+        (None, MISSING, ""),
+        (float("inf"), MISSING, ""),
+    ],
+)
+def test_fmt_change_and_direction_agree(change: float | None, text: str, direction: str) -> None:
+    assert fmt_change(change) == text
+    assert change_direction(change) == direction
+
+
+def test_series_figure_quarterly_compares_the_same_quarter_a_year_earlier() -> None:
+    assert series_figure(QUARTERLY) == Figure("2026Q2", 125.0, "USD", pytest.approx(0.25))
+    # 2026Q1 against 2025Q1, not against the quarter before it.
+    assert series_figure(QUARTERLY, "2026Q1") == Figure(
+        "2026Q1", 120.0, "USD", pytest.approx(1 / 3)
+    )
+
+
+def test_series_figure_annual_compares_the_prior_year() -> None:
+    assert series_figure(ANNUAL) == Figure("2025", 60.0, "USD", pytest.approx(-0.25))
+
+
+def test_series_figure_without_a_comparison_or_without_a_point() -> None:
+    assert series_figure(QUARTERLY, "2025Q2") == Figure("2025Q2", 100.0, "USD", None)
+    gap = {"unit": "USD", "points": [["2024Q3", 10.0], ["2025Q4", 20.0]]}  # 2024Q4 not filed
+    assert series_figure(gap) == Figure("2025Q4", 20.0, "USD", None)
+    zero_base = {"unit": "USD", "points": [["2024", 0.0], ["2025", 61.5]]}
+    assert series_figure(zero_base) == Figure("2025", 61.5, "USD", None)
+    assert series_figure(QUARTERLY, "2030Q1") is None
+    for missing in (None, {}, {"points": []}, {"points": [["2025", None]]}, "n/a"):
+        assert series_figure(missing) is None
+
+
+def test_headline_figures_read_capex_at_the_revenue_period() -> None:
+    reported = {
+        "revenue": QUARTERLY,
+        # Capex runs a quarter ahead: the row still shows 2026Q2 for both, so the ratio is like
+        # for like.
+        "capex": {
+            "unit": "USD",
+            "points": [["2025Q2", 40.0], ["2026Q2", 50.0], ["2026Q3", 70.0]],
+        },
+    }
+    revenue, capex = headline_figures(reported)
+    assert revenue == Figure("2026Q2", 125.0, "USD", pytest.approx(0.25))
+    assert capex == Figure("2026Q2", 50.0, "USD", pytest.approx(0.25))
+    # Annual capex beside quarterly revenue has no point for the quarter.
+    assert headline_figures({"revenue": QUARTERLY, "capex": ANNUAL})[1] is None
+    # Without revenue the row falls back to the latest capex point.
+    assert headline_figures({"capex": ANNUAL}) == (
+        None,
+        Figure("2025", 60.0, "USD", pytest.approx(-0.25)),
+    )
+    assert headline_figures({}) == (None, None) and headline_figures(None) == (None, None)
+
+
+@pytest.mark.parametrize(
+    ("note", "expected"),
+    [
+        (
+            "[derived; proposed; range 4 to 6] Fleet average.",
+            ("derived; proposed; range 4 to 6", "Fleet average."),
+        ),
+        ("  [judgment;  proposed]\nZero on purpose.", ("judgment; proposed", "Zero on purpose.")),
+        ("[disclosed]", ("disclosed", "")),
+        ("No tag here.", ("", "No tag here.")),
+        ("Raised to six years [S-1 p.F-16].", ("", "Raised to six years [S-1 p.F-16].")),
+        ("[derived] first [second] tag stays", ("derived", "first [second] tag stays")),
+        ("[unclosed tag", ("", "[unclosed tag")),
+        ("", ("", "")),
+        (None, ("", "")),
+    ],
+)
+def test_split_basis(note: str | None, expected: tuple[str, str]) -> None:
+    assert split_basis(note) == expected
+
+
+def test_fmt_timestamp() -> None:
+    assert fmt_timestamp("2026-09-17T13:43:24Z") == "2026-09-17 13:43 UTC"
+    assert fmt_timestamp("2026-09-17") == "2026-09-17"
+    assert fmt_timestamp("last Tuesday") == "last Tuesday"
+
+
 def css_block(css: str, selector: str) -> str:
     match = re.search(
         r"^" + re.escape(selector) + r" \{(.*?)^\}", css, flags=re.MULTILINE | re.DOTALL
@@ -844,6 +1438,18 @@ def test_stylesheet_keeps_a_phone_page_from_scrolling_sideways() -> None:
     # The header nav stays on one line and scrolls inside itself instead of wrapping at 375px.
     nav = css_block(css, ".site-header nav")
     assert "flex-wrap: nowrap" in nav and "overflow-x: auto" in nav
+    # Wide tables scroll inside their own box, and the key-figures strip is two columns on a
+    # phone (the wider layouts sit in min-width media queries further down).
+    assert "overflow-x: auto" in css_block(css, ".table-scroll")
+    assert "grid-template-columns: repeat(2, minmax(0, 1fr))" in css_block(css, ".kpis")
+
+
+def test_stylesheet_sets_numbers_in_tabular_figures_and_colours_the_sign_of_a_change() -> None:
+    css = read(SITE_STATIC_DIR / "style.css")
+    assert "font-variant-numeric: tabular-nums" in css_block(css, "table")
+    assert "text-align: right" in css_block(css, ".num")
+    assert "var(--ok)" in css_block(css, ".pos") and "var(--bad)" in css_block(css, ".neg")
+    assert "@media (prefers-color-scheme: dark)" in css
 
 
 def test_audit_html_flags_absolute_links_only() -> None:

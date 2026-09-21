@@ -1104,3 +1104,16 @@ def test_refresh_workflow_structure() -> None:
             if action in line:
                 version = line.split("@", 1)[1].strip()
                 assert version.startswith("v") and version[1:].isdigit(), f"pin a major: {line}"
+
+
+def test_partial_run_keeps_the_other_companies_in_the_index(tmp_path: Path) -> None:
+    # `--tickers AAA` refreshes one company; the site index must still list the rest.
+    _, paths, _ = do_run(tmp_path)
+    before = read_json(paths.site_data_dir / "companies.json")
+    tracked = [c["ticker"] for c in before["companies"]]
+    assert tracked == list(COMPANIES) and len(tracked) > 1
+
+    _, paths, _ = do_run(tmp_path, config=RefreshConfig(tickers=("AAA",), build_site=False))
+    after = read_json(paths.site_data_dir / "companies.json")
+    assert [c["ticker"] for c in after["companies"]] == tracked
+    assert after["companies"][1:] == before["companies"][1:], "untouched rows carried over"

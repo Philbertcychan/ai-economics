@@ -1,33 +1,18 @@
 <article class="company" data-src="${root}data/$ticker.json">
   <header class="page-header">
-    <p class="eyebrow"><span class="layer">$layer</span> · CIK $cik</p>
+    <p class="eyebrow">$eyebrow</p>
     <h1>$name <span class="ticker">$ticker</span></h1>
-    <p class="meta">$status_badge <span>Latest filing: $latest_filing</span> <span>Data as of <time>$company_as_of</time></span></p>
-    <p class="links">
-      $workbook_link
-      <a href="$edgar_url" rel="noopener">All filings on EDGAR</a>
-    </p>
+    <p class="meta">$status_badge $header_links</p>
   </header>
-
+$key_figures
+$model_section
   <section id="reported" class="section">
-    <h2>Reported (SEC XBRL)</h2>
-    <p class="muted">From the SEC company-facts API. Periods are calendar periods (SEC frames): a fiscal quarter or year that does not end on a calendar quarter-end is shown under the nearest calendar period. Where a filing gives only a cumulative figure (a 10-Q reports cash-flow items year-to-date, and a 10-K has no fourth quarter), the quarter shown is the difference between the filed figures. Charts need JavaScript; the tables carry the same numbers.</p>
+    <h2>Reported</h2>
+    <p class="source">SEC XBRL, calendar periods. Cash-flow quarters derived from year-to-date filings.</p>
+    <noscript><p class="source">Charts need JavaScript.</p></noscript>
     <div class="charts" data-charts="reported"></div>
 $reported_html
   </section>
-
-  <section id="outputs" class="section">
-    <h2>Model outputs</h2>
-    <div class="charts" data-charts="outputs"></div>
-$outputs_html
-  </section>
-
-$inputs_html
-
-  <section id="company-writeups" class="section">
-    <h2>Writeups</h2>
-$writeups_list
-  </section>
-
+$writeups_section
   <script type="application/json" data-company>$inline_json</script>
 </article>

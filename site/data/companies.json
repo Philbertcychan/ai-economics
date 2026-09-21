@@ -1,12 +1,12 @@
 {
-  "as_of": "2026-09-17T13:43:24Z",
+  "as_of": "2026-09-21T21:37:36Z",
   "companies": [
     {
       "ticker": "CRWV",
       "name": "CoreWeave, Inc.",
       "layer": "neocloud",
       "cik": "0001769628",
-      "model_status": "pending",
+      "model_status": "built",
       "latest_filing": {
         "form": "10-Q",
         "date": "2026-08-12",

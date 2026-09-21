@@ -22,13 +22,15 @@ data for all seven.
 ## Repository map
 
 ```
-engine/       GPU unit economics: typed inputs with unit labels, three headline functions (bodies pending)
-companies/    one model class per company on shared plumbing (load reported data, export); registry
-data/         EDGAR client, stub interfaces for transcripts and GPU prices; raw/ (dated pulls, gitignored
+engine/       the economics of one GPU: cost stack, rental and token revenue, margin, payback
+assumptions/  one CSV per company: every non-reported number with its source, range and sign-off status
+companies/    one model class per company on shared plumbing; loads the assumptions register
+data/         EDGAR client, interfaces for transcripts and GPU prices; raw/ (dated pulls, gitignored
               except manifests), processed/ (tidy CSVs, committed), last_refresh_diff.md
 scripts/      export_xlsx.py (workbook), build_site.py (static site), refresh.py (daily pipeline)
 models/       generated <TICKER>.xlsx per company plus manifest.json (export fingerprints)
 site/         content/ (writeups), data/ (JSON for the dashboard), templates/, static/, build/ (generated)
+docs/         modeling-approach.md (the financial reasoning) and code-tour.md (how the program is organised)
 tests/        offline pytest suite; tests/fixtures/edgar/ holds trimmed real EDGAR responses
 notes/        reading notes on filings (notes/coreweave-s1.md)
 .github/      workflows/ci.yml (lint + tests) and workflows/refresh.yml (daily data pull + Pages deploy)
@@ -108,19 +110,11 @@ workflow refuses to run without the `EDGAR_USER_AGENT` secret.
 network: the `network` marker registered in `pyproject.toml` is reserved for future live EDGAR
 tests, and none exist yet.
 
-The bodies of the three engine functions have not been written yet, so each of their tests
-carries a conditional `xfail(raises=NotImplementedError, strict=True)`. A test names the engine
-functions it calls, and its marker is active only while one of those still raises
-`NotImplementedError`. The suite is green now, and a test starts running for real as soon as the
-functions it needs exist, so the three can land one at a time with nothing to delete in between.
-Once all three are written the `pending` helper in `tests/test_unit_economics.py` is dead code and
-can be removed. To see the real failures while implementing:
+The engine's expected numbers are worked out by hand, outside the engine, and pinned as literals:
+a test that recomputes the formula it is testing can never fail. Behaviour is tested as well
+(more utilisation never raises unit cost; a GPU that loses cash never pays back).
 
-```
-uv run pytest tests/test_unit_economics.py --runxfail
-```
-
-Input validation tests are not xfailed and pass today. Lint and formatting: `uv run ruff check .`
+Lint and formatting: `uv run ruff check .`
 and `uv run ruff format --check .` (both run in CI).
 
 ## How to read the model
@@ -158,27 +152,29 @@ with unchanged inputs is byte-identical and does not churn the repository.
 
 ### Per GPU-hour
 
-"Per GPU-hour" always means per wall-clock hour of an installed GPU: 8,760 hours a year, 730 a
-month, whether or not the GPU is busy. Utilisation enters as the share of those hours that
-produce billable output; it is never netted out of the denominator, so idle capacity shows up as
-cost instead of disappearing. The engine (`engine/unit_economics.py`) takes nine inputs, each with
-a unit label and a one-line description that the Inputs sheet displays, and produces three headline
-numbers. Their reference definitions, which the tests pin and which may be revised as the model
-matures:
+"Per GPU-hour" always means per wall-clock hour of an installed GPU: 8,760 hours a year, whether
+or not the GPU is busy. Idle time lowers revenue; it never shrinks the hour count, so idle capacity
+shows up as cost instead of disappearing. The engine (`engine/unit_economics.py`) builds the cost
+of that hour in four layers and offers two ways to earn revenue from it:
 
-- **Cost per million tokens** = (energy cost per hour + capital cost per hour) / tokens per hour,
-  scaled to a million. Energy cost per hour is power draw x PUE x electricity price; capital cost
-  per hour is installed chip cost x (1 / depreciation years + financing rate) / 8,760; tokens per
-  hour is tokens per second x 3,600 x utilisation.
-- **Margin per GPU-hour** = revenue per hour less energy and capital cost per hour. Fully loaded:
-  after depreciation and financing.
-- **Payback months** = chip cost / monthly cash contribution, where cash contribution is revenue
-  less energy less financing cost, before depreciation. Infinite when contribution is zero or
-  negative.
+- **Capital**: purchase price x capital recovery factor / 8,760. The factor is the mortgage
+  formula, `rate / (1 - (1 + rate) ** -years)`: a level annual charge that repays the price with
+  interest on the declining balance.
+- **Energy**: kW x PUE x price per kWh x load factor. **Facility**: data-centre space per
+  kW-month. **Other**: staff, maintenance, software, network.
+- **Cash cost** is energy + facility + other. **Fully loaded cost** adds capital.
+- **Revenue**: rental (price per GPU-hour x share of hours rented) or tokens (tokens per hour x
+  price per million).
+- **Payback**: purchase price / monthly cash margin, before financing, the way operators quote it.
 
-"Chip cost" is all-in installed cost per GPU (accelerator plus its share of server, network and
-rack), and "power draw" includes the GPU's share of host power. The reference case the tests use is
-in `tests/test_unit_economics.py`.
+The reasoning behind each choice is in [docs/modeling-approach.md](docs/modeling-approach.md).
+
+### Assumptions
+
+Every number that is not a reported fact lives in `assumptions/<TICKER>.csv`, never in code. Each
+row carries a basis (`disclosed`, `derived`, `external` or `judgment`), a source, an optional range
+and a status. Values start as `proposed`; the owner of the model sets `confirmed` or `overridden`.
+The workbook's Inputs sheet prints basis, status and range next to each value.
 
 ### Positions and calls
 
@@ -190,17 +186,17 @@ which the site builder renders on the index page. Outcomes are graded `open`, `r
 
 ## Status
 
-Scaffold complete as of 2026-09-12: layout, engine inputs with validation and tests, EDGAR client
-with caching and manifests, tidy XBRL facts, workbook exporter, site builder, refresh pipeline, CI.
+As of 2026-09-21:
 
-Pending, in order (see `TODO.md`):
+- Data pipeline, workbook exporter, site and daily refresh are live for seven companies.
+- The unit-economics engine is implemented and tested.
+- CoreWeave has a first assumptions register built from its S-1, and the engine runs on it.
 
-- engine function bodies (`cost_per_m_tokens`, `margin_per_gpu_hour`, `payback_months`);
-- CoreWeave drivers (`companies/coreweave.py`), then Nebius;
-- the first writeup and the first row in `calls.md`.
+Next, in order (see `TODO.md`): the CoreWeave operating model, a ledger of evidence from outside
+filings (contracts, build-outs, energy, statements), Nebius, then the first writeup and call.
 
-Until then `models/` has no workbooks, `export_xlsx.py` reports "model pending", and company pages
-on the site show reported SEC series once a refresh has run but no model outputs.
+Division of labour: the modelling and code are built with Claude; every assumption and every call
+is reviewed and owned by the author.
 
 ## Data sources
 

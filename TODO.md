@@ -22,23 +22,40 @@ they land and add a line to `log.md` per session.
 
 ## Stage 1 — Sept 21–27, 2026: unit economics and CoreWeave
 
-- [ ] Engine logic in `engine/unit_economics.py` (`cost_per_m_tokens`, `margin_per_gpu_hour`,
-      `payback_months`) until `uv run pytest tests/test_unit_economics.py --runxfail` passes. The
-      functions can land one at a time: each test's `xfail` switches itself off once the functions
-      it calls are written, so CI stays green in between.
-- [ ] Housekeeping once all three are written: delete the `pending` / `_is_stub` helper and its
-      decorators in `tests/test_unit_economics.py` (dead code by then, nothing turns red if it
-      stays).
-- [ ] Decide which debt measure the CoreWeave model uses: the Q2 2026 10-Q has no
-      `us-gaap:LongTermDebt` fact (the reported series stops at 2026Q1); the only current element
-      is `DebtInstrumentCarryingAmount`, which is gross of discounts and issuance costs.
-- [ ] CoreWeave drivers in `companies/coreweave.py`: `build()` fills `self.drivers` and
-      `self.outputs` in finance layout (optional `attrs["formulas"]`); `engine_defaults` with
-      sourced values.
-- [ ] First export: `uv run scripts/export_xlsx.py CRWV`; open `models/CRWV.xlsx` and check the
-      blue/black/green/grey convention and the `in_<name>` defined names.
-- [ ] First writeup from `site/content/_template.md` (`status: published`) with a Position and a
-      falsifier; copy the falsifier row into `calls.md`.
+How the work is split: Claude builds the model and explains it; Philbert owns every assumption and
+every call. Start with `docs/modeling-approach.md`, then `docs/code-tour.md`.
+
+Done:
+
+- [x] Unit-economics engine (`engine/unit_economics.py`): cost stack, rental and token revenue,
+      margin, payback, with tests.
+- [x] Assumptions register (`assumptions/`, `companies/assumptions.py`) and CoreWeave's first
+      register from the S-1.
+
+Philbert's decisions:
+
+- [ ] Read `docs/modeling-approach.md`. Ask about anything that does not make sense.
+- [ ] Open `assumptions/CRWV.csv` in Excel. For each row set `status` to `confirmed`, or change the
+      value and set `overridden`. The two that matter most: `depreciation_years` (6, accounting
+      life, against a plausible economic life of 4 to 5) and `financing_rate` (11%, debt only).
+- [ ] Which debt measure the CoreWeave model uses: the Q2 2026 10-Q has no `us-gaap:LongTermDebt`
+      fact (the reported series stops at 2026Q1); the only current element is
+      `DebtInstrumentCarryingAmount`, which is gross of discounts and issuance costs.
+
+Claude's build list, in order:
+
+- [ ] Explain the payback gap: the engine gives 4.7 years on fleet averages against about 2.5
+      disclosed (see "First run on CoreWeave" in `docs/modeling-approach.md`). Needs quarterly
+      capacity figures from the 10-Qs and 10-K.
+- [ ] Extract quarterly KPIs from CoreWeave's 10-Qs and 10-K (active power, contracted power,
+      backlog, GPUs, capex guidance), quote-verified like the S-1 notes.
+- [ ] CoreWeave operating model v0 in `companies/coreweave.py`: capacity, revenue, cost, capex,
+      financing, cash, calibrated to reported history; workbook in `models/CRWV.xlsx`.
+- [ ] Signals ledger v0: contracts, build-outs, energy, statements, rental prices, each entry
+      sourced, dated, rated for confidence and mapped to an assumption.
+- [ ] External sources for the inputs the S-1 cannot give: electricity price, data-centre lease
+      cost per kW, rental prices by GPU generation, token throughput and prices.
+- [ ] First writeup with a Position and a falsifier; first row in `calls.md`.
 
 ## Stage 2 — Sept 28 – Oct 4, 2026: second neocloud and the supply side
 

@@ -4,14 +4,17 @@ Purpose
 -------
 ``scripts/refresh.py`` writes a machine-readable summary of every company into ``site/data/`` and
 the human writes essays into ``site/content/``. This module turns both into a small static site
-that GitHub Pages can serve: an index with the project question, a companies grid and the calls
-ledger; one page per company with server-rendered tables and Chart.js charts layered on top; and
-one page per published writeup. There is no framework and no bundler: templates are
-``string.Template`` files in ``site/templates/`` and the browser assets are copied verbatim from
-``site/static/``.
+that GitHub Pages can serve: an index with one comparison table of the companies (plus the calls
+table and the writeups list once either has entries); one page per company with a key-figures
+strip, server-rendered tables and Chart.js charts layered on top; and one page per published
+writeup. There is no framework and no bundler: templates are ``string.Template`` files in
+``site/templates/`` and the browser assets are copied verbatim from ``site/static/``.
 
 Design notes
 ------------
+* The pages carry labels, numbers, source lines and statuses, and no prose about the project or
+  the method; that lives in the README. A section with nothing in it is left out, not apologised
+  for, and its nav link goes with it.
 * Every link is relative because GitHub Pages serves project sites under ``/<repo>/``.
 * Every value that arrives from JSON or frontmatter is HTML-escaped. Writeup bodies are the
   author's own markdown and are rendered as trusted HTML.
@@ -21,8 +24,9 @@ Design notes
   unchanged inputs produces byte-identical files.
 * The generated subtrees of the output dir are deleted before each build, so an output dir that
   overlaps the sources (``--out site``, ``--out .``) is refused rather than built.
-* This module is presentation only. Nothing here computes a financial number; it formats what the
-  model already wrote to JSON.
+* This module is presentation only. Its one piece of arithmetic is display ratios of figures
+  refresh.py already published (change on a year earlier, capex / revenue); nothing here models
+  or forecasts.
 
 CLI: ``uv run scripts/build_site.py [--out DIR] [--site-dir DIR] [--calls FILE]``
 """
@@ -82,6 +86,20 @@ CONCEPT_LABELS: dict[str, str] = {
     "interest_expense": "Interest expense",
     "shares_outstanding": "Shares outstanding",
 }
+
+# The tiles at the top of a company page, in reading order: the income line, what is being spent,
+# what funds it, and the balance sheet it lands on.
+KEY_FIGURES = ("revenue", "capex", "cfo", "cash", "long_term_debt", "ppe_net")
+
+# Row order of the index table: the layer with company models comes first. A layer not listed
+# here sorts after these, alphabetically.
+LAYER_ORDER = ("neocloud", "chip", "hyperscaler")
+
+# The index lists this many writeups; writeups/index.html lists all of them.
+INDEX_WRITEUPS = 5
+
+# Shown where a figure or a comparison does not exist.
+MISSING = "–"
 
 TEMPLATE_NAMES = ("base", "index", "company", "writeup", "writeups_index")
 
@@ -321,6 +339,154 @@ def fmt_value(value: Any, unit: str = "", *, compact: bool = True) -> str:
     return f"{number:,.0f}" if number.is_integer() else f"{number:,.2f}"
 
 
+_ISO_UTC_RE = re.compile(r"(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?Z")
+
+
+def fmt_timestamp(as_of: str) -> str:
+    """``2026-09-17T13:43:24Z -> '2026-09-17 13:43 UTC'``; any other text is returned unchanged."""
+    match = _ISO_UTC_RE.fullmatch(as_of.strip())
+    return f"{match.group(1)} {match.group(2)} UTC" if match else as_of
+
+
+# --------------------------------------------------------------------------------------------
+# Display arithmetic on reported series (pure functions)
+# --------------------------------------------------------------------------------------------
+#
+# The index table and the key-figures tiles show the latest reported point of a series, its
+# change on the same period a year earlier, and capex as a share of revenue. All three are read
+# straight off points refresh.py already published; none of it is a model.
+
+_PERIOD_RE = re.compile(r"(?P<year>\d{4})(?P<quarter>Q[1-4])?")
+
+
+def _points(raw: Any) -> list[tuple[str, Any]]:
+    """Normalise ``[["2025Q2", 1.2e9], ...]`` and drop malformed entries instead of crashing."""
+    points: list[tuple[str, Any]] = []
+    for item in raw or []:
+        if isinstance(item, list | tuple) and len(item) >= 2:
+            points.append((str(item[0]), item[1]))
+    return points
+
+
+def latest_point(points: list[tuple[str, Any]]) -> tuple[str, float] | None:
+    """The numeric point with the latest period label, or ``None`` when there is none.
+
+    Labels within one series sort as text (``2025Q4 < 2026Q1``, ``2024 < 2025``). A null value is
+    skipped so a placeholder for a quarter not yet filed never counts as the latest figure.
+    """
+    numeric = [
+        (period, number) for period, value in points if (number := _as_float(value)) is not None
+    ]
+    return max(numeric, key=lambda point: point[0]) if numeric else None
+
+
+def value_at(points: list[tuple[str, Any]], period: str) -> float | None:
+    """The numeric value published for ``period``, or ``None``."""
+    for label, value in points:
+        if label == period:
+            return _as_float(value)
+    return None
+
+
+def prior_year_period(period: str) -> str | None:
+    """The label one year earlier: ``2026Q2 -> 2025Q2`` (same quarter) and ``2025 -> 2024``.
+
+    ``None`` for anything that is not a calendar quarter or year, such as a model label
+    (``2026E``): a comparison across label kinds would not be like for like.
+    """
+    match = _PERIOD_RE.fullmatch(period.strip())
+    if match is None:
+        return None
+    return f"{int(match.group('year')) - 1:04d}{match.group('quarter') or ''}"
+
+
+def yoy_change(current: float | None, prior: float | None) -> float | None:
+    """Fractional change on the year-earlier figure (``0.25`` is +25%), or ``None``.
+
+    There is no percentage on a zero or negative base: a cash outflow of 50 that becomes an
+    inflow of 100 is not "-300%", and the reader is better served by a blank than by that number.
+    """
+    if current is None or prior is None or prior <= 0:
+        return None
+    return current / prior - 1.0
+
+
+def capex_to_revenue(capex: float | None, revenue: float | None) -> float | None:
+    """Capex as a fraction of revenue for one period; ``None`` without both or on revenue <= 0."""
+    if capex is None or revenue is None or revenue <= 0:
+        return None
+    return capex / revenue
+
+
+def _change_percent(change: float | None) -> float | None:
+    """The change as displayed, in percent to one decimal, so text and colour cannot disagree."""
+    return None if change is None or not math.isfinite(change) else round(change * 100, 1)
+
+
+def fmt_change(change: float | None) -> str:
+    """``0.177 -> '+17.7%'``, ``-0.2 -> '-20.0%'``, ``0 -> '0.0%'``; an en dash for ``None``."""
+    percent = _change_percent(change)
+    if percent is None:
+        return MISSING
+    return "0.0%" if percent == 0 else f"{percent:+,.1f}%"
+
+
+def change_direction(change: float | None) -> str:
+    """CSS class for a change: ``pos``, ``neg``, ``flat``, or ``""`` when there is no figure."""
+    percent = _change_percent(change)
+    if percent is None:
+        return ""
+    return "flat" if percent == 0 else ("pos" if percent > 0 else "neg")
+
+
+@dataclass(frozen=True)
+class Figure:
+    """One reported point with its change on the same period a year earlier."""
+
+    period: str
+    value: float
+    unit: str
+    change: float | None
+
+
+def series_figure(series: Any, period: str | None = None) -> Figure | None:
+    """The latest point of a reported series, or the point at ``period`` when one is given.
+
+    ``None`` when the series is missing or has no numeric value there.
+    """
+    if not isinstance(series, dict):
+        return None
+    points = _points(series.get("points"))
+    if period is None:
+        latest = latest_point(points)
+        if latest is None:
+            return None
+        period, value = latest
+    else:
+        found = value_at(points, period)
+        if found is None:
+            return None
+        value = found
+    prior_period = prior_year_period(period)
+    prior = value_at(points, prior_period) if prior_period else None
+    return Figure(period, value, str(series.get("unit") or ""), yoy_change(value, prior))
+
+
+def headline_figures(reported: Any) -> tuple[Figure | None, Figure | None]:
+    """``(revenue, capex)`` for one index row, both for the same period.
+
+    The row carries a single period label and a capex / revenue ratio, so capex is read at
+    revenue's latest period and left out when it has no point there (a later capex filing, or an
+    annual capex series beside quarterly revenue). Without revenue the row falls back to the
+    latest capex point.
+    """
+    if not isinstance(reported, dict):
+        return None, None
+    revenue = series_figure(reported.get("revenue"))
+    capex = series_figure(reported.get("capex"), revenue.period if revenue else None)
+    return revenue, capex
+
+
 # --------------------------------------------------------------------------------------------
 # HTML fragments. Every dynamic value passes through ``_e``.
 # --------------------------------------------------------------------------------------------
@@ -335,61 +501,155 @@ def _e(value: Any) -> str:
 # is where it is written): `built`, `pending`, and `no-model` for companies tracked for their
 # reported figures only (no class in companies.REGISTRY).
 _BADGE_LABELS: dict[str, str] = {
-    "built": "model built",
-    "pending": "model pending",
-    "no-model": "data only",
+    "built": "model",
+    "pending": "model in progress",
+    "no-model": "reported data",
 }
 
 
-def _badge(model_status: str | None) -> str:
-    status = (model_status or "pending").lower()
-    label = _BADGE_LABELS.get(status, "model pending")
+def _model_status(model_status: Any) -> str:
+    """The JSON status, lower-cased; a missing one reads as ``pending`` (refresh.py's default)."""
+    return str(model_status or "pending").lower()
+
+
+def _badge(model_status: Any) -> str:
+    status = _model_status(model_status)
+    label = _BADGE_LABELS.get(status, _BADGE_LABELS["pending"])
     return f'<span class="badge badge-{_e(status)}">{label}</span>'
 
 
-def _workbook_link(ticker: str, model_status: str | None) -> str:
+def _workbook_link(ticker: str, model_status: Any) -> str:
     """Link to ``models/<TICKER>.xlsx`` on GitHub, only once the model is built.
 
-    The workbook is exported by a built model, so for a pending or data-only company the link
-    would be a 404 on GitHub.
+    The workbook is exported by a built model, so for any other status the link would be a 404
+    on GitHub.
     """
-    status = (model_status or "pending").lower()
-    if status == "built":
-        url = f"{REPO_URL}/blob/main/models/{ticker}.xlsx"
-        return f'<a href="{_e(url)}" rel="noopener">Workbook: models/{_e(ticker)}.xlsx</a>'
-    if status == "no-model":
-        return ""  # no workbook is planned, so there is nothing to announce
-    return '<span class="muted">Workbook: not exported yet</span>'
+    if _model_status(model_status) != "built":
+        return ""
+    url = f"{REPO_URL}/blob/main/models/{ticker}.xlsx"
+    return f'<a href="{_e(url)}" rel="noopener">Workbook</a>'
 
 
 def _filing_link(latest_filing: Any) -> str:
-    """``10-Q · 2025-08-14`` linked to EDGAR, or a plain note when nothing has been pulled."""
+    """``10-Q · 2025-08-14`` linked to EDGAR, or a status when nothing has been pulled."""
     if not isinstance(latest_filing, dict) or not latest_filing.get("url"):
-        return '<span class="muted">no filing pulled yet</span>'
+        return '<span class="muted">no filing</span>'
     text = " · ".join(str(latest_filing[k]) for k in ("form", "date") if latest_filing.get(k))
-    return f'<a href="{_e(latest_filing["url"])}">{_e(text or "latest filing")}</a>'
+    return f'<a href="{_e(latest_filing["url"])}" rel="noopener">{_e(text or "filing")}</a>'
 
 
-def _company_card(company: dict[str, Any], root: str) -> str:
-    ticker = str(company.get("ticker", "")).upper()
-    name = company.get("name") or ticker
-    href = f"{root}companies/{ticker}.html"
-    data_note = "" if company.get("has_data", True) else '<p class="muted">no data yet</p>'
+def _layer_sort_key(company: dict[str, Any]) -> tuple[int, str, str]:
+    layer = str(company.get("layer") or "").lower()
+    rank = LAYER_ORDER.index(layer) if layer in LAYER_ORDER else len(LAYER_ORDER)
+    return rank, layer, str(company["ticker"]).upper()
+
+
+def _figure_cell(figure: Figure | None) -> str:
+    text = fmt_value(figure.value, figure.unit) if figure else MISSING
+    return f'<td class="num">{_e(text)}</td>'
+
+
+def _change_cell(figure: Figure | None) -> str:
+    change = figure.change if figure else None
+    classes = " ".join(part for part in ("num", "chg", change_direction(change)) if part)
+    return f'<td class="{classes}">{_e(fmt_change(change))}</td>'
+
+
+_COMPANIES_COLUMNS: tuple[tuple[str, bool], ...] = (  # (header, numeric)
+    ("Company", False),
+    ("Layer", False),
+    ("Period", False),
+    ("Revenue", True),
+    ("Revenue YoY", True),
+    ("Capex", True),
+    ("Capex YoY", True),
+    ("Capex / revenue", True),
+    ("Model", False),
+)
+
+
+def _companies_table(
+    companies: list[dict[str, Any]], data_by_ticker: dict[str, Any], root: str
+) -> str:
+    """The index table: one row per company, by layer then ticker. No companies, no rows."""
+    head = "".join(
+        f'<th scope="col" class="num">{_e(label)}</th>'
+        if numeric
+        else f'<th scope="col">{_e(label)}</th>'
+        for label, numeric in _COMPANIES_COLUMNS
+    )
+    rows = []
+    for company in sorted(companies, key=_layer_sort_key):
+        ticker = str(company["ticker"]).upper()
+        data = data_by_ticker.get(ticker)
+        revenue, capex = headline_figures(data.get("reported") if isinstance(data, dict) else None)
+        shown = revenue or capex
+        ratio = None
+        # A ratio of two figures in different units (USD against USD m) would be off by 1e6.
+        if revenue and capex and revenue.unit == capex.unit:
+            ratio = capex_to_revenue(capex.value, revenue.value)
+        href = f"{root}companies/{ticker}.html"
+        rows.append(
+            "<tr>"
+            f'<th scope="row"><a class="co-ticker" href="{_e(href)}">{_e(ticker)}</a> '
+            f'<span class="co-name">{_e(company.get("name") or "")}</span></th>'
+            f'<td class="layer">{_e(company.get("layer") or "")}</td>'
+            f'<td class="nowrap">{_e(shown.period if shown else MISSING)}</td>'
+            f"{_figure_cell(revenue)}{_change_cell(revenue)}"
+            f"{_figure_cell(capex)}{_change_cell(capex)}"
+            f'<td class="num">{_e(fmt_value(ratio, "%") if ratio is not None else MISSING)}</td>'
+            f"<td>{_badge(company.get('model_status'))}</td>"
+            "</tr>"
+        )
     return (
-        '<article class="card">'
-        f'<h3><a href="{_e(href)}">{_e(ticker)}</a></h3>'
-        f'<p class="card-name">{_e(name)}</p>'
-        f'<p class="card-meta"><span class="layer">{_e(company.get("layer", ""))}</span> '
-        f"{_badge(company.get('model_status'))}</p>"
-        f'<p class="card-filing">Latest filing: {_filing_link(company.get("latest_filing"))}</p>'
-        f"{data_note}"
-        "</article>"
+        '<div class="table-scroll"><table class="companies">'
+        f"<thead><tr>{head}</tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
     )
 
 
-def _writeups_list(writeups: list[Writeup], root: str, known: set[str], empty_text: str) -> str:
+def _key_figures_html(data: dict[str, Any] | None) -> str:
+    """The tiles under a company header: label, latest value, change on a year earlier, period.
+
+    Each tile names its own period because series do not always end together (a balance-sheet
+    line can lag a quarter). A series with no numeric point gets no tile.
+    """
+    reported = (data or {}).get("reported") or {}
+    tiles = []
+    for concept in KEY_FIGURES:
+        figure = series_figure(reported.get(concept))
+        if figure is None:
+            continue
+        change = ""
+        if figure.change is not None:
+            change = (
+                f'<span class="chg {change_direction(figure.change)}">'
+                f"{_e(fmt_change(figure.change))} YoY</span> · "
+            )
+        tiles.append(
+            '<div class="kpi">'
+            f"<dt>{_e(CONCEPT_LABELS[concept])}</dt>"
+            f'<dd class="kpi-value">{_e(fmt_value(figure.value, figure.unit))}</dd>'
+            f'<dd class="kpi-note">{change}{_e(figure.period)}</dd>'
+            "</div>"
+        )
+    if not tiles:
+        return ""
+    return (
+        '<section id="key-figures" class="section"><h2>Key figures</h2>'
+        f'<dl class="kpis">{"".join(tiles)}</dl></section>'
+    )
+
+
+def _section(section_id: str, heading: str, body: str) -> str:
+    """A headed section, or nothing at all when there is no body to put in it."""
+    if not body:
+        return ""
+    return f'<section id="{_e(section_id)}" class="section"><h2>{_e(heading)}</h2>{body}</section>'
+
+
+def _writeups_list(writeups: list[Writeup], root: str, known: set[str]) -> str:
     if not writeups:
-        return f'<p class="note">{_e(empty_text)}</p>'
+        return ""
     items = []
     for w in writeups:
         company = w.company.upper()
@@ -410,7 +670,7 @@ def _writeups_list(writeups: list[Writeup], root: str, known: set[str], empty_te
 
 def _calls_table(calls: list[dict[str, str]]) -> str:
     if not calls:
-        return '<p class="note">No calls logged yet. The first writeup will add one.</p>'
+        return ""
     head = "".join(f'<th scope="col">{_e(h.capitalize())}</th>' for h in CALLS_HEADER)
     rows = []
     for call in calls:
@@ -428,15 +688,6 @@ def _calls_table(calls: list[dict[str, str]]) -> str:
         '<div class="table-scroll"><table class="calls">'
         f"<thead><tr>{head}</tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
     )
-
-
-def _points(raw: Any) -> list[tuple[str, Any]]:
-    """Normalise ``[["2025Q2", 1.2e9], ...]`` and drop malformed entries instead of crashing."""
-    points: list[tuple[str, Any]] = []
-    for item in raw or []:
-        if isinstance(item, list | tuple) and len(item) >= 2:
-            points.append((str(item[0]), item[1]))
-    return points
 
 
 def _series_table(
@@ -485,15 +736,12 @@ def _reported_html(data: dict[str, Any] | None) -> str:
         if series.get("tag"):
             elements.append((label, str(series["tag"])))
     if not by_freq:
-        return (
-            '<p class="note">No reported data yet. <code>uv run scripts/refresh.py</code> '
-            "pulls it from SEC EDGAR.</p>"
-        )
+        return '<p class="note">No data</p>'
     parts = []
     for freq in sorted(by_freq, key=lambda f: (f != "Q", f)):  # quarters first
         # Annual points come from SEC's CYyyyy frames, so for a filer whose year does not end in
         # December the column is a calendar year, not the fiscal year a finance reader expects.
-        caption = "Latest quarters" if freq == "Q" else "Latest calendar years (SEC frames)"
+        caption = "Quarters" if freq == "Q" else "Calendar years"
         parts.append(_series_table(by_freq[freq], max_periods=6, caption=caption))
     if elements:
         # Filers tag the same line differently (capex is three different elements across the
@@ -503,13 +751,19 @@ def _reported_html(data: dict[str, Any] | None) -> str:
             for label, tag in elements
         )
         parts.append(
-            '<details class="sources"><summary>XBRL elements behind these series</summary>'
-            f"<ul>{items}</ul></details>"
+            f'<details class="sources"><summary>XBRL elements</summary><ul>{items}</ul></details>'
         )
     return "".join(parts)
 
 
-def _outputs_html(data: dict[str, Any] | None, ticker: str, model_status: str | None) -> str:
+def _has_model_content(data: dict[str, Any] | None) -> bool:
+    return bool((data or {}).get("outputs") or (data or {}).get("inputs"))
+
+
+_SeriesRow = tuple[str, str, list[tuple[str, Any]]]  # (label, unit, points)
+
+
+def _output_rows(data: dict[str, Any] | None) -> list[_SeriesRow]:
     outputs = (data or {}).get("outputs") or {}
     rows = []
     for item, series in outputs.items():
@@ -521,40 +775,104 @@ def _outputs_html(data: dict[str, Any] | None, ticker: str, model_status: str | 
                 _points(series.get("points")),
             )
         )
-    if not rows:
-        if (model_status or "").lower() == "no-model":
-            return (
-                f'<p class="note">No model for {_e(ticker)}: it is tracked for its reported '
-                "figures only (see TODO.md for what comes next).</p>"
-            )
-        return (
-            f'<p class="note">Model pending: the {_e(ticker)} drivers are not written yet '
-            "(see TODO.md). Reported figures above are live.</p>"
+    return rows
+
+
+def _is_single_period(rows: list[_SeriesRow]) -> bool:
+    """True when no output has more than one point: a snapshot, with nothing to chart."""
+    return bool(rows) and all(len(points) <= 1 for _, _, points in rows)
+
+
+def _snapshot_table(rows: list[_SeriesRow]) -> str:
+    """Single-period outputs as Output | Value | Unit, with the period in the caption.
+
+    Outputs that do not share one period get a Period column instead, so no value is shown
+    under a label that is not its own.
+    """
+    periods = {points[0][0] for _, _, points in rows if points}
+    shared = next(iter(periods)) if len(periods) == 1 else None
+    body = []
+    for label, unit, points in rows:
+        period, value = points[0] if points else (MISSING, None)
+        period_cell = "" if shared else f'<td class="nowrap">{_e(period)}</td>'
+        body.append(
+            f'<tr><th scope="row">{_e(label)}</th>{period_cell}'
+            f'<td class="num">{_e(fmt_value(value, unit))}</td>'
+            f'<td class="unit">{_e(unit)}</td></tr>'
         )
-    return _series_table(rows, max_periods=12, caption="Model outputs by period")
+    caption = f"Outputs · {shared}" if shared else "Outputs"
+    period_head = "" if shared else '<th scope="col">Period</th>'
+    return (
+        f'<div class="table-scroll"><table class="outputs"><caption>{_e(caption)}</caption>'
+        f'<thead><tr><th scope="col">Output</th>{period_head}'
+        '<th scope="col" class="num">Value</th><th scope="col">Unit</th></tr></thead>'
+        f"<tbody>{''.join(body)}</tbody></table></div>"
+    )
 
 
-def _inputs_html(data: dict[str, Any] | None) -> str:
+_NOTE_TAG_RE = re.compile(r"\s*\[(?P<basis>[^\[\]]*)\]\s*(?P<note>.*)", re.DOTALL)
+
+
+def split_basis(note: Any) -> tuple[str, str]:
+    """Split the leading bracketed tag of an assumption's note from the rest: ``(basis, note)``.
+
+    ``"[derived; proposed; range 4 to 6] Fleet average."`` gives
+    ``("derived; proposed; range 4 to 6", "Fleet average.")``. A note without a leading tag
+    comes back whole with an empty basis; brackets further into the note are left alone.
+    """
+    text = "" if note is None else str(note)
+    match = _NOTE_TAG_RE.fullmatch(text)
+    if match is None:
+        return "", text.strip()
+    return " ".join(match.group("basis").split()), match.group("note").strip()
+
+
+def _inputs_table(data: dict[str, Any] | None) -> str:
+    """The assumptions register: one row per model input, exact values (not abbreviated)."""
     inputs = (data or {}).get("inputs") or []
-    if not inputs:
-        return ""
     rows = []
     for row in inputs:
-        row = row or {}
+        if not isinstance(row, dict):
+            continue
         value = fmt_value(row.get("value"), str(row.get("unit") or ""), compact=False)
+        basis, note = split_basis(row.get("note"))
         rows.append(
             f'<tr><th scope="row"><code>{_e(row.get("name"))}</code></th>'
             f'<td class="num">{_e(value)}</td><td class="unit">{_e(row.get("unit"))}</td>'
-            f"<td>{_e(row.get('source'))}</td><td>{_e(row.get('note'))}</td></tr>"
+            f'<td class="basis">{_e(basis)}</td>'
+            f"<td>{_e(row.get('source'))}</td><td>{_e(note)}</td></tr>"
         )
+    if not rows:
+        return ""
     return (
-        '<section id="inputs"><h2>Assumptions</h2>'
-        '<p class="muted">These are the blue cells of the workbook. Change them there.</p>'
-        '<div class="table-scroll"><table class="inputs"><thead><tr>'
-        '<th scope="col">Name</th><th scope="col" class="num">Value</th><th scope="col">Unit</th>'
-        '<th scope="col">Source</th><th scope="col">Note</th></tr></thead>'
-        f"<tbody>{''.join(rows)}</tbody></table></div></section>"
+        '<div class="table-scroll"><table class="inputs"><caption>Assumptions</caption><thead><tr>'
+        '<th scope="col">Assumption</th><th scope="col" class="num">Value</th>'
+        '<th scope="col">Unit</th><th scope="col">Basis</th><th scope="col">Source</th>'
+        '<th scope="col">Note</th></tr></thead>'
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
     )
+
+
+def _model_section(data: dict[str, Any] | None, model_status: Any) -> str:
+    """Outputs and the assumptions behind them, for a built model only.
+
+    Outputs over several periods get charts and a table by period. Single-period outputs get one
+    Output | Value | Unit table and no chart host: a chart of one bar per output says less than
+    the number does. Any status other than ``built`` renders nothing, since the badge in the page
+    header already carries it.
+    """
+    if _model_status(model_status) != "built" or not _has_model_content(data):
+        return ""
+    rows = _output_rows(data)
+    if _is_single_period(rows):
+        outputs = _snapshot_table(rows)
+    elif rows:
+        outputs = '<div class="charts" data-charts="outputs"></div>' + _series_table(
+            rows, max_periods=12, caption="Outputs"
+        )
+    else:
+        outputs = ""
+    return _section("model", "Model", outputs + _inputs_table(data))
 
 
 def _inline_json(data: Any) -> str:
@@ -698,21 +1016,38 @@ def _pick_dir(preferred: Path, fallback: Path) -> Path:
 class _SiteWriter:
     """Writes finished pages, audits them, and records them in the report."""
 
-    def __init__(self, out_dir: Path, templates: dict[str, Template], as_of: str) -> None:
+    def __init__(
+        self,
+        out_dir: Path,
+        templates: dict[str, Template],
+        *,
+        as_of: str,
+        nav: tuple[tuple[str, str], ...],
+    ) -> None:
         self.out_dir = out_dir
         self.templates = templates
         self.as_of = as_of
+        self.nav = nav  # (label, href relative to the site root) for the sections that exist
         self.report = BuildReport()
 
     def page(self, rel: str, *, title: str, content: str, scripts: str = "") -> None:
         root = "../" * (rel.count("/"))  # companies/X.html -> "../"; index.html -> ""
         full_title = title if title == SITE_NAME else f"{title} · {SITE_NAME}"
+        nav_links = "\n".join(
+            f'    <a href="{_e(root + href)}">{_e(label)}</a>' for label, href in self.nav
+        )
+        if self.as_of:
+            updated = (
+                f'Updated <time datetime="{_e(self.as_of)}">{_e(fmt_timestamp(self.as_of))}</time>'
+            )
+        else:
+            updated = "Not refreshed"
         text = self.templates["base"].substitute(
             title=_e(full_title),
             root=root,
             content=content,
-            as_of=_e(self.as_of),
-            owner=_e(REPO_OWNER),
+            nav_links=nav_links,
+            updated=updated,
             repo_url=_e(REPO_URL),
             scripts=scripts,
         )
@@ -786,8 +1121,25 @@ def build(
     companies = [c for c in companies if c.get("ticker")]
     if companies_doc and not companies:
         warnings.append("companies.json lists no companies")
-    as_of = str(companies_doc.get("as_of") or "not yet refreshed")
+    as_of = str(companies_doc.get("as_of") or "")
     known = {str(c["ticker"]).upper() for c in companies}
+
+    # Every company file is read up front because the index table needs the reported series too.
+    data_by_ticker: dict[str, Any] = {}
+    for company in companies:
+        ticker = str(company["ticker"]).upper()
+        data = _read_json(data_dir / f"{ticker}.json", warnings, required=False)
+        if data is not None and not isinstance(data, dict):
+            warnings.append(f"{ticker}.json is not a JSON object; ignored")
+            data = None
+        if data is None and company.get("has_data", False):
+            warnings.append(f"{ticker}.json missing although has_data is true")
+        if _model_status(company.get("model_status")) != "built" and _has_model_content(data):
+            warnings.append(
+                f"{ticker}.json carries model outputs or inputs but model_status is not 'built'; "
+                "they are not shown"
+            )
+        data_by_ticker[ticker] = data
 
     writeups = load_writeups(content_dir, warnings)
 
@@ -797,21 +1149,26 @@ def build(
         calls = []
         warnings.append(f"{calls_md.name} not found; calls table left empty")
 
+    # A link to a section that was left out would go nowhere, so the nav follows the content.
+    nav = [("Companies", "index.html#companies")]
+    if writeups:
+        nav.append(("Writeups", "writeups/index.html"))
+    if calls:
+        nav.append(("Calls", "index.html#calls"))
+
     _reset_out_dir(out_dir)
-    writer = _SiteWriter(out_dir, templates, as_of)
+    writer = _SiteWriter(out_dir, templates, as_of=as_of, nav=tuple(nav))
     writer.report.warnings.extend(warnings)
 
     # Index -----------------------------------------------------------------------------------
-    cards = "".join(_company_card(c, "") for c in sorted(companies, key=lambda c: c["ticker"]))
-    if not cards:
-        cards = (
-            '<p class="note">No company data yet. Run <code>uv run scripts/refresh.py</code>.</p>'
-        )
+    index_writeups = _writeups_list(writeups[:INDEX_WRITEUPS], "", known)
+    if index_writeups:
+        index_writeups += '<p class="more"><a href="writeups/index.html">All writeups</a></p>'
     index_content = templates["index"].substitute(
         root="",
-        companies_cards=cards,
-        writeups_list=_writeups_list(writeups[:5], "", known, "No writeups published yet."),
-        calls_table=_calls_table(calls),
+        companies_table=_companies_table(companies, data_by_ticker, ""),
+        calls_section=_section("calls", "Calls", _calls_table(calls)),
+        writeups_section=_section("writeups", "Writeups", index_writeups),
     )
     writer.page("index.html", title=SITE_NAME, content=index_content)
 
@@ -819,9 +1176,7 @@ def build(
     chart_scripts = f'<script src="{CHART_JS_URL}" defer></script>'
     for company in sorted(companies, key=lambda c: c["ticker"]):
         ticker = str(company["ticker"]).upper()
-        data = _read_json(data_dir / f"{ticker}.json", writer.report.warnings, required=False)
-        if data is None and company.get("has_data", False):
-            writer.report.warnings.append(f"{ticker}.json missing although has_data is true")
+        data = data_by_ticker[ticker]
         cik = str(company.get("cik") or (data or {}).get("cik") or "")
         edgar_url = (
             "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany"
@@ -829,22 +1184,38 @@ def build(
             if cik
             else "https://www.sec.gov/edgar/search/"
         )
+        layer = company.get("layer") or (data or {}).get("layer") or ""
+        eyebrow = " · ".join(
+            part
+            for part in (
+                f'<span class="layer">{_e(layer)}</span>' if layer else "",
+                f"CIK {_e(cik)}" if cik else "",
+            )
+            if part
+        )
+        header_links = " ".join(
+            part
+            for part in (
+                _filing_link(company.get("latest_filing")),
+                f'<a href="{_e(edgar_url)}" rel="noopener">EDGAR</a>',
+                _workbook_link(ticker, company.get("model_status")),
+            )
+            if part
+        )
         mine = [w for w in writeups if w.company.upper() == ticker]
         content = templates["company"].substitute(
             root="../",
             ticker=_e(ticker),
             name=_e(company.get("name") or (data or {}).get("name") or ticker),
-            layer=_e(company.get("layer") or (data or {}).get("layer") or ""),
-            cik=_e(cik or "n/a"),
-            company_as_of=_e((data or {}).get("as_of") or as_of),
+            eyebrow=eyebrow,
             status_badge=_badge(company.get("model_status")),
-            latest_filing=_filing_link(company.get("latest_filing")),
-            workbook_link=_workbook_link(ticker, company.get("model_status")),
-            edgar_url=_e(edgar_url),
+            header_links=header_links,
+            key_figures=_key_figures_html(data),
+            model_section=_model_section(data, company.get("model_status")),
             reported_html=_reported_html(data),
-            outputs_html=_outputs_html(data, ticker, company.get("model_status")),
-            inputs_html=_inputs_html(data),
-            writeups_list=_writeups_list(mine, "../", known, f"No writeups on {ticker} yet."),
+            writeups_section=_section(
+                "company-writeups", "Writeups", _writeups_list(mine, "../", known)
+            ),
             inline_json=_inline_json(data) if data is not None else "",
         )
         writer.page(
@@ -870,12 +1241,12 @@ def build(
             summary=_e(w.summary),
             tags=f'<ul class="tags">{tags_html}</ul>' if tags_html else "",
             body=w.body_html,
+            calls_link=' · <a href="../index.html#calls">Calls</a>' if calls else "",
         )
         writer.page(w.href, title=w.title, content=content)
 
     writeups_index = templates["writeups_index"].substitute(
-        root="../",
-        writeups_list=_writeups_list(writeups, "../", known, "No writeups published yet."),
+        root="../", writeups_list=_writeups_list(writeups, "../", known)
     )
     writer.page("writeups/index.html", title="Writeups", content=writeups_index)
 

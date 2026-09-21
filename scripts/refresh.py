@@ -22,7 +22,7 @@ For every tracked company (``data.edgar.COMPANIES``, optionally narrowed with ``
    workflow commits them together with the data change they document;
 5. if a model class is registered in ``companies.REGISTRY``: loads, builds and exports it to
    ``models/<TICKER>.xlsx`` - but only when the frames' fingerprint changed, so an unchanged
-   model never churns the committed workbook. A ``build()`` that is still a ``TODO(philbert)``
+   model never churns the committed workbook. A ``build()`` that has not been written yet
    is reported as ``pending``; companies tracked for their reported data only are ``no-model``;
 6. writes ``site/data/<TICKER>.json`` (reported series plus model outputs) for the dashboard.
 
@@ -559,6 +559,26 @@ def _companies_payload(
     return {"as_of": as_of, "companies": entries}
 
 
+def _merge_companies_index(
+    payload: dict[str, Any], previous: Any, tracked: Mapping[str, CompanyInfo]
+) -> dict[str, Any]:
+    """Keep index rows of tracked companies that this run did not refresh.
+
+    A partial run (``--tickers CRWV``) must not make the other companies vanish from the site,
+    so their rows from the previous index are carried over, in the tracked order. Companies
+    that are no longer tracked are dropped.
+    """
+    fresh = {entry["ticker"]: entry for entry in payload["companies"]}
+    kept = {}
+    if isinstance(previous, dict):
+        for entry in previous.get("companies") or []:
+            if isinstance(entry, dict) and entry.get("ticker") in tracked:
+                kept[entry["ticker"]] = entry
+    merged = {**kept, **fresh}
+    order = [t for t in tracked if t in merged] + [t for t in merged if t not in tracked]
+    return {"as_of": payload["as_of"], "companies": [merged[t] for t in order]}
+
+
 # --------------------------------------------------------------------------------------------
 # One company
 # --------------------------------------------------------------------------------------------
@@ -722,7 +742,8 @@ def run(
     """
     clock = now or (lambda: datetime.now(UTC))
     paths = paths or RefreshPaths()
-    selected = _select_companies(COMPANIES if companies is None else companies, config.tickers)
+    all_companies = COMPANIES if companies is None else companies
+    selected = _select_companies(all_companies, config.tickers)
     registry = _load_registry() if registry is None else registry
     started_at = utc_iso(clock())
 
@@ -747,10 +768,10 @@ def run(
     errors = [f"{result.ticker}: {result.error}" for result in results if result.error]
 
     try:
-        _write_json(
-            paths.site_data_dir / "companies.json",
-            _companies_payload(started_at, selected, results),
-        )
+        index_path = paths.site_data_dir / "companies.json"
+        previous = _read_json(index_path) if index_path.exists() else None
+        payload = _companies_payload(started_at, selected, results)
+        _write_json(index_path, _merge_companies_index(payload, previous, all_companies))
     except Exception as exc:  # recorded like a company failure; the diff must still be written
         log.error("companies.json: %s", exc, exc_info=log.isEnabledFor(logging.DEBUG))
         errors.append(f"companies.json: {type(exc).__name__}: {exc}")

@@ -1,21 +1,21 @@
-/* AI economics — site stylesheet.
-   Phone-first, no framework, no build step. The palette is deliberately quiet: one accent for
-   links and charts, two status tones, everything else ink on paper. Dark mode follows the OS. */
+/* AI economics: site stylesheet.
+   Dense and quiet. Numbers sit in tabular figures under thin rules, labels are small and muted,
+   and there is one accent. Green and red mark the sign of a change and nothing else.
+   Phone-first, no framework, no build step. Dark mode follows the OS. */
 
 :root {
   color-scheme: light dark;
-  --bg: #faf9f6;
+  --bg: #fbfaf8;
   --surface: #ffffff;
   --ink: #1b1b1a;
-  --muted: #5d5c57;
+  --muted: #62615c;
   --line: #dedbd2;
+  --rule: #8e8c85;
   --grid: #ebe8df;
   --accent: #2c5d8a;
   --accent-soft: rgba(44, 93, 138, 0.28);
   --ok: #2f6b4f;
-  --ok-soft: rgba(47, 107, 79, 0.14);
   --warn: #8a5a12;
-  --warn-soft: rgba(138, 90, 18, 0.14);
   --bad: #9b3b31;
   --code-bg: #f1efe8;
 }
@@ -27,13 +27,12 @@
     --ink: #e7e5de;
     --muted: #a29f97;
     --line: #33342f;
+    --rule: #6d6b64;
     --grid: #2a2b27;
     --accent: #8fb5dd;
     --accent-soft: rgba(143, 181, 221, 0.32);
     --ok: #7fc39f;
-    --ok-soft: rgba(127, 195, 159, 0.16);
     --warn: #d9a850;
-    --warn-soft: rgba(217, 168, 80, 0.16);
     --bad: #e08a80;
     --code-bg: #23241f;
   }
@@ -56,8 +55,8 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 17px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 img,
@@ -91,14 +90,14 @@ pre {
 code {
   background: var(--code-bg);
   padding: 0.1em 0.3em;
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 pre {
   background: var(--code-bg);
   padding: 0.75rem 1rem;
   overflow-x: auto;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 pre code {
@@ -109,7 +108,7 @@ pre code {
 blockquote {
   margin: 1em 0;
   padding: 0.25em 0 0.25em 1em;
-  border-left: 3px solid var(--line);
+  border-left: 2px solid var(--line);
   color: var(--muted);
 }
 
@@ -121,7 +120,7 @@ hr {
 
 .wrap {
   width: 100%;
-  max-width: 68rem;
+  max-width: 72rem;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -144,21 +143,21 @@ h3 {
 }
 
 h1 {
-  font-size: 1.9rem;
+  font-size: 1.5rem;
 }
 
 h2 {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   margin-top: 1.5em;
 }
 
 h3 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
 @media (min-width: 40rem) {
   h1 {
-    font-size: 2.4rem;
+    font-size: 1.75rem;
   }
 }
 
@@ -168,10 +167,13 @@ ol {
   margin: 0 0 1em;
 }
 
-/* A bare URL or a file path in inline code has no break point; without this it pushes a phone
-   page sideways. */
+/* Writeups are read, not scanned, so they get a larger size and a text measure. A bare URL or a
+   file path in inline code has no break point; without the wrap rule it pushes a phone page
+   sideways. */
 .prose {
   max-width: 72ch;
+  font-size: 1.0625rem;
+  line-height: 1.65;
   overflow-wrap: anywhere;
 }
 
@@ -187,23 +189,31 @@ ol {
   font-size: 1.15rem;
 }
 
-.eyebrow {
-  font-size: 0.85rem;
+.eyebrow,
+.section > h2,
+thead th,
+caption {
+  font-size: 0.72rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--muted);
+}
+
+.eyebrow {
   margin-bottom: 0.25rem;
 }
 
-.muted {
+.muted,
+.source,
+.note {
   color: var(--muted);
 }
 
+.source,
 .note {
-  color: var(--muted);
-  border-left: 3px solid var(--line);
-  padding: 0.5rem 0.75rem;
-  background: var(--surface);
+  font-size: 0.8rem;
+  margin: 0 0 0.75rem;
 }
 
 .nowrap {
@@ -211,7 +221,8 @@ ol {
 }
 
 .more {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
 }
 
 /* ---- header / nav ---------------------------------------------------------------------- */
@@ -221,7 +232,7 @@ ol {
   background: var(--surface);
 }
 
-/* One line at every width: on a 375px phone the five links do not fit, so the row scrolls
+/* One line at every width: on a 375px phone the links do not always fit, so the row scrolls
    sideways inside the header instead of wrapping to a second line. */
 .site-header nav {
   display: flex;
@@ -242,8 +253,9 @@ ol {
   display: inline-block;
   flex: 0 0 auto;
   white-space: nowrap;
-  padding: 0.75rem 0.5rem;
+  padding: 0.7rem 0.5rem;
   min-height: 44px;
+  font-size: 0.9rem;
   text-decoration: none;
   color: var(--muted);
 }
@@ -265,41 +277,47 @@ ol {
 }
 
 main {
-  padding: 1.5rem 0 3rem;
+  padding: 1.5rem 0 2.5rem;
   min-width: 0;
 }
 
 .section {
-  margin: 2.5rem 0;
+  margin: 2rem 0;
 }
 
 .section > h2 {
-  margin-bottom: 0.75rem;
-}
-
-.hero {
-  padding-top: 1rem;
-}
-
-.hero h1 {
-  margin-bottom: 0.75rem;
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--rule);
 }
 
 /* ---- page header ----------------------------------------------------------------------- */
 
 .page-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
-.page-header .meta,
-.page-header .links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
+.page-header h1 {
+  margin-bottom: 0.35rem;
+}
+
+.question {
+  max-width: 60ch;
+  margin: 0;
   color: var(--muted);
 }
 
-.page-header .links a {
+.page-header .meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.page-header .meta a {
   padding: 0.25rem 0;
 }
 
@@ -315,69 +333,91 @@ main {
 
 .badge {
   display: inline-block;
-  padding: 0.1rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: var(--muted);
+  font-size: 0.66rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
   vertical-align: middle;
 }
 
 .badge-built {
-  color: var(--ok);
-  background: var(--ok-soft);
+  color: var(--accent);
 }
 
 .badge-pending {
-  color: var(--warn);
-  background: var(--warn-soft);
+  border-style: dashed;
 }
 
-/* Companies tracked for reported figures only (no model class yet): neutral, not a warning. */
+/* Tracked for reported figures only: the quietest of the three. */
 .badge-no-model {
-  color: var(--muted);
-  background: var(--code-bg);
+  border-color: var(--line);
 }
 
-/* ---- companies grid -------------------------------------------------------------------- */
+/* ---- key figures ----------------------------------------------------------------------- */
 
-/* min(100%, 16rem) keeps a card from forcing horizontal scroll on a 375px screen. */
-.cards {
+/* Two columns on a phone, so six tiles are three short rows and not one long column. */
+.kpis {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1.25rem;
+  margin: 0;
 }
 
-.card {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 1rem 1.1rem;
+@media (min-width: 40rem) {
+  .kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .kpis {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.kpi {
   min-width: 0;
+  padding: 0.55rem 0 0.75rem;
+  border-bottom: 1px solid var(--line);
 }
 
-.card h3 {
-  margin: 0 0 0.15rem;
+.kpi dt {
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 
-.card h3 a {
-  text-decoration: none;
-  display: inline-block;
-  padding: 0.15rem 0;
+.kpi dd {
+  margin: 0;
 }
 
-.card p {
-  margin: 0.25rem 0;
-  overflow-wrap: anywhere;
+.kpi-value {
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
 }
 
-.card-name {
-  font-weight: 500;
+.kpi-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
-.card-meta,
-.card-filing {
-  font-size: 0.92rem;
+/* The sign of a change on a year earlier. Direction only: more debt is green too. */
+.pos {
+  color: var(--ok);
+}
+
+.neg {
+  color: var(--bad);
+}
+
+.flat {
   color: var(--muted);
 }
 
@@ -390,17 +430,12 @@ main {
 }
 
 .writeup-list li {
-  padding: 0.9rem 0;
-  border-top: 1px solid var(--line);
-}
-
-.writeup-list li:last-child {
+  padding: 0.7rem 0;
   border-bottom: 1px solid var(--line);
 }
 
 .writeup-title {
   font-weight: 600;
-  font-size: 1.05rem;
   display: inline-block;
   padding: 0.15rem 0;
 }
@@ -408,12 +443,13 @@ main {
 .writeup-list .meta {
   display: block;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .writeup-list .summary {
-  margin: 0.35rem 0 0;
+  margin: 0.25rem 0 0;
   max-width: 72ch;
+  font-size: 0.95rem;
 }
 
 .tags {
@@ -426,11 +462,11 @@ main {
 }
 
 .tag {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--muted);
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0.05rem 0.55rem;
+  border-radius: 2px;
+  padding: 0.05rem 0.45rem;
 }
 
 .page-footer {
@@ -438,6 +474,7 @@ main {
   padding-top: 1rem;
   border-top: 1px solid var(--line);
   color: var(--muted);
+  font-size: 0.9rem;
 }
 
 /* ---- tables ---------------------------------------------------------------------------- */
@@ -447,44 +484,53 @@ main {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   max-width: 100%;
-  margin: 1rem 0 1.5rem;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--surface);
+  margin: 0.5rem 0 1.5rem;
 }
 
 table {
   border-collapse: collapse;
   width: 100%;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-variant-numeric: tabular-nums;
 }
 
 caption {
   text-align: left;
-  padding: 0.6rem 0.75rem 0.2rem;
-  font-weight: 600;
-  color: var(--muted);
+  padding: 0.5rem 0 0.3rem;
 }
 
 th,
 td {
-  padding: 0.5rem 0.75rem;
-  border-top: 1px solid var(--line);
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
 }
 
+/* The first and last cells line up with the section rule above instead of sitting inset. */
+th:first-child,
+td:first-child {
+  padding-left: 0;
+}
+
+th:last-child,
+td:last-child {
+  padding-right: 0;
+}
+
 thead th {
-  border-top: none;
-  border-bottom: 1px solid var(--line);
-  font-weight: 600;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: bottom;
   white-space: nowrap;
 }
 
 tbody th {
   font-weight: 500;
   white-space: nowrap;
+}
+
+tbody tr:hover {
+  background: var(--surface);
 }
 
 .num {
@@ -497,8 +543,60 @@ tbody th {
   white-space: nowrap;
 }
 
+/* Index table: ticker over name on a phone keeps the first column narrow, so the period and
+   the first figure are on screen before any sideways scroll. */
+.companies td,
+.companies th {
+  vertical-align: middle;
+}
+
+.co-ticker {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.co-ticker:hover {
+  text-decoration: underline;
+}
+
+.co-name {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+@media (min-width: 64rem) {
+  .co-name {
+    display: inline;
+    margin-left: 0.4rem;
+    font-size: 0.85rem;
+  }
+}
+
 .calls td {
   min-width: 8rem;
+}
+
+/* Three short columns: at full width the value would sit a screen away from its label. */
+.outputs {
+  width: auto;
+  min-width: min(100%, 22rem);
+}
+
+.basis {
+  font-size: 0.78rem;
+  color: var(--muted);
+  min-width: 7rem;
+}
+
+/* The note is a sentence or two; without a floor the other columns squeeze it into a ribbon. */
+.inputs td:last-child {
+  min-width: 18rem;
+}
+
+.prose table {
+  font-size: 0.9rem;
 }
 
 .outcome {
@@ -522,13 +620,29 @@ tbody th {
   color: var(--warn);
 }
 
+.sources {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.sources summary {
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.sources ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  overflow-wrap: anywhere;
+}
+
 /* ---- charts ---------------------------------------------------------------------------- */
 
 .charts {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  margin: 1rem 0;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  margin: 0.75rem 0 1rem;
 }
 
 .charts:empty {
@@ -539,13 +653,13 @@ tbody th {
   margin: 0;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.75rem 0.75rem 0.5rem;
+  border-radius: 2px;
+  padding: 0.6rem 0.6rem 0.4rem;
   min-width: 0;
 }
 
 .chart figcaption {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--muted);
   margin-bottom: 0.25rem;
 }
@@ -553,7 +667,7 @@ tbody th {
 /* Chart.js needs a positioned, fixed-height box to size a responsive canvas. */
 .chart-box {
   position: relative;
-  height: 260px;
+  height: 220px;
   width: 100%;
 }
 
@@ -561,12 +675,12 @@ tbody th {
 
 .site-footer {
   border-top: 1px solid var(--line);
-  padding: 1.5rem 0 2.5rem;
+  padding: 1rem 0 2rem;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.8rem;
 }
 
 .site-footer p {
-  margin: 0 0 0.4em;
+  margin: 0 auto;
   overflow-wrap: anywhere;
 }

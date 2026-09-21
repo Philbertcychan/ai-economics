@@ -6,11 +6,12 @@ Every company in this repository (CoreWeave, Nebius, later the chip and hypersca
 lines) is modelled by a small class that turns *reported* SEC figures plus a handful of
 *assumptions* into per-period *drivers* and *outputs*. This module holds everything those
 classes share, so a company file contains only what is specific to that company: its
-ticker, its assumptions and - written by Philbert, never generated - its driver logic.
+ticker and its driver logic. Its assumptions live in ``assumptions/<TICKER>.csv``, where each
+value has a source and a sign-off status that Philbert owns.
 
 There is no financial-model logic here. ``BaseCompanyModel.build`` raises
-``NotImplementedError``; the subclasses in ``companies/coreweave.py`` and
-``companies/nebius.py`` carry the ``TODO(philbert)`` markers where the logic belongs.
+``NotImplementedError`` until a subclass implements it; the refresh pipeline reports such a
+company as "pending" and still publishes its reported data.
 
 Writing a company model
 -----------------------
@@ -37,7 +38,8 @@ from typing import Any, Protocol, runtime_checkable
 
 import pandas as pd
 
-from data import PROCESSED_DIR
+from companies.assumptions import load_assumptions, to_inputs_frame
+from data import ASSUMPTIONS_DIR, PROCESSED_DIR
 from data.edgar import (
     COMPANIES,
     EdgarClient,
@@ -105,8 +107,9 @@ class BaseCompanyModel:
     three are copied from there at class-creation time so the registry stays the single
     source of truth. A subclass for a company outside that registry sets all four itself.
 
-    ``engine_defaults`` holds the company's ``GPUEconomicsInputs`` assumptions. It is ``None``
-    until Philbert fills it in; ``default_inputs()`` then returns an empty Inputs frame.
+    Assumptions come from the register ``assumptions/<TICKER>.csv`` (see
+    ``companies/assumptions.py``). ``engine_defaults`` is an older, in-code alternative kept
+    for tests and quick experiments; the register wins whenever it exists.
     """
 
     ticker: str
@@ -126,7 +129,11 @@ class BaseCompanyModel:
                 setattr(cls, attribute, getattr(info, attribute))
 
     def __init__(
-        self, edgar: EdgarClient | None = None, *, processed_dir: Path = PROCESSED_DIR
+        self,
+        edgar: EdgarClient | None = None,
+        *,
+        processed_dir: Path = PROCESSED_DIR,
+        assumptions_dir: Path = ASSUMPTIONS_DIR,
     ) -> None:
         """Create an empty model.
 
@@ -136,9 +143,12 @@ class BaseCompanyModel:
                 ``load_data()`` reads the processed CSVs instead, or leaves the model empty.
             processed_dir: root of the tidy CSVs (``<processed_dir>/<TICKER>/reported.csv``
                 and ``filings.csv``); tests point this at a temporary directory.
+            assumptions_dir: folder of the assumptions registers (``<TICKER>.csv``); when a
+                register exists it becomes the Inputs sheet. See ``companies/assumptions.py``.
         """
         self.edgar = edgar
         self.processed_dir = Path(processed_dir)
+        self.assumptions_dir = Path(assumptions_dir)
         self.filings: list[Filing] = []
         self.reported: pd.DataFrame | None = None
         self.inputs: pd.DataFrame | None = None
@@ -199,6 +209,11 @@ class BaseCompanyModel:
         engine's nine, or want to cite a source per row, override this or set ``self.inputs``
         in ``build()``.
         """
+        register = load_assumptions(self.ticker, self.assumptions_dir)
+        if register is not None:
+            # The register carries a source and a sign-off status per row, which the bare
+            # engine defaults cannot, so it wins whenever it exists.
+            return to_inputs_frame(register)
         rows: list[dict[str, Any]] = []
         if self.engine_defaults is not None:
             values = self.engine_defaults.to_dict()

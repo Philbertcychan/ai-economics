@@ -31,6 +31,7 @@ from companies import (
     Nebius,
     get_model,
 )
+from companies.assumptions import engine_inputs, load_assumptions
 from companies.base import FILINGS_CSV_COLUMNS
 from data import PROCESSED_DIR
 from data.edgar import COMPANIES, FACT_COLUMNS, SERIES_COLUMNS, Filing, iter_filings
@@ -39,6 +40,7 @@ from engine.unit_economics import (
     INPUT_FIELDS,
     INPUT_UNITS,
     GPUEconomicsInputs,
+    breakdown,
 )
 from scripts.export_xlsx import INPUT_COLUMNS, INPUT_NAME_RE, fingerprint
 from scripts.export_xlsx import main as export_main
@@ -475,10 +477,67 @@ def test_subclass_may_override_or_supply_identity() -> None:
     assert isinstance(Outsider(), CompanyModel)
 
 
-@pytest.mark.parametrize("cls", list(REGISTRY.values()), ids=list(REGISTRY))
-def test_build_raises_not_implemented_with_a_pointer(cls: type[BaseCompanyModel]) -> None:
+def test_unbuilt_model_raises_not_implemented_with_a_pointer() -> None:
     with pytest.raises(NotImplementedError, match=r"not written yet - TODO\.md"):
-        cls().build()
+        Nebius().build()
+
+
+def test_coreweave_needs_its_assumptions_register(tmp_path: Path) -> None:
+    with pytest.raises(NotImplementedError, match="no assumptions register"):
+        CoreWeave(assumptions_dir=tmp_path).build()
+
+
+def test_coreweave_v0_matches_the_engine_and_declares_every_formula() -> None:
+    # Built from the committed register: values come from the engine, and every line also
+    # carries an Excel formula so the workbook can be traced cell by cell.
+    model = CoreWeave()
+    model.build()
+    register = load_assumptions("CRWV")
+    expected = breakdown(engine_inputs(register), "rental")
+    period = model.drivers.columns[0]
+    for name in ("capital_cost_per_gpu_hour", "cash_cost_per_gpu_hour", "cost_per_gpu_hour"):
+        assert model.drivers.loc[name, period] == pytest.approx(expected[name])
+    assert model.outputs.loc["margin_per_gpu_hour", period] == pytest.approx(
+        expected["margin_per_gpu_hour"]
+    )
+    assert model.outputs.loc["payback_years", period] == pytest.approx(
+        expected["payback_months"] / 12
+    )
+    assert set(model.drivers.attrs["formulas"]) == set(model.drivers.index)
+    assert set(model.outputs.attrs["formulas"]) == set(model.outputs.index)
+    assert list(model.inputs.columns) == list(INPUT_COLUMNS)
+
+
+def test_coreweave_workbook_formulas_recompute_to_the_python_values(tmp_path: Path) -> None:
+    # Evaluate the exported Excel formulas with a tiny interpreter (named inputs and same-sheet
+    # or cross-sheet cell references only) and compare with what Python computed. This is the
+    # check that the formulas a finance reader sees say the same thing as the engine.
+    model = CoreWeave()
+    model.build()
+    path = model.to_xlsx(tmp_path / "CRWV.xlsx")
+    wb = load_workbook(path)
+    names = {
+        name: wb["Inputs"][dn.attr_text.split("!")[1].replace("$", "")].value
+        for name, dn in wb.defined_names.items()
+    }
+
+    def cell_value(sheet: str, ref: str) -> float:
+        raw = wb[sheet][ref].value
+        if not (isinstance(raw, str) and raw.startswith("=")):
+            return float(raw)
+        expr = raw[1:].replace("^", "**")
+        expr = re.sub(r"IF\(", "_if(", expr)
+        expr = re.sub(r"(Drivers|Outputs)!([A-Z]+[0-9]+)", r'_cell("\1","\2")', expr)
+        expr = re.sub(
+            r"(?<![A-Za-z_\"])([A-Z]+[0-9]+)(?![A-Za-z_\"(])", rf'_cell("{sheet}","\1")', expr
+        )
+        expr = re.sub(r"(?<![=<>])=(?!=)", "==", expr)
+        scope = {"_cell": cell_value, "_if": lambda c, a, b: a if c else b, **names}
+        return float(eval(expr, {"__builtins__": {}}, scope))  # noqa: S307 - our own formulas
+
+    for sheet, frame in (("Drivers", model.drivers), ("Outputs", model.outputs)):
+        for row, item in enumerate(frame.index, start=2):
+            assert cell_value(sheet, f"C{row}") == pytest.approx(frame.iloc[row - 2, 0]), item
 
 
 @pytest.mark.parametrize("cls", list(REGISTRY.values()), ids=list(REGISTRY))
@@ -618,14 +677,15 @@ def test_nebius_keeps_usd_when_facts_carry_rub_and_usd() -> None:
 # ---------------------------------------------------------------------------------------
 
 
-def test_default_inputs_empty_frame_has_exporter_input_columns() -> None:
-    frame = CoreWeave().default_inputs()
+def test_default_inputs_empty_frame_has_exporter_input_columns(tmp_path: Path) -> None:
+    # An empty assumptions folder: the committed CRWV register must not leak into the test.
+    frame = CoreWeave(assumptions_dir=tmp_path).default_inputs()
     assert list(frame.columns) == list(INPUT_COLUMNS) == ["name", "value", "unit", "source", "note"]
     assert frame.empty
 
 
-def test_default_inputs_from_engine_defaults() -> None:
-    frame = ToyBuilt().default_inputs()
+def test_default_inputs_from_engine_defaults(tmp_path: Path) -> None:
+    frame = ToyBuilt(assumptions_dir=tmp_path).default_inputs()
 
     assert list(frame.columns) == list(INPUT_COLUMNS)
     assert list(frame["name"]) == list(INPUT_FIELDS)
@@ -661,8 +721,24 @@ def test_summary_shape() -> None:
     }
 
 
+def test_default_inputs_prefer_the_assumptions_register(tmp_path: Path) -> None:
+    header = "name,value,unit,low,high,basis,source,status,note"
+    row = "chip_cost,41000,USD,35000,45000,external,https://example.com/x,confirmed,quoted price"
+    text = f"{header}\n{row}\n"
+    (tmp_path / "CRWV.csv").write_text(text, encoding="utf-8", newline="\n")
+    frame = CoreWeave(assumptions_dir=tmp_path).default_inputs()
+    assert list(frame.columns) == list(INPUT_COLUMNS) and len(frame) == 1
+    only = frame.iloc[0]
+    assert (only["name"], only["value"], only["source"]) == (
+        "chip_cost",
+        41000.0,
+        "https://example.com/x",
+    )
+    assert only["note"].startswith("[external; confirmed; range 35000 to 45000]")
+
+
 def test_built_subclass_round_trips_through_to_xlsx(tmp_path: Path) -> None:
-    model = ToyBuilt(edgar=crwv_fake())
+    model = ToyBuilt(edgar=crwv_fake(), assumptions_dir=tmp_path / "no-registers")
     model.load_data()
     model.build()
 
@@ -706,10 +782,10 @@ def test_export_cli_reports_model_pending(tmp_path: Path, capsys: pytest.Capture
     # commits to: this test must not start parsing whatever CSVs landed there that day.
     # Registry lookup is covered by test_get_model_is_case_insensitive_and_names_known_tickers.
     code = export_main(
-        ["crwv", "--out", str(tmp_path / "CRWV.xlsx")],
-        model_cls=lambda: CoreWeave(processed_dir=tmp_path),
+        ["nbis", "--out", str(tmp_path / "NBIS.xlsx")],
+        model_cls=lambda: Nebius(processed_dir=tmp_path),
     )
     out = capsys.readouterr().out
     assert code == 2
-    assert re.search(r"CRWV: model pending - CoreWeave drivers not written yet", out)
-    assert not (tmp_path / "CRWV.xlsx").exists()
+    assert re.search(r"NBIS: model pending - Nebius drivers not written yet", out)
+    assert not (tmp_path / "NBIS.xlsx").exists()

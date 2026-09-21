@@ -25,5 +25,8 @@ SITE_BUILD_DIR = SITE_DIR / "build"  # generated site, deployed to GitHub Pages
 SITE_TEMPLATES_DIR = SITE_DIR / "templates"
 SITE_STATIC_DIR = SITE_DIR / "static"
 
+# One CSV per company; every value has a source and a status column that Philbert owns.
+ASSUMPTIONS_DIR = REPO_ROOT / "assumptions"
+
 NOTES_DIR = REPO_ROOT / "notes"
 CALLS_MD = REPO_ROOT / "calls.md"

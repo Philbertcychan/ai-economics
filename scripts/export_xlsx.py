@@ -816,7 +816,7 @@ def export_company(
             the ``companies`` package or any data on disk.
 
     Raises:
-        NotImplementedError: the model's ``build()`` is still a ``TODO(philbert)``.
+        NotImplementedError: the model's ``build()`` has not been written yet.
         companies.ModelNotBuilt: ``build()`` ran but left ``drivers`` or ``outputs`` unset.
         KeyError: the ticker is not registered (only when ``model_cls`` is not given).
     """
@@ -872,7 +872,7 @@ def main(argv: list[str] | None = None, *, model_cls: Callable[[], Any] | None =
         # The exception text names the company's TODO.md stage, so this line stays generic.
         print(
             f"{ticker}: model pending - {exc}\n"
-            "Nothing exported. The driver logic is a TODO(philbert); see TODO.md."
+            "Nothing exported. The operating model is not built yet; see TODO.md."
         )
         return 2
     except _model_not_built_errors():
