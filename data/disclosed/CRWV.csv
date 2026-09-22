@@ -24,6 +24,13 @@ period,kpi,value,unit,qualifier,form,filed,accession,page,url
 2023Q4,data_centers,10,count,,10-K,2026-03-02,0001769628-26-000104,5,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm
 2024Q4,data_centers,32,count,,10-K,2026-03-02,0001769628-26-000104,5,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm
 2025Q4,data_centers,43,count,,10-K,2026-03-02,0001769628-26-000104,5,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm
+2026,debt_principal_due_usd_m,4413,USD m,remainder of year,10-Q,2026-08-12,0001769628-26-000366,28,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm
+2027,debt_principal_due_usd_m,6184,USD m,,10-Q,2026-08-12,0001769628-26-000366,28,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm
+2028,debt_principal_due_usd_m,4416,USD m,,10-Q,2026-08-12,0001769628-26-000366,28,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm
+2029,debt_principal_due_usd_m,2421,USD m,,10-Q,2026-08-12,0001769628-26-000366,28,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm
+2030,debt_principal_due_usd_m,3221,USD m,,10-Q,2026-08-12,0001769628-26-000366,28,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm
+2031,debt_principal_due_usd_m,14896,USD m,thereafter,10-Q,2026-08-12,0001769628-26-000366,28,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm
+2026Q2,debt_principal_usd_m,35551,USD m,,10-Q,2026-08-12,0001769628-26-000366,28,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000366/crwv-20260630.htm
 2024Q4,gpus_installed,250000,count,more than,S-1,2025-03-03,0001193125-25-044231,2,https://www.sec.gov/Archives/edgar/data/1769628/000119312525044231/d899798ds1.htm
 2025Q1,revenue_backlog_usd_bn,25.9,USD bn,,8-K EX-99.1,2025-05-14,0001769628-25-000010,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000010/coreweave1q25earningspress.htm
 2025Q2,revenue_backlog_usd_bn,30.1,USD bn,,8-K EX-99.1,2025-08-12,0001769628-25-000039,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000039/coreweave2q25earningspress.htm

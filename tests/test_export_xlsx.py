@@ -675,3 +675,37 @@ def test_cli_returns_2_when_companies_package_is_missing(
     monkeypatch.setitem(sys.modules, "companies", None)
     assert main(["CRWV", "--out", str(tmp_path / "CRWV.xlsx")]) == 2
     assert "companies" in capsys.readouterr().err
+
+
+def test_formula_starts_hard_codes_actuals_and_computes_estimates(tmp_path: Path) -> None:
+    frames = toy_frames()
+    drivers = pd.DataFrame(
+        {"2024A": [10.0, 1.0], "2025A": [12.0, 2.0], "2026E": [13.0, 3.0]},
+        index=["units", "growth"],
+    )
+    drivers.attrs = {
+        "formulas": {"units": "={units@prev}*(1+{growth})"},
+        "formula_starts": {"units": "2026E"},
+    }
+    frames["drivers"] = drivers
+    frames["outputs"] = frames["outputs"].iloc[:0]  # the toy outputs refer to the old drivers
+    frames["outputs"].attrs = {}
+    path = export_workbook(frames, tmp_path / "t.xlsx", title="Toy")
+    ws = load_workbook(path)["Drivers"]
+    assert ws["C2"].value == 10.0 and ws["D2"].value == 12.0, "actuals stay pasted values"
+    assert ws["E2"].value == "=D2*(1+E3)", "the estimate column computes"
+    assert ws["D2"].font.color.rgb.endswith(COLOUR_PASTED)
+    assert ws["E2"].font.color.rgb.endswith(COLOUR_FORMULA)
+
+
+def test_formula_starts_is_validated(tmp_path: Path) -> None:
+    frames = toy_frames()
+    frames["drivers"].attrs = {"formula_starts": {"gpu_hours_sold": PERIODS[0]}}
+    with pytest.raises(ValueError, match="no formula to start"):
+        export_workbook(frames, tmp_path / "t.xlsx", title="Toy")
+    frames["drivers"].attrs = {
+        "formulas": {"gpu_hours_sold": "={gpu_hours_sold@prev}*2"},
+        "formula_starts": {"gpu_hours_sold": "2099E"},
+    }
+    with pytest.raises(ValueError, match="not a period column"):
+        export_workbook(frames, tmp_path / "t.xlsx", title="Toy")

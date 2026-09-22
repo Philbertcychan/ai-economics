@@ -84,6 +84,14 @@ CONCEPT_LABELS: dict[str, str] = {
     "ppe_net": "PP&E, net",
     "long_term_debt": "Long-term debt",
     "interest_expense": "Interest expense",
+    "debt_principal": "Debt, principal",
+    "interest_expense_debt": "Interest on debt",
+    "debt_proceeds": "Debt raised",
+    "debt_repayments": "Debt repaid",
+    "deferred_revenue": "Deferred revenue (customer prepayments)",
+    "deferred_revenue_change": "Change in deferred revenue",
+    "deferred_revenue_recognised": "Prepaid revenue recognised",
+    "receivables": "Receivables",
     "shares_outstanding": "Shares outstanding",
 }
 

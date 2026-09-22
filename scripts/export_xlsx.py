@@ -37,7 +37,10 @@ title (the key, capitalised) must not collide with another sheet, ignoring case.
   - ``{in.name}``          the defined name ``in_name`` from the Inputs sheet
 
   A template may refer to its own item only as ``{item@prev}``; any other self-reference is a
-  circular formula and is rejected.
+  circular formula and is rejected. ``formula_starts`` (item -> period label) makes a template
+  apply only from that period on: the earlier columns are written as plain values. This is how
+  a line that is a reported fact in actual periods and a driver in estimate periods is laid
+  out, the way finance models hard-code actuals and compute estimates.
 
 Determinism
 -----------
@@ -79,7 +82,7 @@ from data import MODELS_DIR, PROCESSED_DIR
 
 REQUIRED_FRAMES: tuple[str, ...] = ("inputs", "drivers", "outputs")
 FINANCE_FRAMES: tuple[str, ...] = ("drivers", "outputs")
-FINANCE_ATTRS: tuple[str, ...] = ("labels", "units", "formulas")
+FINANCE_ATTRS: tuple[str, ...] = ("labels", "units", "formulas", "formula_starts")
 INPUT_COLUMNS: tuple[str, ...] = ("name", "value", "unit", "source", "note")
 INPUT_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 DEFINED_NAME_PREFIX = "in_"
@@ -380,6 +383,15 @@ def _validate_finance_frame(key: str, df: pd.DataFrame) -> None:
                 f"{key}.attrs[{name!r}] names item(s) that are not in the {key} index: "
                 f"{unknown_items}"
             )
+    periods = [str(period) for period in df.columns]
+    formulas = df.attrs.get("formulas", {})
+    for item, start in df.attrs.get("formula_starts", {}).items():
+        if item not in formulas:
+            raise ValueError(f"{key}.attrs['formula_starts'][{item!r}] has no formula to start")
+        if str(start) not in periods:
+            raise ValueError(
+                f"{key}.attrs['formula_starts'][{item!r}] = {start!r} is not a period column"
+            )
 
 
 def _validate_extra_titles(extra_keys: list[str]) -> None:
@@ -454,6 +466,7 @@ def _write_finance_sheet(
     labels: Mapping[str, str] = df.attrs.get("labels", {})
     units: Mapping[str, str] = df.attrs.get("units", {})
     formulas: Mapping[str, str] = df.attrs.get("formulas", {})
+    starts: Mapping[str, str] = df.attrs.get("formula_starts", {})
 
     items = [str(item) for item in df.index]
     for item, values in zip(items, df.itertuples(index=False, name=None), strict=True):
@@ -467,10 +480,11 @@ def _write_finance_sheet(
         if template is not None:
             font_colour = COLOUR_LINK if _is_cross_sheet(template, key) else COLOUR_FORMULA
 
+        first_formula_offset = periods.index(str(starts[item])) if item in starts else 0
         for offset, value in enumerate(values):
             column = FIRST_PERIOD_COLUMN + offset
             formula = None
-            if template is not None:
+            if template is not None and offset >= first_formula_offset:
                 formula = resolve_formula(
                     template,
                     sheet=key,

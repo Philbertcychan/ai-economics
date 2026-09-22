@@ -738,7 +738,15 @@ def test_facts_to_frame_empty_input() -> None:
 
 
 def test_concept_sets_partition_standard_concepts() -> None:
-    assert INSTANT_CONCEPTS == {"ppe_net", "long_term_debt", "cash", "shares_outstanding"}
+    assert INSTANT_CONCEPTS == {
+        "ppe_net",
+        "long_term_debt",
+        "cash",
+        "shares_outstanding",
+        "debt_principal",
+        "deferred_revenue",
+        "receivables",
+    }
     assert INSTANT_CONCEPTS | FLOW_CONCEPTS == set(STANDARD_CONCEPTS)
     assert not INSTANT_CONCEPTS & FLOW_CONCEPTS
 

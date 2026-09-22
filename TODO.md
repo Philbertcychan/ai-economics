@@ -34,13 +34,21 @@ Done:
 
 Philbert's decisions:
 
-- [ ] Read `docs/modeling-approach.md`. Ask about anything that does not make sense.
+- [x] Read `docs/modeling-approach.md` (2026-09-21).
 - [ ] Open `assumptions/CRWV.csv` in Excel. For each row set `status` to `confirmed`, or change the
-      value and set `overridden`. The two that matter most: `depreciation_years` (6, accounting
-      life, against a plausible economic life of 4 to 5) and `financing_rate` (11%, debt only).
+      value and set `overridden`. The Sensitivities sheet in `models/CRWV.xlsx` ranks what
+      matters: for the cash floor, `debt_share_of_capex`, `mw_added_per_quarter`,
+      `capex_per_mw_usd_m` and `receivables_share_of_quarterly_revenue`; for payback per GPU,
+      `revenue_per_mw_year_usd_m`, `adjusted_ebitda_margin` and `prepayment_share_of_tcv`.
+      Two rows where the evidence disagrees with itself and the choice is yours:
+      `prepayment_share_of_tcv` (S-1 says 15-25%, cash since the IPO says about 8%; set to 10%)
+      and `cost_of_debt` (expensed 7.4% versus contractual 9-10%; set to 7.5%).
 - [ ] Which debt measure the CoreWeave model uses: the Q2 2026 10-Q has no `us-gaap:LongTermDebt`
       fact (the reported series stops at 2026Q1); the only current element is
-      `DebtInstrumentCarryingAmount`, which is gross of discounts and issuance costs.
+      `DebtInstrumentCarryingAmount`, which is gross of discounts and issuance costs. The model
+      now uses the gross principal (`debt_principal`), which is what the maturity ladder and
+      the interest cost are measured on; the site's long-term debt tile still shows the
+      carrying amount. Confirm or change.
 
 Claude's build list, in order:
 
@@ -49,11 +57,22 @@ Claude's build list, in order:
       `data/disclosed/CRWV.csv`; revenue and capex from XBRL; per-MW and per-GPU-hour lines
       for six quarters. Result: payback on the company's own cash flows is 4 to 5 years per MW
       against the 2.5 it discloses per GPU; the guide explains the gap.
-- [ ] Customer prepayments in the payback line (15% to 25% of contract value, S-1 p.96), the
-      largest known difference between the model's payback and the disclosed one.
-- [ ] Forecast columns (`E`): capacity ramp from contracted power, revenue per MW, capex per MW
-      with a spend-to-live lag, debt drawn against contracts, interest, cash. Calibrated to the
-      six reported quarters first.
+- [x] Customer prepayments in the payback line: three definitions side by side (gross, the
+      company's net-of-prepayment definition, strict cash timing) against the disclosed 2.5.
+- [x] Forecast columns (`E`), ten quarters: contracts signed and capacity going live, revenue per
+      MW, EBITDA margin, capex per MW, prepayments and deferred revenue, receivables, net debt
+      against capex with the 10-Q maturity ladder refinanced, interest, cash, and the external
+      funding required to hold a minimum balance. Reviewed by three independent readers
+      (finance logic, code, docs) and revised; base case needs no outside money, debt reaches
+      $97bn by 2028 at 3x EBITDA.
+- [x] Sensitivities: every register row with a range at its low and high, one at a time, on the
+      workbook's Sensitivities sheet (funding required, minimum cash, leverage, payback,
+      final-year revenue). Not yet on the site.
+- [ ] Sensitivity table on the site (the workbook has it).
+- [ ] Prepaid revenue recognised by contract vintage instead of a flat share of the balance
+      (contracts signed in 2024 unwind in 2027-28, inside the forecast window).
+- [ ] A spend-to-live lag for capex (spending lands one or two quarters before capacity
+      goes live) once the ramp is not held flat.
 - [ ] Signals ledger v0: contracts, build-outs, energy, statements, rental prices, each entry
       sourced, dated, rated for confidence and mapped to an assumption.
 - [ ] External sources for the inputs the filings cannot give: electricity price, data-centre

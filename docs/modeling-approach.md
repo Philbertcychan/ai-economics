@@ -36,7 +36,7 @@ Four kinds of company share each dollar spent on AI compute:
 | GPU owners: hyperscalers | Microsoft, Alphabet, Amazon, Meta | the same, plus their own use |
 | AI labs and applications | OpenAI, Anthropic and their customers | tokens, which need GPU-hours to make |
 
-The unit that connects them is the **GPU-hour**. It is the owner's product, the lab's raw
+The unit that connects them is the **GPU-hour**, one graphics processor running for one hour. It is the owner's product, the lab's raw
 material, and the thing a chip exists to produce. So the model is built on it.
 
 ## 3. Layer 1: the economics of one GPU
@@ -100,14 +100,24 @@ operators quote it, before financing and depreciation, so that it can be compare
 disclosed figures. CoreWeave's S-1 (p.97) gives about 2.5 years, measured through adjusted
 EBITDA per GPU and net of customer prepayments.
 
+A note on rates: the capital charge above uses the register's `financing_rate` (11%, what the
+GPUs already bought cost to finance), while the forecast's interest line uses `cost_of_debt`
+(7.5%, what the next dollar of debt costs as expensed). The register explains both.
+
 ### What CoreWeave's own numbers say, quarter by quarter
 
-Code: [companies/coreweave.py](../companies/coreweave.py). The first version of the company
-model is a HISTORY, not a forecast: one column per reported quarter, built from three sources
-that are all visible on the workbook. Revenue and capex come from SEC's structured data.
-Active power, contracted power, revenue backlog and adjusted EBITDA come from the company's
-own press releases, read into [data/disclosed/CRWV.csv](../data/disclosed/CRWV.csv) with a
-link to each source. The assumptions register supplies what neither gives.
+Code: [companies/coreweave.py](../companies/coreweave.py). The model's actual columns are a
+history built from three sources. Revenue, capex, cash from operations, cash, receivables,
+debt, interest and deferred revenue come from SEC's structured data. Active power, contracted
+power, revenue backlog and adjusted EBITDA come from the company's own press releases, read
+into [data/disclosed/CRWV.csv](../data/disclosed/CRWV.csv) with a link to each source and
+shown on the workbook's Disclosed sheet. The assumptions register supplies what neither gives.
+
+Glossary for these tables: *adjusted EBITDA* is profit before interest, tax, depreciation and
+stock compensation, the company's own measure of cash operating profit; *annualised* means a
+quarter's figure times four; *take-or-pay* means the customer pays for the committed capacity
+whether or not it uses it; *DDTL* is a delayed-draw term loan, a loan drawn in pieces as GPUs
+are bought.
 
 The model measures the business two ways.
 
@@ -122,26 +132,41 @@ the fleet at quarter end:
 | Capex per MW added, cumulative, $m | 23.4 | 35.1 | 27.2 | 21.0 | 28.1 | 21.4 |
 | Payback per MW, years | 3.8 | 5.2 | 4.3 | 4.2 | 5.6 | 4.4 |
 
-**Per installed GPU-hour** converts MW to GPUs with one assumption (kW per GPU) and runs the
-shared engine, so CoreWeave can be compared with anything else built on it. Revenue per
+**Per installed GPU-hour** converts MW to GPUs with one assumption (1.44 kW per GPU) and runs
+the shared engine, so CoreWeave can be compared with anything else built on it. Revenue per
 installed GPU-hour has drifted from about $1.70 to about $1.36, and the fully loaded margin
 turned negative in the second half of 2025.
 
-Three things a reader should take from this table.
+Three things a reader should take from this.
 
 1. **Revenue per MW is falling, from about $10m to about $8m a year.** Either newer capacity
    earns less per MW (denser GPUs need more power per dollar of rent, or new sites take a
    quarter to fill), or the fleet is filling more slowly than it is being built. The backlog,
-   at 10 to 12 years of current revenue, says the demand is contracted. The gap is timing.
-2. **Payback on the company's own cash flows is 4 to 5 years, against the 2.5 it discloses.**
-   The disclosed figure is per GPU, on committed contracts, net of customer prepayments of 15%
-   to 25% of contract value. The model's figure is per MW of everything: GPUs, networking,
-   storage, and the capex for capacity that is not yet earning. Both are right about different
-   things. The prepayment effect alone explains a large part of the gap, and adding it to the
-   model is the next refinement.
-3. **Capex per MW added swings between $21m and $35m** because capex lands before the MW it
-   buys goes live. Cumulative figures smooth this, but a forecast needs an explicit lag between
-   spending and capacity, which is why the forecast version starts from the capacity ramp.
+   at 10 years of current revenue, says the demand is contracted. The gap is timing.
+2. **Payback on the company's own cash flows is 3.8 to 5.6 years per MW, against the 2.5
+   years it discloses per GPU.** Three definitions of payback per GPU sit side by side on the
+   Outputs sheet:
+
+   | Payback per GPU, years | 2025Q1 | 2026Q2 | What it assumes |
+   |---|---|---|---|
+   | Gross of prepayment | 4.0 | 5.2 | price / annual cash margin |
+   | Net of prepayment, the company's definition | 3.4 | 4.6 | (price - prepayment) / annual cash margin |
+   | Strict cash timing | 3.4 | 5.2 | prepayment at signing, credited against the final months of the contract |
+   | Disclosed | 2.5 | 2.5 | committed contracts only, at signing |
+
+   The S-1 says prepayments are generally credited against the final months of a contract,
+   so until that window the GPU bills its full revenue. The company's definition is therefore
+   the true cash payback whenever the GPU pays back before the window, as it did on the early
+   2025 fleet; it flatters only when payback runs past the window, as it does on 2026's
+   figures, where the prepayment has fully unwound by the time the GPU pays back. At the
+   register's 10% prepayment share (the cash evidence since the IPO) the prepayment closes a
+   quarter of the gap to the disclosed figure; at the S-1's 20% it closes half. The rest is
+   mix and cost base: committed contracts on new GPUs earn more per hour than the fleet
+   average, and the $36,586 per GPU of technology equipment includes networking and storage.
+   Capex per MW added, the same idea measured from cash flows, is $31k per GPU.
+3. **Capex per MW added swings between $13m and $51m a quarter** because capex lands before
+   the MW it buys goes live. Cumulative figures smooth this, but a forecast needs an explicit
+   lag between spending and capacity, which this model does not yet have.
 
 The habit to take from this: compute the same quantity two ways, from the bottom up and from
 what the company discloses. Where they disagree, there is something to learn.
@@ -149,39 +174,104 @@ what the company discloses. Where they disagree, there is something to learn.
 ## 4. Layer 2: a company is a fleet over time
 
 Code: `companies/`. One module per company, all with the same four steps: load data, build,
-produce tables, export to Excel.
+produce tables, export to Excel. The CoreWeave model has six actual quarters (``A`` columns)
+and ten forecast quarters (``E`` columns) on the same sheets, laid out the way finance models
+are: reported facts hard-coded in grey, everything else computed in black, assumptions in blue.
 
 A company model is a chain of **drivers**, each computed from the one before, one column per
-period:
+quarter. CoreWeave's chain:
 
 ```
-power online (MW)  ->  GPUs installed  ->  GPU-hours available
-        x share rented, x price per hour          ->  revenue
-        less energy, leases, staff                ->  cash profit (EBITDA)
-        less depreciation, interest               ->  profit
-capex for next period's GPUs                      ->  cash needed
-debt drawn against signed contracts, repayments   ->  cash balance and debt
+contracted MW signed (assumption)  -> contracts signed (rate x term) -> backlog
+                                   -> customer prepayments (a share of contracts signed)
+MW going live (assumption)         -> active power, averaged over the quarter
+                                   -> revenue (revenue per MW-year, assumption)
+                                   -> adjusted EBITDA (margin, assumption)
+MW going live x capex per MW       -> capex -> net debt raised (a share of capex); maturities refinanced
+EBITDA - interest + change in deferred revenue - receivables build + other -> cash from operations
+cash + CFO - capex + net debt raised                                       -> cash
+shortfall below the minimum cash balance                                   -> external funding
 ```
 
-Things worth knowing about this kind of business:
+Things worth knowing about this kind of business, and where each shows up in the model:
 
-- **Capacity leads revenue.** Power and GPUs are paid for before they earn. In a fast-growing
-  fleet, this quarter's costs include GPUs that will only earn next quarter.
-- **Contracts, not spot prices, set revenue.** 96% of CoreWeave's 2024 revenue came from
-  committed take-or-pay contracts averaging four years. The backlog of signed contracts
-  (remaining performance obligations, $15.1bn at year-end 2024) says more about the next two
-  years than any price forecast.
+- **Capacity leads revenue.** Power and GPUs are paid for before they earn. The model
+  averages capacity over the quarter, and its capex-per-MW figure is cumulative because single
+  quarters swing from $13m to $51m per MW as spending lands ahead of go-live.
+- **Contracts, not spot prices, set revenue.** 96% of 2024 revenue came from committed
+  take-or-pay contracts averaging four years. The backlog ($104bn at June 2026) is 10 years
+  of current revenue. Signings, not go-lives, drive the backlog: 300, 600, 700, 200, 400 and
+  200 MW of contracted power were added in the six quarters to June 2026, and the forecast
+  assumes 400 MW a quarter, each at the prevailing rate for four years. The Drivers sheet
+  shows the pipeline of contracted-but-not-active power so a plan that activates more than it
+  signed is visible.
+- **Customers prepay.** Deferred revenue was $9.7bn at June 2026, more than a quarter of the
+  debt, and it is generally credited only in the final months of each contract. Prepayments
+  are a real funding source in the forecast: 10% of the value of contracts signed, with 3% of
+  the balance recognised as revenue each quarter. Both figures are contested and the register
+  says why; the sensitivity sheet shows what each is worth.
 - **Financing is part of the product.** GPUs are bought with loans drawn against specific
-  customer contracts, at rates set by the customer's credit quality. A model that ignores the
-  debt schedule misses the main way this business can fail.
-- **Concentration.** One customer was 62% of 2024 revenue. A driver-based model lets that
-  customer be switched off to see what breaks.
+  customer contracts. Debt raised net of repayments was 82% of capex in both 2025 and the
+  first half of 2026, and the model applies that share net: maturities from the 10-Q's
+  ladder are refinanced, and principal grows by 80% of capex. Interest follows the balance at
+  the rate the company expenses (7.5%); the higher contractual rates on the newest facilities
+  are partly capitalised into construction and so sit inside capex per MW.
+- **Cash conversion is receivables.** Over six quarters, cash from operations was $2.4bn
+  below what EBITDA, interest and prepayments explain, and $2.1bn of that was growth in
+  receivables: customers invoiced but not yet paid, prepayments included. The model carries
+  receivables at one quarter of revenue, so the drag grows with revenue and fades as growth
+  slows, and a residual 3% of revenue covers taxes and the rest.
 
-**Actuals and estimates.** Periods that have been reported are marked `A` and come from filings.
-Future periods are marked `E` and come from drivers. The first test of any model is
-**calibration**: run the drivers over the reported periods and check they reproduce reported
-revenue, capex and cash within a small error. A model that cannot explain the past has no
-business forecasting.
+**Actuals and estimates.** Reported quarters come from filings and are marked `A`. Future
+quarters come from the drivers and are marked `E`. In actual columns the cash, debt and
+deferred-revenue balances are reported facts, and the flows on the sheet do not fully explain
+their movements (non-cash debt additions, rounding of disclosed balances, acquisitions). Three
+"other movements" rows carry the difference so that every roll-forward on the sheet ties, and
+the size of those rows is itself information: $7.6bn of debt movements over six quarters
+that the cash-flow statement does not show as proceeds.
+
+### The base case, and what to read from it
+
+With the proposed assumptions (400 MW signed and 350 MW going live a quarter, $9m revenue per
+MW-year, a 58% EBITDA margin, $22m capex per MW, 80% of capex funded by net new debt at 7.5%,
+prepayments at 10% of contracts signed), the model gives:
+
+| | 2025A | 2026E (H1 actual) | 2027E | 2028E |
+|---|---|---|---|---|
+| Revenue, $bn | 5.1 | 13.0 | 26.1 | 38.8 |
+| Adjusted EBITDA, $bn | 3.1 | 7.5 | 15.2 | 22.5 |
+| Capex, $bn | 10.3 | 29.5 | 30.8 | 30.8 |
+| Prepayments received, $bn | 5.0 | 4.8 | 5.8 | 5.8 |
+| Cash from operations, $bn | 3.1 | 7.0 | 10.8 | 15.5 |
+| Free cash flow, $bn | -7.3 | -22.6 | -20.0 | -15.3 |
+| Debt raised net of repaid, $bn | 8.4 | 23.8 | 24.6 | 24.6 |
+| Active power at year end, GW | 0.85 | 2.2 | 3.6 | 5.0 |
+| Contracted power at year end, GW | 3.1 | 4.5 | 6.1 | 7.7 |
+| Debt principal at year end, $bn | 21.6 | 47.9 | 72.5 | 97.2 |
+| Cash at year end, $bn | 3.1 | 5.7 | 10.4 | 19.7 |
+| Net debt / annualised EBITDA at year end | 5.1x | 4.0x | 3.4x | 3.0x |
+
+Four readings:
+
+1. **The business never funds itself in this plan.** Free cash flow stays between -$15bn and
+   -$23bn a year because every dollar of EBITDA and more goes into the next tranche of
+   capacity. That is a choice, not a flaw, as long as the contracts behind the capacity are real.
+2. **Debt is the plan.** Principal grows from $36bn to $97bn by the end of 2028 while
+   leverage falls from 5x to 3x, because EBITDA grows faster than debt. The cash line
+   accumulates to $20bn because the model draws 80% of capex mechanically; a real treasurer
+   would draw less. The plan needs no outside money in the base case.
+3. **What the cash floor actually depends on.** The Sensitivities sheet moves each assumption
+   to the edge of its range with the rest held. Ranked by how low cash goes: the debt share
+   of capex (50% needs $4.8bn of outside money), building faster (600 MW a quarter), capex
+   per MW ($35m), receivables at two quarters of revenue, then signings and contract terms.
+   The cost of debt and the EBITDA margin barely move it. Payback per GPU moves with only
+   the revenue rate, the margin and the contract terms.
+4. **Prepayments matter less than the S-1 suggested.** At 10% of contracts signed they bring
+   $5.8bn a year in 2027, a fifth of the net debt raised; at the S-1's 20% they would bring
+   twice that and take a year off the per-GPU payback.
+
+The way to use this is not to believe the base case. It is to change one assumption in the
+register and see what breaks: the cash floor, the leverage, or the payback.
 
 ## 5. Layer 3: does supply match demand?
 

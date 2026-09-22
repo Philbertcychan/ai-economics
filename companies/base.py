@@ -158,6 +158,8 @@ class BaseCompanyModel:
         self.inputs: pd.DataFrame | None = None
         self.drivers: pd.DataFrame | None = None
         self.outputs: pd.DataFrame | None = None
+        # Extra sheets a model wants on the workbook (plain values), e.g. a sensitivity table.
+        self.extra_frames: dict[str, pd.DataFrame] = {}
         self.as_of: str | None = None
 
     # -- data ---------------------------------------------------------------------------
@@ -249,7 +251,8 @@ class BaseCompanyModel:
         return self.drivers is not None and self.outputs is not None
 
     def to_frames(self) -> dict[str, pd.DataFrame]:
-        """Frames for the exporter: ``inputs``, ``drivers``, ``outputs`` [+ ``reported``].
+        """Frames for the exporter: the three required frames plus ``reported``, ``disclosed``
+        and any ``extra_frames`` the model added, each as a plain-value sheet.
 
         The layout is the "Frames contract" section at the top of ``scripts/export_xlsx.py``.
 
@@ -268,6 +271,9 @@ class BaseCompanyModel:
         }
         if self.reported is not None:
             frames["reported"] = self.reported
+        if self.disclosed is not None:
+            frames["disclosed"] = self.disclosed
+        frames.update(self.extra_frames)
         return frames
 
     def to_xlsx(self, path: Path | str) -> Path:

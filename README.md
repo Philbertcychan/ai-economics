@@ -186,14 +186,17 @@ which the site builder renders on the index page. Outcomes are graded `open`, `r
 
 ## Status
 
-As of 2026-09-21:
+As of 2026-09-22:
 
 - Data pipeline, workbook exporter, site and daily refresh are live for seven companies.
 - The unit-economics engine is implemented and tested.
-- CoreWeave has a first assumptions register built from its S-1, and the engine runs on it.
+- CoreWeave has a full model: six reported quarters and a ten-quarter forecast of contracts,
+  capacity, revenue, EBITDA, capex, prepayments, receivables, debt, interest and cash, with
+  three definitions of payback per GPU and a one-at-a-time sensitivity sheet. Operating KPIs
+  come from the earnings releases; assumptions from the register built from the S-1 and 10-Qs.
 
-Next, in order (see `TODO.md`): the CoreWeave operating model, a ledger of evidence from outside
-filings (contracts, build-outs, energy, statements), Nebius, then the first writeup and call.
+Next, in order (see `TODO.md`): a spend-to-live lag for capex, the signals ledger of evidence
+from outside filings, the first writeup and call; then Nebius in Stage 2.
 
 Division of labour: the modelling and code are built with Claude; every assumption and every call
 is reviewed and owned by the author.

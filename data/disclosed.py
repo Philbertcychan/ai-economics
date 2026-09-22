@@ -10,7 +10,9 @@ the sentences themselves are kept outside the repository.
 Columns: ``period`` (``2025Q3``), ``kpi``, ``value``, ``unit``, ``qualifier`` (the company's own
 hedge: "approximately", "more than", or blank), ``form``, ``filed``, ``accession``, ``page``
 and ``url``.
-The qualifier matters: "more than 850 MW" is a floor, not a measurement.
+The qualifier matters: "more than 850 MW" is a floor, not a measurement. A maturity ladder
+uses two more: "remainder of year" for the first, partial year and "thereafter" for the
+sum beyond the ladder, filed under the first year it can fall in.
 """
 
 from pathlib import Path

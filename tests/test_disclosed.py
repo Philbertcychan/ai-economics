@@ -51,5 +51,13 @@ def test_malformed_rows_fail_loudly(tmp_path: Path, bad_row: str, message: str) 
 def test_committed_datasets_load(path: Path) -> None:
     frame = load_disclosed(path.stem)
     assert frame is not None and not frame.empty
-    assert set(frame["qualifier"]) <= {"", "approximately", "more than", "nearly"}
+    # The company's own hedges, plus the two labels a maturity ladder needs.
+    assert set(frame["qualifier"]) <= {
+        "",
+        "approximately",
+        "more than",
+        "nearly",
+        "remainder of year",
+        "thereafter",
+    }
     assert frame["url"].str.startswith("https://www.sec.gov/Archives/edgar/data/").all()

@@ -794,10 +794,33 @@ STANDARD_CONCEPTS: dict[str, tuple[str, ...]] = {
         "dei:EntityCommonStockSharesOutstanding",
         "CommonStockSharesOutstanding",
     ),
+    # Financing and prepayment mechanics. Neoclouds are financed by loans drawn against
+    # customer contracts and by customer prepayments (deferred revenue), so a model of one
+    # needs the debt principal, what it costs, and how the prepayment balance moves.
+    "debt_principal": ("DebtInstrumentCarryingAmount", "LongTermDebt", "Borrowings"),
+    "interest_expense_debt": ("InterestExpenseDebt", "InterestExpenseDebtExcludingAmortization"),
+    "debt_proceeds": ("ProceedsFromIssuanceOfLongTermDebt", "ProceedsFromIssuanceOfDebt"),
+    "debt_repayments": ("RepaymentsOfLongTermDebt", "RepaymentsOfDebt"),
+    "deferred_revenue": (
+        "ContractWithCustomerLiability",
+        "DeferredRevenue",
+        "ContractWithCustomerLiabilityCurrent",
+    ),
+    "deferred_revenue_change": ("IncreaseDecreaseInContractWithCustomerLiability",),
+    "deferred_revenue_recognised": ("ContractWithCustomerLiabilityRevenueRecognized",),
+    "receivables": ("AccountsReceivableNetCurrent", "ReceivablesNetCurrent"),
 }
 # Balance-sheet items are point-in-time; everything else accumulates over a period.
 INSTANT_CONCEPTS: frozenset[str] = frozenset(
-    {"ppe_net", "long_term_debt", "cash", "shares_outstanding"}
+    {
+        "ppe_net",
+        "long_term_debt",
+        "cash",
+        "shares_outstanding",
+        "debt_principal",
+        "deferred_revenue",
+        "receivables",
+    }
 )
 FLOW_CONCEPTS: frozenset[str] = frozenset(STANDARD_CONCEPTS) - INSTANT_CONCEPTS
 

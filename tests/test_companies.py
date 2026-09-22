@@ -33,11 +33,20 @@ from companies import (
     Nebius,
     get_model,
 )
+from companies.assumptions import load_assumptions
 from companies.base import FILINGS_CSV_COLUMNS
-from companies.coreweave import _is_next_quarter, hours_in_quarter
+from companies.coreweave import (
+    FORECAST_QUARTERS,
+    FORMULA_FROM_FORECAST,
+    _is_next_quarter,
+    _scheduled_repayment,
+    hours_in_quarter,
+    payback_with_prepayment,
+)
 from data import PROCESSED_DIR
 from data.edgar import COMPANIES, FACT_COLUMNS, SERIES_COLUMNS, Filing, iter_filings
 from engine.unit_economics import (
+    HOURS_PER_YEAR,
     INPUT_DESCRIPTIONS,
     INPUT_FIELDS,
     INPUT_UNITS,
@@ -496,12 +505,19 @@ def test_coreweave_history_ties_to_reported_and_disclosed_figures() -> None:
     model.load_data()
     model.build()
     assert list(model.drivers.columns) == list(model.outputs.columns)
-    assert len(model.drivers.columns) >= 4
-    period = model.drivers.columns[-1]
-    revenue = model.reported_series("revenue", "Q").set_index("period")["val"][period] / 1e6
+    actuals = [c for c in model.drivers.columns if c.endswith("A")]
+    estimates = [c for c in model.drivers.columns if c.endswith("E")]
+    assert len(actuals) >= 4 and len(estimates) == FORECAST_QUARTERS
+    assert list(model.drivers.columns) == actuals + estimates
+    period = actuals[-1]
+    quarter = period[:-1]
+    revenue = model.reported_series("revenue", "Q").set_index("period")["val"][quarter] / 1e6
     power = model.disclosed.set_index(["kpi", "period"])["value"]
     assert model.drivers.loc["revenue_usd_m", period] == pytest.approx(revenue)
-    assert model.drivers.loc["active_power_mw_end", period] == power["active_power_mw", period]
+    assert model.drivers.loc["active_power_mw_end", period] == power["active_power_mw", quarter]
+    assert model.drivers.loc["cash_end_usd_m", period] == pytest.approx(
+        model.reported_series("cash", "Q").set_index("period")["val"][quarter] / 1e6
+    )
     average = model.drivers.loc["active_power_mw_avg", period]
     assert model.outputs.loc["revenue_per_mw_year_usd_m", period] == pytest.approx(
         revenue * 4 / average
@@ -510,18 +526,158 @@ def test_coreweave_history_ties_to_reported_and_disclosed_figures() -> None:
         model.outputs.loc["cash_margin_per_gpu_hour", period]
         - model.outputs.loc["capital_charge_per_gpu_hour", period]
     )
-    facts = {
-        "active_power_mw_end",
-        "contracted_power_gw",
-        "revenue_backlog_usd_bn",
+    # Rows with no formula at all: the repayment schedule, and plugs that are zero in estimates.
+    pasted = {
         "hours_in_quarter",
-        "revenue_usd_m",
-        "adjusted_ebitda_usd_m",
-        "capex_usd_m",
+        "debt_repaid_usd_m",
+        "other_deferred_revenue_movements_usd_m",
+        "other_debt_movements_usd_m",
+        "other_financing_usd_m",
     }
-    assert set(model.drivers.attrs["formulas"]) == set(model.drivers.index) - facts
+    assert set(model.drivers.attrs["formulas"]) == set(model.drivers.index) - pasted
+    assert "sensitivities" in model.to_frames()
+    assert "disclosed" in model.to_frames()
+    assert set(model.drivers.attrs["formula_starts"]) == FORMULA_FROM_FORECAST
+    assert set(model.drivers.attrs["formula_starts"].values()) == {estimates[0]}
     assert set(model.outputs.attrs["formulas"]) == set(model.outputs.index)
     assert list(model.inputs.columns) == list(INPUT_COLUMNS)
+
+
+def test_coreweave_forecast_roll_forwards_tie() -> None:
+    model = CoreWeave()
+    model.load_data()
+    model.build()
+    d, o = model.drivers, model.outputs
+    register = load_assumptions("CRWV").set_index("name")["value"]
+    cols = list(d.columns)
+    estimates = [c for c in cols if c.endswith("E")]
+    # Every column after the first: the balances roll forward through the flows shown on the
+    # sheet. In actual columns the "other movements" plugs carry whatever the reported balance
+    # moved by beyond the cash-flow lines, so the identity holds there too.
+    for prev, cur in zip(cols[:-1], cols[1:], strict=True):
+        assert d.loc["debt_principal_end_usd_m", cur] == pytest.approx(
+            d.loc["debt_principal_end_usd_m", prev]
+            + d.loc["debt_drawn_usd_m", cur]
+            - d.loc["debt_repaid_usd_m", cur]
+            + d.loc["other_debt_movements_usd_m", cur]
+        )
+        assert d.loc["deferred_revenue_end_usd_m", cur] == pytest.approx(
+            d.loc["deferred_revenue_end_usd_m", prev]
+            + d.loc["deferred_revenue_change_usd_m", cur]
+            + d.loc["other_deferred_revenue_movements_usd_m", cur]
+        )
+        assert d.loc["cash_end_usd_m", cur] == pytest.approx(
+            d.loc["cash_end_usd_m", prev]
+            + d.loc["cfo_usd_m", cur]
+            - d.loc["capex_usd_m", cur]
+            + d.loc["debt_drawn_usd_m", cur]
+            - d.loc["debt_repaid_usd_m", cur]
+            + d.loc["other_financing_usd_m", cur]
+            + d.loc["funding_required_usd_m", cur]
+        )
+        assert d.loc["cfo_usd_m", cur] == pytest.approx(
+            d.loc["adjusted_ebitda_usd_m", cur]
+            - d.loc["interest_on_debt_usd_m", cur]
+            + d.loc["deferred_revenue_change_usd_m", cur]
+            - d.loc["receivables_build_usd_m", cur]
+            + d.loc["other_operating_cash_usd_m", cur]
+        )
+        if cur.endswith("E"):
+            assert d.loc["funding_required_usd_m", cur] >= 0
+            assert d.loc["cash_end_usd_m", cur] >= register["minimum_cash_usd_bn"] * 1000 - 1e-6
+            assert d.loc["active_power_mw_added", cur] == register["mw_added_per_quarter"]
+            assert d.loc["contracted_power_mw_added", cur] == register["mw_contracted_per_quarter"]
+            # Net debt raised is the register's share of capex; maturities are refinanced.
+            assert d.loc["debt_drawn_usd_m", cur] - d.loc[
+                "debt_repaid_usd_m", cur
+            ] == pytest.approx(d.loc["capex_usd_m", cur] * register["debt_share_of_capex"])
+            assert d.loc["pipeline_gw", cur] >= 0, "the plan must not activate more than it signed"
+        assert o.loc["free_cash_flow_usd_m", cur] == pytest.approx(
+            d.loc["cfo_usd_m", cur] - d.loc["capex_usd_m", cur]
+        )
+    # The maturity ladder: the first year's remainder is split over its remaining quarters.
+    last_actual = [c for c in cols if c.endswith("A")][-1][:-1]
+    due = model.disclosed.set_index(["kpi", "period"])["value"]["debt_principal_due_usd_m"]
+    first_e = estimates[0]
+    assert d.loc["debt_repaid_usd_m", first_e] == pytest.approx(
+        due[first_e[:4]] / (4 - int(last_actual[5]))
+    )
+    following_year = str(int(first_e[:4]) + 1)
+    assert d.loc["debt_repaid_usd_m", f"{following_year}Q1E"] == pytest.approx(
+        due[following_year] / 4
+    )
+    assert o.loc["cumulative_funding_required_usd_m", cols[-1]] == pytest.approx(
+        d.loc["funding_required_usd_m", estimates].sum()
+    )
+    sens = model.extra_frames["sensitivities"]
+    assert sens.index[0] == "base case" and (sens["external_funding_usd_m"] >= 0).all()
+    assert sens.loc["base case", "external_funding_usd_m"] == pytest.approx(
+        o.loc["cumulative_funding_required_usd_m", cols[-1]]
+    )
+
+
+def test_coreweave_guards_against_bad_history(tmp_path: Path) -> None:
+    base = CoreWeave()
+    base.load_data()
+    # A gap in the actuals would make every @prev formula on the sheet point at the wrong
+    # quarter, so the model refuses rather than exporting a plausible-looking workbook.
+    gappy = CoreWeave()
+    gappy.load_data()
+    gappy.disclosed = gappy.disclosed[
+        ~(
+            (gappy.disclosed["kpi"] == "adjusted_ebitda_usd_m")
+            & (gappy.disclosed["period"] == "2025Q3")
+        )
+    ]
+    with pytest.raises(ValueError, match="not contiguous"):
+        gappy.build()
+    # A maturity ladder from an older filing would double count repayments.
+    stale = CoreWeave()
+    stale.load_data()
+    ladder = stale.disclosed["kpi"] == "debt_principal_due_usd_m"
+    stale.disclosed.loc[ladder, "filed"] = "2026-02-26"
+    with pytest.raises(ValueError, match="maturity ladder"):
+        stale.build()
+    # A missing opening balance would become a zero in Excel and silently corrupt the forecast.
+    blank = CoreWeave()
+    blank.load_data()
+    blank.disclosed = blank.disclosed[
+        ~(
+            (blank.disclosed["kpi"] == "revenue_backlog_usd_bn")
+            & (blank.disclosed["period"] == "2026Q2")
+        )
+    ]
+    with pytest.raises(ValueError, match="lacks"):
+        blank.build()
+
+
+def test_payback_with_prepayment_follows_the_end_of_contract_credit() -> None:
+    # Revenue 3/h, margin 2/h, price 30k, prepayment 10k on a 4-year contract. The credit
+    # window is 10k / (3 x 8760) = 0.38 years at the end. Cash payback lands at 1.14 years,
+    # inside the billing period, so the company's definition IS the cash payback.
+    company, strict = payback_with_prepayment(30_000, 3.0, 2.0, 10_000, 4)
+    assert company == strict == pytest.approx(20_000 / (2.0 * HOURS_PER_YEAR))
+    assert company < 30_000 / (2.0 * HOURS_PER_YEAR)
+    # Margin 0.5/h: 20k / 4,380 = 4.57 years, past the window. During the window (0.38 y) the
+    # GPU pays costs (2.5/h) without billing; the deficit at contract end is repaid at 0.5/h.
+    company, strict = payback_with_prepayment(30_000, 3.0, 0.5, 10_000, 4)
+    window = 10_000 / (3.0 * HOURS_PER_YEAR)
+    deficit = 20_000 - 0.5 * HOURS_PER_YEAR * (4 - window) + 2.5 * HOURS_PER_YEAR * window
+    assert strict == pytest.approx(4 + deficit / (0.5 * HOURS_PER_YEAR))
+    assert company < strict
+    # Over a whole contract the prepayment is cash-neutral, so strict equals gross then.
+    assert strict == pytest.approx(30_000 / (0.5 * HOURS_PER_YEAR))
+    # No prepayment: both agree with gross. No cash margin: never.
+    gross = 30_000 / (2.0 * HOURS_PER_YEAR)
+    assert payback_with_prepayment(30_000, 3.0, 2.0, 0.0, 4) == pytest.approx((gross, gross))
+    assert payback_with_prepayment(30_000, 3.0, 0.0, 10_000, 4) == (math.inf, math.inf)
+
+
+def test_scheduled_repayment_spreads_the_ladder() -> None:
+    due = pd.Series({"2026": 4000.0, "2027": 6000.0}, dtype="float64")
+    assert _scheduled_repayment(due, "2026Q3", "2026Q2") == 2000.0
+    assert _scheduled_repayment(due, "2027Q2", "2026Q2") == 1500.0
+    assert _scheduled_repayment(due, "2029Q1", "2026Q2") == 0.0
 
 
 def test_coreweave_quarter_helpers() -> None:
@@ -561,7 +717,16 @@ def test_coreweave_workbook_formulas_recompute_to_the_python_values(tmp_path: Pa
         for name, dn in wb.defined_names.items()
     }
 
+    memo: dict[tuple[str, str], float] = {}
+
     def cell_value(sheet: str, ref: str) -> float:
+        # Every estimate column refers to the previous one, so without a cache the
+        # evaluation is exponential in the number of periods.
+        if (sheet, ref) not in memo:
+            memo[(sheet, ref)] = _evaluate(sheet, ref)
+        return memo[(sheet, ref)]
+
+    def _evaluate(sheet: str, ref: str) -> float:
         raw = wb[sheet][ref].value
         if raw is None:
             return math.nan
@@ -569,12 +734,22 @@ def test_coreweave_workbook_formulas_recompute_to_the_python_values(tmp_path: Pa
             return float(raw)
         expr = raw[1:].replace("^", "**")
         expr = re.sub(r"IF\(", "_if(", expr)
+        expr = re.sub(r"MAX\(", "max(", expr)
+        expr = re.sub(r"MIN\(", "min(", expr)
+        expr = re.sub(r"AND\(", "_and(", expr)
         expr = re.sub(r"(Drivers|Outputs)!([A-Z]+[0-9]+)", r'_cell("\1","\2")', expr)
         expr = re.sub(
             r"(?<![A-Za-z_\"])([A-Z]+[0-9]+)(?![A-Za-z_\"(])", rf'_cell("{sheet}","\1")', expr
         )
         expr = re.sub(r"(?<![=<>])=(?!=)", "==", expr)
-        scope = {"_cell": cell_value, "_if": lambda c, a, b: a if c else b, **names}
+        scope = {
+            "_cell": cell_value,
+            "_if": lambda c, a, b: a if c else b,
+            "_and": lambda *c: all(c),
+            "max": max,
+            "min": min,
+            **names,
+        }
         return float(eval(expr, {"__builtins__": {}}, scope))  # noqa: S307 - our own formulas
 
     for sheet, frame in (("Drivers", model.drivers), ("Outputs", model.outputs)):
@@ -791,8 +966,8 @@ def test_built_subclass_round_trips_through_to_xlsx(tmp_path: Path) -> None:
     model.build()
 
     frames = model.to_frames()
-    assert list(frames) == [*FRAME_ORDER, "reported"]
-    assert frames["reported"] is model.reported
+    assert list(frames) == [*FRAME_ORDER, "reported", "disclosed"]
+    assert frames["reported"] is model.reported and frames["disclosed"] is model.disclosed
     assert fingerprint(frames) == fingerprint(model.to_frames())
     assert model.summary()["model_status"] == "built"
 
@@ -800,7 +975,7 @@ def test_built_subclass_round_trips_through_to_xlsx(tmp_path: Path) -> None:
     assert out == tmp_path / "toy.xlsx" and out.is_file()
 
     wb = load_workbook(out)
-    assert wb.sheetnames == ["README", "Inputs", "Drivers", "Outputs", "Reported"]
+    assert wb.sheetnames == ["README", "Inputs", "Drivers", "Outputs", "Disclosed", "Reported"]
     inputs = wb["Inputs"]
     assert inputs["A2"].value == "chip_cost" and inputs["B2"].value == 32_000
     assert "in_chip_cost" in wb.defined_names
@@ -815,7 +990,7 @@ def test_built_subclass_round_trips_through_to_xlsx(tmp_path: Path) -> None:
 
 
 def test_built_model_without_reported_data_exports_core_sheets_only(tmp_path: Path) -> None:
-    model = ToyBuilt(processed_dir=tmp_path)
+    model = ToyBuilt(processed_dir=tmp_path, disclosed_dir=tmp_path)
     model.load_data()  # nothing on disk
     model.build()
     assert list(model.to_frames()) == list(FRAME_ORDER)
