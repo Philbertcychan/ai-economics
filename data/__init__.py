@@ -14,6 +14,9 @@ DATA_DIR = REPO_ROOT / "data"
 # workflow commits together with the data change they document.
 RAW_DIR = DATA_DIR / "raw"
 PROCESSED_DIR = DATA_DIR / "processed"  # tidy CSVs derived from raw pulls; committed
+# Figures a company discloses in prose or press releases (active power, backlog) that SEC's
+# structured data does not carry. Read from filings, each row pointing at its source.
+DISCLOSED_DIR = DATA_DIR / "disclosed"
 LAST_REFRESH_DIFF = DATA_DIR / "last_refresh_diff.md"
 
 MODELS_DIR = REPO_ROOT / "models"  # generated .xlsx per company; committed build artifact

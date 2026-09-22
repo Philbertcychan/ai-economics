@@ -46,6 +46,7 @@ from data.edgar import (
     filing_index_url,
     filing_url,
     full_text_search_url,
+    iter_filings,
     load_processed_facts,
     merge_submissions,
     parse_frame,
@@ -1197,3 +1198,65 @@ def test_gpu_price_csv_source(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setenv("GPU_PRICE_PROVIDER", "live")
     with pytest.raises(ValueError, match="GPU_PRICE_PROVIDER"):
         get_gpu_price_source()
+
+
+def test_items_are_parsed_and_stay_out_of_filings_csv() -> None:
+    block = {
+        "accessionNumber": ["0001769628-26-000362", "0001769628-26-000366"],
+        "form": ["8-K", "10-Q"],
+        "filingDate": ["2026-08-11", "2026-08-12"],
+        "primaryDocument": ["crwv-20260811.htm", "crwv-20260630.htm"],
+        "items": ["2.02,9.01", ""],
+    }
+    earnings, quarterly = list(iter_filings("1769628", block))
+    assert earnings.items == "2.02,9.01" and quarterly.items is None
+    assert "items" not in earnings.to_row(), "filings.csv keeps its eight columns"
+
+
+def test_filing_exhibits_and_download_document(tmp_path: Path) -> None:
+    filing = Filing(
+        cik="0001769628",
+        accession="0001769628-26-000362",
+        form="8-K",
+        filing_date="2026-08-11",
+        report_date="2026-08-11",
+        primary_document="crwv-20260811.htm",
+        description=None,
+        size=None,
+        is_xbrl=True,
+        items="2.02,9.01",
+    )
+    index = {
+        "directory": {
+            "item": [
+                {"name": "0001769628-26-000362-index.html"},
+                {"name": "coreweave2q26earningspress.htm"},
+                {"name": "crwv-20260811.htm"},
+                {"name": "R1.htm"},
+                {"name": "crwv-20260811_lab.xml"},
+                {"name": "Show.js"},
+            ]
+        }
+    }
+    calls: list[str] = []
+
+    def fetch(url: str, headers: dict[str, str]) -> bytes:
+        calls.append(url)
+        if url.endswith("index.json"):
+            return json.dumps(index).encode()
+        return b"<html>press release</html>"
+
+    client = EdgarClient(tmp_path, fetch=fetch, sleep=lambda s: None, today=dt.date(2026, 9, 21))
+    assert client.filing_exhibits(filing) == ["coreweave2q26earningspress.htm"]
+    assert calls == [
+        "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000362/index.json"
+    ]
+
+    path = client.download_document("CRWV", filing, "coreweave2q26earningspress.htm")
+    assert path.read_bytes() == b"<html>press release</html>"
+    assert path.parent.name == filing.accession and calls[-1].endswith(
+        "/000176962826000362/coreweave2q26earningspress.htm"
+    )
+    before = len(calls)
+    assert client.download_document("CRWV", filing, "coreweave2q26earningspress.htm") == path
+    assert len(calls) == before, "second request is served from the cache"

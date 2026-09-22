@@ -100,35 +100,48 @@ operators quote it, before financing and depreciation, so that it can be compare
 disclosed figures. CoreWeave's S-1 (p.97) gives about 2.5 years, measured through adjusted
 EBITDA per GPU and net of customer prepayments.
 
-### First run on CoreWeave, and the first puzzle
+### What CoreWeave's own numbers say, quarter by quarter
 
-Every input below comes from the S-1 and sits in
-[assumptions/CRWV.csv](../assumptions/CRWV.csv) with its page and arithmetic.
+Code: [companies/coreweave.py](../companies/coreweave.py). The first version of the company
+model is a HISTORY, not a forecast: one column per reported quarter, built from three sources
+that are all visible on the workbook. Revenue and capex come from SEC's structured data.
+Active power, contracted power, revenue backlog and adjusted EBITDA come from the company's
+own press releases, read into [data/disclosed/CRWV.csv](../data/disclosed/CRWV.csv) with a
+link to each source. The assumptions register supplies what neither gives.
 
-| Per installed GPU-hour, Q4 2024 | USD | Where it comes from |
-|---|---|---|
-| Revenue | 1.35 | Q4 revenue / (250,000 GPUs x 2,208 hours) |
-| Cash cost | 0.47 | revenue less adjusted EBITDA, same basis |
-| Cash margin | 0.88 | a 65% adjusted EBITDA margin |
-| Capital charge | 0.99 | $36,586 per GPU, 6 years, 11% |
-| **Fully loaded margin** | **-0.11** | |
-| Payback | 4.7 years | against about 2.5 disclosed |
+The model measures the business two ways.
 
-On fleet averages, the GPUs do not quite earn an 11% cost of capital, and payback is almost
-twice what the company reports. Both cannot be the whole truth. That gap is the first real
-analytical question in this project, and working it out is how the model gets better.
-Candidate explanations, to be tested against later filings:
+**Per megawatt of active power** uses no assumptions at all. Capacity is averaged over the
+quarter (opening and closing MW), because revenue is earned on the fleet that was running, not
+the fleet at quarter end:
 
-1. **Timing.** 250,000 is the year-end count. GPUs installed late in Q4 earned little or no
-   revenue in the quarter, so revenue per GPU is understated. The 10-Qs give quarterly
-   capacity, which allows average-fleet figures.
-2. **Mix.** The fleet average includes older, cheaper-to-rent GPUs. The 2.5 years describes
-   committed contracts, which are mostly on newer GPUs at higher prices.
-3. **Prepayments.** Customers pay 15% to 25% of contract value up front (p.96). The company
-   nets this off the investment; the engine does not yet.
-4. **Cost base.** Technology equipment includes networking and storage, not only GPUs, so
-   cost per GPU is overstated as a measure of what a GPU contract has to repay.
-5. **The company's figure is forward-looking** and rests on its own assumptions.
+| Annualised, per MW of average active power | 2025Q1 | 2025Q2 | 2025Q3 | 2025Q4 | 2026Q1 | 2026Q2 |
+|---|---|---|---|---|---|---|
+| Revenue, $m | 10.1 | 10.9 | 10.3 | 8.7 | 9.0 | 8.2 |
+| Adjusted EBITDA, $m | 6.2 | 6.8 | 6.3 | 5.0 | 5.0 | 4.8 |
+| Capex per MW added, cumulative, $m | 23.4 | 35.1 | 27.2 | 21.0 | 28.1 | 21.4 |
+| Payback per MW, years | 3.8 | 5.2 | 4.3 | 4.2 | 5.6 | 4.4 |
+
+**Per installed GPU-hour** converts MW to GPUs with one assumption (kW per GPU) and runs the
+shared engine, so CoreWeave can be compared with anything else built on it. Revenue per
+installed GPU-hour has drifted from about $1.70 to about $1.36, and the fully loaded margin
+turned negative in the second half of 2025.
+
+Three things a reader should take from this table.
+
+1. **Revenue per MW is falling, from about $10m to about $8m a year.** Either newer capacity
+   earns less per MW (denser GPUs need more power per dollar of rent, or new sites take a
+   quarter to fill), or the fleet is filling more slowly than it is being built. The backlog,
+   at 10 to 12 years of current revenue, says the demand is contracted. The gap is timing.
+2. **Payback on the company's own cash flows is 4 to 5 years, against the 2.5 it discloses.**
+   The disclosed figure is per GPU, on committed contracts, net of customer prepayments of 15%
+   to 25% of contract value. The model's figure is per MW of everything: GPUs, networking,
+   storage, and the capex for capacity that is not yet earning. Both are right about different
+   things. The prepayment effect alone explains a large part of the gap, and adding it to the
+   model is the next refinement.
+3. **Capex per MW added swings between $21m and $35m** because capex lands before the MW it
+   buys goes live. Cumulative figures smooth this, but a forecast needs an explicit lag between
+   spending and capacity, which is why the forecast version starts from the capacity ramp.
 
 The habit to take from this: compute the same quantity two ways, from the bottom up and from
 what the company discloses. Where they disagree, there is something to learn.

@@ -12,6 +12,7 @@ carry no financial meaning and exist only to push frames through ``to_xlsx``.
 from __future__ import annotations
 
 import csv
+import math
 import re
 from collections.abc import Iterable
 from pathlib import Path
@@ -20,6 +21,7 @@ from typing import Any
 import pandas as pd
 import pytest
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 
 from companies import (
     FRAME_ORDER,
@@ -31,8 +33,8 @@ from companies import (
     Nebius,
     get_model,
 )
-from companies.assumptions import engine_inputs, load_assumptions
 from companies.base import FILINGS_CSV_COLUMNS
+from companies.coreweave import _is_next_quarter, hours_in_quarter
 from data import PROCESSED_DIR
 from data.edgar import COMPANIES, FACT_COLUMNS, SERIES_COLUMNS, Filing, iter_filings
 from engine.unit_economics import (
@@ -40,7 +42,6 @@ from engine.unit_economics import (
     INPUT_FIELDS,
     INPUT_UNITS,
     GPUEconomicsInputs,
-    breakdown,
 )
 from scripts.export_xlsx import INPUT_COLUMNS, INPUT_NAME_RE, fingerprint
 from scripts.export_xlsx import main as export_main
@@ -487,25 +488,63 @@ def test_coreweave_needs_its_assumptions_register(tmp_path: Path) -> None:
         CoreWeave(assumptions_dir=tmp_path).build()
 
 
-def test_coreweave_v0_matches_the_engine_and_declares_every_formula() -> None:
-    # Built from the committed register: values come from the engine, and every line also
-    # carries an Excel formula so the workbook can be traced cell by cell.
+def test_coreweave_history_ties_to_reported_and_disclosed_figures() -> None:
+    # Built from the committed data: each quarter's revenue is the reported XBRL figure, its
+    # capacity the disclosed one, and the per-MW lines are plain ratios of the two. Every line
+    # that is not a fact carries an Excel formula so the workbook can be traced cell by cell.
     model = CoreWeave()
+    model.load_data()
     model.build()
-    register = load_assumptions("CRWV")
-    expected = breakdown(engine_inputs(register), "rental")
-    period = model.drivers.columns[0]
-    for name in ("capital_cost_per_gpu_hour", "cash_cost_per_gpu_hour", "cost_per_gpu_hour"):
-        assert model.drivers.loc[name, period] == pytest.approx(expected[name])
+    assert list(model.drivers.columns) == list(model.outputs.columns)
+    assert len(model.drivers.columns) >= 4
+    period = model.drivers.columns[-1]
+    revenue = model.reported_series("revenue", "Q").set_index("period")["val"][period] / 1e6
+    power = model.disclosed.set_index(["kpi", "period"])["value"]
+    assert model.drivers.loc["revenue_usd_m", period] == pytest.approx(revenue)
+    assert model.drivers.loc["active_power_mw_end", period] == power["active_power_mw", period]
+    average = model.drivers.loc["active_power_mw_avg", period]
+    assert model.outputs.loc["revenue_per_mw_year_usd_m", period] == pytest.approx(
+        revenue * 4 / average
+    )
     assert model.outputs.loc["margin_per_gpu_hour", period] == pytest.approx(
-        expected["margin_per_gpu_hour"]
+        model.outputs.loc["cash_margin_per_gpu_hour", period]
+        - model.outputs.loc["capital_charge_per_gpu_hour", period]
     )
-    assert model.outputs.loc["payback_years", period] == pytest.approx(
-        expected["payback_months"] / 12
-    )
-    assert set(model.drivers.attrs["formulas"]) == set(model.drivers.index)
+    facts = {
+        "active_power_mw_end",
+        "contracted_power_gw",
+        "revenue_backlog_usd_bn",
+        "hours_in_quarter",
+        "revenue_usd_m",
+        "adjusted_ebitda_usd_m",
+        "capex_usd_m",
+    }
+    assert set(model.drivers.attrs["formulas"]) == set(model.drivers.index) - facts
     assert set(model.outputs.attrs["formulas"]) == set(model.outputs.index)
     assert list(model.inputs.columns) == list(INPUT_COLUMNS)
+
+
+def test_coreweave_quarter_helpers() -> None:
+    assert hours_in_quarter("2025Q1") == 24 * 90 and hours_in_quarter("2024Q1") == 24 * 91
+    assert hours_in_quarter("2025Q3") == 24 * 92
+    assert _is_next_quarter("2025Q4", "2026Q1") and _is_next_quarter("2025Q1", "2025Q2")
+    assert not _is_next_quarter("2025Q1", "2025Q3") and not _is_next_quarter("2025Q4", "2026Q2")
+
+
+def test_coreweave_needs_a_complete_quarter(tmp_path: Path) -> None:
+    # Capacity alone is not enough: with no revenue, EBITDA and capex for the same quarter
+    # the model says so instead of producing an empty sheet.
+    header = "period,kpi,value,unit,qualifier,form,filed,accession,page,url"
+    rows = [
+        "2025Q1,active_power_mw,420,MW,,8-K,2025-05-14,acc,,https://www.sec.gov/x",
+        "2025Q2,active_power_mw,470,MW,,8-K,2025-08-12,acc,,https://www.sec.gov/y",
+    ]
+    text = "\n".join([header, *rows]) + "\n"
+    (tmp_path / "CRWV.csv").write_text(text, encoding="utf-8")
+    model = CoreWeave(processed_dir=tmp_path, disclosed_dir=tmp_path)
+    model.load_data()
+    with pytest.raises(NotImplementedError, match="no quarter has"):
+        model.build()
 
 
 def test_coreweave_workbook_formulas_recompute_to_the_python_values(tmp_path: Path) -> None:
@@ -513,6 +552,7 @@ def test_coreweave_workbook_formulas_recompute_to_the_python_values(tmp_path: Pa
     # or cross-sheet cell references only) and compare with what Python computed. This is the
     # check that the formulas a finance reader sees say the same thing as the engine.
     model = CoreWeave()
+    model.load_data()
     model.build()
     path = model.to_xlsx(tmp_path / "CRWV.xlsx")
     wb = load_workbook(path)
@@ -523,6 +563,8 @@ def test_coreweave_workbook_formulas_recompute_to_the_python_values(tmp_path: Pa
 
     def cell_value(sheet: str, ref: str) -> float:
         raw = wb[sheet][ref].value
+        if raw is None:
+            return math.nan
         if not (isinstance(raw, str) and raw.startswith("=")):
             return float(raw)
         expr = raw[1:].replace("^", "**")
@@ -537,7 +579,13 @@ def test_coreweave_workbook_formulas_recompute_to_the_python_values(tmp_path: Pa
 
     for sheet, frame in (("Drivers", model.drivers), ("Outputs", model.outputs)):
         for row, item in enumerate(frame.index, start=2):
-            assert cell_value(sheet, f"C{row}") == pytest.approx(frame.iloc[row - 2, 0]), item
+            for col, period in enumerate(frame.columns):
+                expected = frame.loc[item, period]
+                if math.isnan(expected):
+                    continue  # blank cells (a KPI the company did not disclose that quarter)
+                letter = get_column_letter(3 + col)
+                got = cell_value(sheet, f"{letter}{row}")
+                assert got == pytest.approx(expected, rel=1e-9), (item, period)
 
 
 @pytest.mark.parametrize("cls", list(REGISTRY.values()), ids=list(REGISTRY))

@@ -1,41 +1,11 @@
-# Refresh 2026-09-21T21:37:36Z
+# Refresh 2026-09-22T00:08:41Z
 
-7 companies: no new filings, 0 documents downloaded, models: 5 no-model, 1 pending, 1 unchanged, 0 errors. Finished 2026-09-21T21:37:46Z.
+1 company: no new filings, 0 documents downloaded, models: 1 changed, 0 errors. Finished 2026-09-22T00:08:42Z.
 
 ## CRWV
 
 - New filings: none (10 tracked)
-- Model: unchanged
-
-## NBIS
-
-- New filings: none (262 tracked)
-- Model: pending
-
-## NVDA
-
-- New filings: none (108 tracked)
-- Model: no-model
-
-## MSFT
-
-- New filings: none (131 tracked)
-- Model: no-model
-
-## GOOGL
-
-- New filings: none (44 tracked)
-- Model: no-model
-
-## AMZN
-
-- New filings: none (114 tracked)
-- Model: no-model
-
-## META
-
-- New filings: none (57 tracked)
-- Model: no-model
+- Model: changed - changed line items: revenue_per_mw_year_usd_m, ebitda_per_mw_year_usd_m, adjusted_ebitda_margin, capex_per_mw_added_usd_m, payback_years_per_mw, backlog_years_of_revenue, revenue_per_gpu_hour, cash_cost_per_gpu_hour, cash_margin_per_gpu_hour, capital_charge_per_gpu_hour, margin_per_gpu_hour, payback_years_per_gpu, disclosed_payback_years, cash_margin_share, breakeven_price_per_gpu_hour, payback_years, payback_gap_years
 
 ## Site
 

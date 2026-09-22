@@ -44,17 +44,23 @@ Philbert's decisions:
 
 Claude's build list, in order:
 
-- [ ] Explain the payback gap: the engine gives 4.7 years on fleet averages against about 2.5
-      disclosed (see "First run on CoreWeave" in `docs/modeling-approach.md`). Needs quarterly
-      capacity figures from the 10-Qs and 10-K.
-- [ ] Extract quarterly KPIs from CoreWeave's 10-Qs and 10-K (active power, contracted power,
-      backlog, GPUs, capex guidance), quote-verified like the S-1 notes.
-- [ ] CoreWeave operating model v0 in `companies/coreweave.py`: capacity, revenue, cost, capex,
-      financing, cash, calibrated to reported history; workbook in `models/CRWV.xlsx`.
+- [x] Quarterly history for CoreWeave (`companies/coreweave.py` v1): active power, contracted
+      power, backlog and adjusted EBITDA read from the earnings releases into
+      `data/disclosed/CRWV.csv`; revenue and capex from XBRL; per-MW and per-GPU-hour lines
+      for six quarters. Result: payback on the company's own cash flows is 4 to 5 years per MW
+      against the 2.5 it discloses per GPU; the guide explains the gap.
+- [ ] Customer prepayments in the payback line (15% to 25% of contract value, S-1 p.96), the
+      largest known difference between the model's payback and the disclosed one.
+- [ ] Forecast columns (`E`): capacity ramp from contracted power, revenue per MW, capex per MW
+      with a spend-to-live lag, debt drawn against contracts, interest, cash. Calibrated to the
+      six reported quarters first.
 - [ ] Signals ledger v0: contracts, build-outs, energy, statements, rental prices, each entry
       sourced, dated, rated for confidence and mapped to an assumption.
-- [ ] External sources for the inputs the S-1 cannot give: electricity price, data-centre lease
-      cost per kW, rental prices by GPU generation, token throughput and prices.
+- [ ] External sources for the inputs the filings cannot give: electricity price, data-centre
+      lease cost per kW, rental prices by GPU generation, token throughput and prices.
+- [ ] Public dashboard with Philbert's signed-off assumptions as the default and toggles for
+      readers to change them (Philbert's request, 2026-09-21). Needs the engine mirrored in the
+      browser and checked against Python with shared test cases; after the forecast exists.
 - [ ] First writeup with a Position and a falsifier; first row in `calls.md`.
 
 ## Stage 2 — Sept 28 – Oct 4, 2026: second neocloud and the supply side

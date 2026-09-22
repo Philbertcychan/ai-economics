@@ -1,0 +1,35 @@
+period,kpi,value,unit,qualifier,form,filed,accession,page,url
+2023Q4,active_power_mw,70,MW,approximately,10-K,2026-03-02,0001769628-26-000104,5,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm
+2024Q4,active_power_mw,360,MW,approximately,10-K,2026-03-02,0001769628-26-000104,5,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm
+2025Q1,active_power_mw,420,MW,approximately,8-K EX-99.1,2025-05-14,0001769628-25-000010,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000010/coreweave1q25earningspress.htm
+2025Q2,active_power_mw,470,MW,approximately,8-K EX-99.1,2025-08-12,0001769628-25-000039,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000039/coreweave2q25earningspress.htm
+2025Q3,active_power_mw,590,MW,approximately,8-K EX-99.1,2025-11-10,0001769628-25-000059,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000059/coreweave3q25earningspress.htm
+2025Q4,active_power_mw,850,MW,more than,8-K EX-99.1,2026-02-26,0001769628-26-000094,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000094/coreweave4q25earningspress.htm
+2026Q1,active_power_mw,1000,MW,more than,8-K EX-99.1,2026-05-07,0001769628-26-000220,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000220/coreweave1q26earningspress.htm
+2026Q2,active_power_mw,1500,MW,,8-K EX-99.1,2026-08-11,0001769628-26-000362,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000362/coreweave2q26earningspress.htm
+2024Q4,adjusted_ebitda_usd_m,486.114,USD m,,S-1,2025-03-03,0001193125-25-044231,115,https://www.sec.gov/Archives/edgar/data/1769628/000119312525044231/d899798ds1.htm
+2025Q1,adjusted_ebitda_usd_m,606.131,USD m,,8-K EX-99.1,2025-05-14,0001769628-25-000010,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000010/coreweave1q25earningspress.htm
+2025Q2,adjusted_ebitda_usd_m,753.169,USD m,,8-K EX-99.1,2025-08-12,0001769628-25-000039,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000039/coreweave2q25earningspress.htm
+2025Q3,adjusted_ebitda_usd_m,838.124,USD m,,8-K EX-99.1,2025-11-10,0001769628-25-000059,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000059/coreweave3q25earningspress.htm
+2025Q4,adjusted_ebitda_usd_m,898,USD m,,8-K EX-99.1,2026-02-26,0001769628-26-000094,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000094/coreweave4q25earningspress.htm
+2026Q1,adjusted_ebitda_usd_m,1157,USD m,,8-K EX-99.1,2026-05-07,0001769628-26-000220,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000220/coreweave1q26earningspress.htm
+2026Q2,adjusted_ebitda_usd_m,1510,USD m,,8-K EX-99.1,2026-08-11,0001769628-26-000362,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000362/coreweave2q26earningspress.htm
+2024Q4,contracted_power_gw,1.3,GW,approximately,S-1,2025-03-03,0001193125-25-044231,2,https://www.sec.gov/Archives/edgar/data/1769628/000119312525044231/d899798ds1.htm
+2025Q1,contracted_power_gw,1.6,GW,approximately,8-K EX-99.1,2025-05-14,0001769628-25-000010,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000010/coreweave1q25earningspress.htm
+2025Q2,contracted_power_gw,2.2,GW,,8-K EX-99.1,2025-08-12,0001769628-25-000039,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000039/coreweave2q25earningspress.htm
+2025Q3,contracted_power_gw,2.9,GW,approximately,8-K EX-99.1,2025-11-10,0001769628-25-000059,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000059/coreweave3q25earningspress.htm
+2025Q4,contracted_power_gw,3.1,GW,approximately,8-K EX-99.1,2026-02-26,0001769628-26-000094,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000094/coreweave4q25earningspress.htm
+2026Q1,contracted_power_gw,3.5,GW,more than,8-K EX-99.1,2026-05-07,0001769628-26-000220,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000220/coreweave1q26earningspress.htm
+2026Q2,contracted_power_gw,3.7,GW,approximately,8-K EX-99.1,2026-08-11,0001769628-26-000362,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000362/coreweave2q26earningspress.htm
+2023Q4,data_centers,10,count,,10-K,2026-03-02,0001769628-26-000104,5,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm
+2024Q4,data_centers,32,count,,10-K,2026-03-02,0001769628-26-000104,5,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm
+2025Q4,data_centers,43,count,,10-K,2026-03-02,0001769628-26-000104,5,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000104/crwv-20251231.htm
+2024Q4,gpus_installed,250000,count,more than,S-1,2025-03-03,0001193125-25-044231,2,https://www.sec.gov/Archives/edgar/data/1769628/000119312525044231/d899798ds1.htm
+2025Q1,revenue_backlog_usd_bn,25.9,USD bn,,8-K EX-99.1,2025-05-14,0001769628-25-000010,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000010/coreweave1q25earningspress.htm
+2025Q2,revenue_backlog_usd_bn,30.1,USD bn,,8-K EX-99.1,2025-08-12,0001769628-25-000039,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000039/coreweave2q25earningspress.htm
+2025Q3,revenue_backlog_usd_bn,55.6,USD bn,,8-K EX-99.1,2025-11-10,0001769628-25-000059,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000059/coreweave3q25earningspress.htm
+2025Q4,revenue_backlog_usd_bn,66.8,USD bn,,8-K EX-99.1,2026-02-26,0001769628-26-000094,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000094/coreweave4q25earningspress.htm
+2026Q1,revenue_backlog_usd_bn,99.4,USD bn,,8-K EX-99.1,2026-05-07,0001769628-26-000220,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000220/coreweave1q26earningspress.htm
+2026Q2,revenue_backlog_usd_bn,104,USD bn,approximately,8-K EX-99.1,2026-08-11,0001769628-26-000362,,https://www.sec.gov/Archives/edgar/data/1769628/000176962826000362/coreweave2q26earningspress.htm
+2024Q4,rpo_usd_bn,15.1,USD bn,,S-1,2025-03-03,0001193125-25-044231,2,https://www.sec.gov/Archives/edgar/data/1769628/000119312525044231/d899798ds1.htm
+2025Q1,rpo_usd_bn,14.7,USD bn,,8-K EX-99.1,2025-05-14,0001769628-25-000010,,https://www.sec.gov/Archives/edgar/data/1769628/000176962825000010/coreweave1q25earningspress.htm

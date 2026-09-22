@@ -39,7 +39,8 @@ from typing import Any, Protocol, runtime_checkable
 import pandas as pd
 
 from companies.assumptions import load_assumptions, to_inputs_frame
-from data import ASSUMPTIONS_DIR, PROCESSED_DIR
+from data import ASSUMPTIONS_DIR, DISCLOSED_DIR, PROCESSED_DIR
+from data.disclosed import load_disclosed
 from data.edgar import (
     COMPANIES,
     EdgarClient,
@@ -134,6 +135,7 @@ class BaseCompanyModel:
         *,
         processed_dir: Path = PROCESSED_DIR,
         assumptions_dir: Path = ASSUMPTIONS_DIR,
+        disclosed_dir: Path = DISCLOSED_DIR,
     ) -> None:
         """Create an empty model.
 
@@ -149,8 +151,10 @@ class BaseCompanyModel:
         self.edgar = edgar
         self.processed_dir = Path(processed_dir)
         self.assumptions_dir = Path(assumptions_dir)
+        self.disclosed_dir = Path(disclosed_dir)
         self.filings: list[Filing] = []
         self.reported: pd.DataFrame | None = None
+        self.disclosed: pd.DataFrame | None = None  # KPIs stated in prose; data/disclosed.py
         self.inputs: pd.DataFrame | None = None
         self.drivers: pd.DataFrame | None = None
         self.outputs: pd.DataFrame | None = None
@@ -159,7 +163,7 @@ class BaseCompanyModel:
     # -- data ---------------------------------------------------------------------------
 
     def load_data(self) -> None:
-        """Fill ``filings``, ``reported`` and ``as_of``; never raises for missing data.
+        """Fill ``filings``, ``reported``, ``disclosed`` and ``as_of``; missing data is allowed.
 
         With an EDGAR client the filings and XBRL facts come from it (live or from its own
         cache). Without one, the processed CSVs written by ``scripts/refresh.py`` are read if
@@ -172,6 +176,7 @@ class BaseCompanyModel:
         else:
             self.filings = self._read_filings_csv()
             self.reported = load_processed_facts(self.ticker, self.processed_dir)
+        self.disclosed = load_disclosed(self.ticker, self.disclosed_dir)
         self.filings.sort(key=lambda f: (f.filing_date, f.accession), reverse=True)
         # ISO dates sort lexicographically, so the newest filing date is the max string.
         self.as_of = max((f.filing_date for f in self.filings if f.filing_date), default=None)

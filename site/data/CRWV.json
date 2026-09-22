@@ -500,53 +500,363 @@
     }
   },
   "outputs": {
-    "cash_margin_per_gpu_hour": {
-      "label": "Cash margin",
-      "unit": "USD/GPU-hour",
+    "revenue_per_mw_year_usd_m": {
+      "label": "Revenue per MW, annualised",
+      "unit": "USD m",
       "points": [
         [
-          "2024Q4",
-          0.8806
+          "2025Q1",
+          10.071794871794872
+        ],
+        [
+          "2025Q2",
+          10.89438202247191
+        ],
+        [
+          "2025Q3",
+          10.299441509433962
+        ],
+        [
+          "2025Q4",
+          8.7328
+        ],
+        [
+          "2026Q1",
+          8.985945945945947
+        ],
+        [
+          "2026Q2",
+          8.24
         ]
       ]
     },
-    "cash_margin_share": {
-      "label": "Cash margin, share of revenue",
+    "ebitda_per_mw_year_usd_m": {
+      "label": "Adjusted EBITDA per MW, annualised",
+      "unit": "USD m",
+      "points": [
+        [
+          "2025Q1",
+          6.216728205128205
+        ],
+        [
+          "2025Q2",
+          6.770058426966292
+        ],
+        [
+          "2025Q3",
+          6.325464150943397
+        ],
+        [
+          "2025Q4",
+          4.988888888888889
+        ],
+        [
+          "2026Q1",
+          5.003243243243244
+        ],
+        [
+          "2026Q2",
+          4.832
+        ]
+      ]
+    },
+    "adjusted_ebitda_margin": {
+      "label": "Adjusted EBITDA margin",
       "unit": "%",
       "points": [
         [
-          "2024Q4",
-          0.6503692762186115
+          "2025Q1",
+          0.6172413441955193
+        ],
+        [
+          "2025Q2",
+          0.6214265676567656
+        ],
+        [
+          "2025Q3",
+          0.6141560341062641
+        ],
+        [
+          "2025Q4",
+          0.571281706770897
+        ],
+        [
+          "2026Q1",
+          0.5567853705486044
+        ],
+        [
+          "2026Q2",
+          0.5864077669902913
+        ]
+      ]
+    },
+    "capex_per_mw_added_usd_m": {
+      "label": "Capex per MW added, cumulative since the first quarter",
+      "unit": "USD m",
+      "points": [
+        [
+          "2025Q1",
+          23.45
+        ],
+        [
+          "2025Q2",
+          35.09090909090909
+        ],
+        [
+          "2025Q3",
+          27.170604347826085
+        ],
+        [
+          "2025Q4",
+          21.038775510204083
+        ],
+        [
+          "2026Q1",
+          28.13125
+        ],
+        [
+          "2026Q2",
+          21.426315789473684
+        ]
+      ]
+    },
+    "payback_years_per_mw": {
+      "label": "Payback per MW: capex per MW / EBITDA per MW",
+      "unit": "years",
+      "points": [
+        [
+          "2025Q1",
+          3.7720806228356576
+        ],
+        [
+          "2025Q2",
+          5.183250553811478
+        ],
+        [
+          "2025Q3",
+          4.295432508897199
+        ],
+        [
+          "2025Q4",
+          4.2171264942502615
+        ],
+        [
+          "2026Q1",
+          5.6226029062229905
+        ],
+        [
+          "2026Q2",
+          4.43425409550366
+        ]
+      ]
+    },
+    "backlog_years_of_revenue": {
+      "label": "Backlog, years of current revenue",
+      "unit": "years",
+      "points": [
+        [
+          "2025Q1",
+          6.593686354378819
+        ],
+        [
+          "2025Q2",
+          6.208745874587459
+        ],
+        [
+          "2025Q3",
+          10.185567856399615
+        ],
+        [
+          "2025Q4",
+          10.624058466674809
+        ],
+        [
+          "2026Q1",
+          11.95861405197305
+        ],
+        [
+          "2026Q2",
+          10.097087378640778
+        ]
+      ]
+    },
+    "revenue_per_gpu_hour": {
+      "label": "Revenue per installed GPU-hour",
+      "unit": "USD/GPU-hour",
+      "points": [
+        [
+          "2025Q1",
+          1.6786324786324782
+        ],
+        [
+          "2025Q2",
+          1.7957772564514136
+        ],
+        [
+          "2025Q3",
+          1.679256767842494
+        ],
+        [
+          "2025Q4",
+          1.4238260869565218
+        ],
+        [
+          "2026Q1",
+          1.4976576576576577
+        ],
+        [
+          "2026Q2",
+          1.358241758241758
+        ]
+      ]
+    },
+    "cash_cost_per_gpu_hour": {
+      "label": "Cash cost per installed GPU-hour",
+      "unit": "USD/GPU-hour",
+      "points": [
+        [
+          "2025Q1",
+          0.642511111111111
+        ],
+        [
+          "2025Q2",
+          0.6798335596987282
+        ],
+        [
+          "2025Q3",
+          0.6479310910582444
+        ],
+        [
+          "2025Q4",
+          0.6104202898550725
+        ],
+        [
+          "2026Q1",
+          0.6637837837837838
+        ],
+        [
+          "2026Q2",
+          0.5617582417582417
+        ]
+      ]
+    },
+    "cash_margin_per_gpu_hour": {
+      "label": "Cash margin per installed GPU-hour",
+      "unit": "USD/GPU-hour",
+      "points": [
+        [
+          "2025Q1",
+          1.0361213675213672
+        ],
+        [
+          "2025Q2",
+          1.1159436967526855
+        ],
+        [
+          "2025Q3",
+          1.0313256767842494
+        ],
+        [
+          "2025Q4",
+          0.8134057971014493
+        ],
+        [
+          "2026Q1",
+          0.8338738738738739
+        ],
+        [
+          "2026Q2",
+          0.7964835164835163
+        ]
+      ]
+    },
+    "capital_charge_per_gpu_hour": {
+      "label": "Capital charge per installed GPU-hour",
+      "unit": "USD/GPU-hour",
+      "points": [
+        [
+          "2025Q1",
+          0.9872229401219857
+        ],
+        [
+          "2025Q2",
+          0.9872229401219857
+        ],
+        [
+          "2025Q3",
+          0.9872229401219857
+        ],
+        [
+          "2025Q4",
+          0.9872229401219857
+        ],
+        [
+          "2026Q1",
+          0.9872229401219857
+        ],
+        [
+          "2026Q2",
+          0.9872229401219857
         ]
       ]
     },
     "margin_per_gpu_hour": {
-      "label": "Fully loaded margin",
+      "label": "Fully loaded margin per installed GPU-hour",
       "unit": "USD/GPU-hour",
       "points": [
         [
-          "2024Q4",
-          -0.10662294012198559
-        ]
-      ]
-    },
-    "breakeven_price_per_gpu_hour": {
-      "label": "Break-even rental price",
-      "unit": "USD/GPU-hour",
-      "points": [
+          "2025Q1",
+          0.04889842739938133
+        ],
         [
-          "2024Q4",
-          1.4606229401219857
+          "2025Q2",
+          0.12872075663069982
+        ],
+        [
+          "2025Q3",
+          0.04410273666226372
+        ],
+        [
+          "2025Q4",
+          -0.1738171430205364
+        ],
+        [
+          "2026Q1",
+          -0.15334906624811184
+        ],
+        [
+          "2026Q2",
+          -0.1907394236384694
         ]
       ]
     },
-    "payback_years": {
-      "label": "Payback, model",
+    "payback_years_per_gpu": {
+      "label": "Payback per GPU (engine)",
       "unit": "years",
       "points": [
         [
-          "2024Q4",
-          4.742770858806313
+          "2025Q1",
+          4.030883011568345
+        ],
+        [
+          "2025Q2",
+          3.7425580075572835
+        ],
+        [
+          "2025Q3",
+          4.0496267205209415
+        ],
+        [
+          "2025Q4",
+          5.134563871007108
+        ],
+        [
+          "2026Q1",
+          5.008532044375511
+        ],
+        [
+          "2026Q2",
+          5.243654051629422
         ]
       ]
     },
@@ -555,18 +865,28 @@
       "unit": "years",
       "points": [
         [
-          "2024Q4",
+          "2025Q1",
           2.5
-        ]
-      ]
-    },
-    "payback_gap_years": {
-      "label": "Payback gap, model less disclosed",
-      "unit": "years",
-      "points": [
+        ],
         [
-          "2024Q4",
-          2.2427708588063133
+          "2025Q2",
+          2.5
+        ],
+        [
+          "2025Q3",
+          2.5
+        ],
+        [
+          "2025Q4",
+          2.5
+        ],
+        [
+          "2026Q1",
+          2.5
+        ],
+        [
+          "2026Q2",
+          2.5
         ]
       ]
     }
@@ -577,14 +897,14 @@
       "value": 36586.0,
       "unit": "USD",
       "source": "S-1 p.F-29, p.2",
-      "note": "[derived; proposed] Technology equipment, gross 9,146,575 thousand divided by more than 250,000 GPUs at Dec 31, 2024. A fleet average that includes servers and networking and excludes construction in progress. Newer GPU generations cost more than this average."
+      "note": "[derived; proposed] Technology equipment, gross 9,146,575 thousand divided by more than 250,000 GPUs at Dec 31, 2024. A fleet average that includes servers and networking and excludes construction in progress. Compare with the model's capex per MW added (Outputs sheet), which is the same idea measured from cash flows."
     },
     {
       "name": "power_draw_kw",
       "value": 1.44,
       "unit": "kW",
       "source": "S-1 p.2",
-      "note": "[derived; proposed] More than 360 MW of active power divided by more than 250,000 GPUs at Dec 31, 2024. Facility-level power per GPU, so cooling and non-GPU load are already inside it."
+      "note": "[derived; proposed] More than 360 MW of active power divided by more than 250,000 GPUs at Dec 31, 2024. Facility-level power per GPU, so cooling and non-GPU load are already inside it. This is the ONE assumption that converts disclosed MW into GPU counts; every per-GPU line scales with it, the per-MW lines do not use it."
     },
     {
       "name": "pue",
@@ -605,7 +925,7 @@
       "value": 1.0,
       "unit": "share",
       "source": "",
-      "note": "[judgment; proposed] Set to 1.0 because price_per_gpu_hour below is revenue per INSTALLED hour. Idle and not-yet-billing GPUs are already inside that price."
+      "note": "[judgment; proposed] Set to 1.0 because the model measures revenue per INSTALLED GPU-hour (quarterly revenue over average installed capacity). Idle and not-yet-billing GPUs are already inside that figure. Only used by the per-GPU lines."
     },
     {
       "name": "tokens_per_sec",
@@ -637,10 +957,10 @@
     },
     {
       "name": "price_per_gpu_hour",
-      "value": 1.354,
+      "value": 0.0,
       "unit": "USD/GPU-hour",
-      "source": "S-1 p.113, p.2",
-      "note": "[derived; proposed] Q4 2024 revenue 747,430 thousand divided by 250,000 GPUs times 2,208 hours. Realised revenue per installed GPU-hour across the whole fleet. It is NOT a contract price, and it is understated because the year-end GPU count is applied to the whole quarter."
+      "source": "",
+      "note": "[judgment; proposed] Not used: the model computes revenue per installed GPU-hour for each quarter from reported revenue and disclosed capacity (see the Outputs sheet). Kept at 0 so the engine's rental mode has a defined input."
     },
     {
       "name": "facility_cost_per_kw_month",
@@ -651,10 +971,10 @@
     },
     {
       "name": "other_opex_per_gpu_hour",
-      "value": 0.4734,
+      "value": 0.0,
       "unit": "USD/GPU-hour",
-      "source": "S-1 p.113, p.115, p.2",
-      "note": "[derived; proposed] Q4 2024 revenue less adjusted EBITDA (747,430 less 486,114 thousand) per installed GPU-hour. Lumps energy, data-centre leases, staff and everything else above adjusted EBITDA into one number."
+      "source": "",
+      "note": "[judgment; proposed] Not used: each quarter's cash cost per GPU-hour is revenue less adjusted EBITDA over installed GPU-hours, computed by the model. Kept at 0."
     },
     {
       "name": "idle_power_share",

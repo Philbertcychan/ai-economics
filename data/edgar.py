@@ -24,6 +24,7 @@ the test suite runs fully offline against the trimmed real responses in
 from __future__ import annotations
 
 import copy
+import dataclasses
 import datetime as dt
 import gzip
 import hashlib
@@ -244,6 +245,7 @@ class Filing:
     description: str | None
     size: int | None
     is_xbrl: bool
+    items: str | None = None  # 8-K item codes, e.g. "2.02,9.01" (2.02 = results of operations)
 
     @property
     def url(self) -> str:
@@ -290,6 +292,7 @@ def iter_filings(cik: str | int, columnar: Mapping[str, Sequence[Any]]) -> Itera
     descriptions = column("primaryDocDescription")
     sizes = column("size")
     xbrl_flags = column("isXBRL")
+    items = column("items")
     for i in range(count):
         yield Filing(
             cik=cik_padded,
@@ -301,6 +304,7 @@ def iter_filings(cik: str | int, columnar: Mapping[str, Sequence[Any]]) -> Itera
             description=str(descriptions[i]) if descriptions[i] else None,
             size=int(sizes[i]) if sizes[i] not in (None, "") else None,
             is_xbrl=bool(xbrl_flags[i]),
+            items=str(items[i]) if items[i] else None,
         )
 
 
@@ -654,6 +658,33 @@ class EdgarClient:
             return target
         self._write_bytes(target, self.get_bytes(filing.url), filing.url)
         return target
+
+    def filing_exhibits(self, filing: Filing) -> list[str]:
+        """Names of a filing's exhibit documents, from SEC's per-filing ``index.json``.
+
+        Operating KPIs that are not in the structured data (active power, backlog) are usually
+        disclosed in the earnings press release, which is an EXHIBIT to an 8-K, not its primary
+        document. The index carries no exhibit type, so an exhibit is any ``.htm`` file that is
+        neither the primary document nor one of SEC's own renderings (``R1.htm``, the index).
+        """
+        folder = f"{ARCHIVES_BASE}/{int(filing.cik)}/{accession_nodash(filing.accession)}"
+        listing = self.get_json(f"{folder}/index.json")
+        names = [str(item.get("name", "")) for item in listing.get("directory", {}).get("item", [])]
+        return [
+            name
+            for name in names
+            if name.lower().endswith((".htm", ".html"))
+            and name != filing.primary_document
+            and not re.fullmatch(r"R\d+\.htm", name)
+            and "-index" not in name
+        ]
+
+    def download_document(self, ticker: str, filing: Filing, name: str) -> Path:
+        """Store any document of a filing (for example an exhibit) beside its primary document.
+
+        Same caching rule as ``download_filing``: a copy in any dated directory is reused.
+        """
+        return self.download_filing(ticker, dataclasses.replace(filing, primary_document=name))
 
     def full_text_search(
         self,

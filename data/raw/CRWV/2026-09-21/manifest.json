@@ -1,7 +1,7 @@
 {
   "ticker": "CRWV",
   "cik": "0001769628",
-  "pulled_at": "2026-09-21T21:37:36Z",
+  "pulled_at": "2026-09-21T23:59:38Z",
   "files": [
     {
       "path": "companyfacts.json",
@@ -9,6 +9,48 @@
       "sha256": "c0af16143fd615e9d4d3066226d81722fcbb49de9ee4125f038b1f47e285026f",
       "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001769628.json",
       "fetched_at": "2026-09-21T21:34:53Z"
+    },
+    {
+      "path": "filings/0001769628-25-000010/coreweave1q25earningspress.htm",
+      "bytes": 253929,
+      "sha256": "355cb82cdcb08acd9718ba3dc7963e5eb4017ecf4819223e0df6741cb67c7f31",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962825000010/coreweave1q25earningspress.htm",
+      "fetched_at": "2026-09-21T23:59:38Z"
+    },
+    {
+      "path": "filings/0001769628-25-000039/coreweave2q25earningspress.htm",
+      "bytes": 339944,
+      "sha256": "496ce50b7d1a8ecaed4676a1c6deb16619ebe85b7ad7fbf607e7645934c31428",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962825000039/coreweave2q25earningspress.htm",
+      "fetched_at": "2026-09-21T23:59:37Z"
+    },
+    {
+      "path": "filings/0001769628-25-000059/coreweave3q25earningspress.htm",
+      "bytes": 349276,
+      "sha256": "950bfd1afcc6cb239c37accbca55f1474c256b4b969c98de69bd2b5c1947d6b5",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962825000059/coreweave3q25earningspress.htm",
+      "fetched_at": "2026-09-21T23:59:37Z"
+    },
+    {
+      "path": "filings/0001769628-26-000094/coreweave4q25earningspress.htm",
+      "bytes": 373521,
+      "sha256": "fe2d7ca5b26d1218c9024ad4938aa73eb1484f1d9d2f69f899d047773055caf7",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000094/coreweave4q25earningspress.htm",
+      "fetched_at": "2026-09-21T23:59:36Z"
+    },
+    {
+      "path": "filings/0001769628-26-000220/coreweave1q26earningspress.htm",
+      "bytes": 264271,
+      "sha256": "f73c05b94c454c489e0ccf1702c8a2d5622fe6383468c383c8c2461935ada9b2",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000220/coreweave1q26earningspress.htm",
+      "fetched_at": "2026-09-21T23:59:36Z"
+    },
+    {
+      "path": "filings/0001769628-26-000362/coreweave2q26earningspress.htm",
+      "bytes": 359361,
+      "sha256": "52456b9e12a1e8d3472f720021ff903c938fdfc57565271d3436ab17c188c32b",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000362/coreweave2q26earningspress.htm",
+      "fetched_at": "2026-09-21T23:59:35Z"
     },
     {
       "path": "submissions-001.json",
