@@ -1,0 +1,21 @@
+{
+  "ticker": "NBIS",
+  "cik": "0001513845",
+  "pulled_at": "2026-09-22T15:33:14Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 1568737,
+      "sha256": "7e21951ecf0fed0fb2a26b5e2464c7b15d69bcdd1928d8cda52a875a29ca04f7",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001513845.json",
+      "fetched_at": "2026-09-22T15:33:14Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 80695,
+      "sha256": "95b055faba021d37054af95853a7190195a5f4649e82da05370deefabf595a69",
+      "source_url": "https://data.sec.gov/submissions/CIK0001513845.json",
+      "fetched_at": "2026-09-22T15:33:14Z"
+    }
+  ]
+}

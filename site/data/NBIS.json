@@ -592,6 +592,159 @@
           253016971.0
         ]
       ]
+    },
+    "debt_principal": {
+      "unit": "USD",
+      "freq": "A",
+      "tag": "us-gaap:DebtInstrumentCarryingAmount",
+      "points": [
+        [
+          "2025",
+          4836800000.0
+        ]
+      ]
+    },
+    "interest_expense_debt": {
+      "unit": "USD",
+      "freq": "A",
+      "tag": "us-gaap:InterestExpenseDebtExcludingAmortization",
+      "points": [
+        [
+          "2025",
+          31400000.0
+        ]
+      ]
+    },
+    "debt_proceeds": {
+      "unit": "USD",
+      "freq": "A",
+      "tag": "us-gaap:ProceedsFromIssuanceOfLongTermDebt",
+      "points": [
+        [
+          "2025",
+          4162500000.0
+        ]
+      ]
+    },
+    "debt_repayments": {
+      "unit": "USD",
+      "freq": "A",
+      "tag": "us-gaap:RepaymentsOfDebt",
+      "points": [
+        [
+          "2022",
+          704600000.0
+        ],
+        [
+          "2023",
+          1536000000.0
+        ],
+        [
+          "2024",
+          700000.0
+        ],
+        [
+          "2025",
+          800000.0
+        ]
+      ]
+    },
+    "deferred_revenue": {
+      "unit": "USD",
+      "freq": "A",
+      "tag": "us-gaap:ContractWithCustomerLiability",
+      "points": [
+        [
+          "2024",
+          16300000.0
+        ],
+        [
+          "2025",
+          1577500000.0
+        ]
+      ]
+    },
+    "deferred_revenue_recognised": {
+      "unit": "USD",
+      "freq": "A",
+      "tag": "us-gaap:ContractWithCustomerLiabilityRevenueRecognized",
+      "points": [
+        [
+          "2024",
+          6900000.0
+        ],
+        [
+          "2025",
+          16300000.0
+        ]
+      ]
+    },
+    "receivables": {
+      "unit": "USD",
+      "freq": "A",
+      "tag": "us-gaap:AccountsReceivableNetCurrent",
+      "points": [
+        [
+          "2011",
+          38800000.0
+        ],
+        [
+          "2012",
+          58200000.0
+        ],
+        [
+          "2013",
+          85100000.0
+        ],
+        [
+          "2014",
+          65800000.0
+        ],
+        [
+          "2015",
+          76600000.0
+        ],
+        [
+          "2016",
+          127600000.0
+        ],
+        [
+          "2017",
+          169300000.0
+        ],
+        [
+          "2018",
+          209700000.0
+        ],
+        [
+          "2019",
+          226200000.0
+        ],
+        [
+          "2020",
+          344400000.0
+        ],
+        [
+          "2021",
+          586400000.0
+        ],
+        [
+          "2022",
+          824800000.0
+        ],
+        [
+          "2023",
+          4100000.0
+        ],
+        [
+          "2024",
+          11200000.0
+        ],
+        [
+          "2025",
+          720300000.0
+        ]
+      ]
     }
   },
   "outputs": null,
