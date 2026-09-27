@@ -201,13 +201,17 @@ As of 2026-09-22:
 - Nebius has the same shape of model on less disclosure: six quarters read from its 6-K results
   exhibits (no XBRL), an ARR-driven ten-quarter forecast, prepayments as a share of capex, the
   company's ARR and revenue guidance as check lines, and a sensitivity sheet.
-- The stack has its schema, loaders, primers and site pages; sourced figures are in for power,
-  the grid and data centres, with the other six stages being researched.
+- The stack has its schema, loaders, primers and site pages, and sourced figures for all nine
+  stages (about 160 figures, 105 players and 60 unit conversions, each with a URL; every stage's
+  headline rows were re-checked against their sources).
+- The first power-supply dataset is in: `scripts/pull_eia860m.py` pulls EIA's monthly generator
+  inventory and tidies operating, planned and retired generators with summaries by fuel, year
+  and state under `data/processed/eia860m/`.
 
 The spine of the project from here is the value chain itself, bottom-up: nine stages from
 power generation to applications in `stack/`, each with its unit, sourced figures, players,
-lead time and a bottleneck score. Next, in order (see `TODO.md`): finish the stack figures,
-then power in depth (US supply, interconnection queues, a site map), then memory.
+lead time and a bottleneck score. Next, in order (see `TODO.md`): the owner's bottleneck scores,
+then power in depth (interconnection queues, the campus pipeline, a site map), then memory.
 
 Division of labour: the modelling and code are built with Claude; every assumption and every call
 is reviewed and owned by the author.

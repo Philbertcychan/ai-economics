@@ -49,8 +49,9 @@ Track: all three (the skeleton serves fluency first).
       time), `stack/metrics.csv` (6 to 12 sourced figures per stage), `stack/players.csv`,
       `stack/conversions.csv` (how one stage's unit becomes the next), `stack/consumption_tiers.csv`
       (applications split by tokens consumed), one primer per stage in `stack/primers/`, and the
-      site pages `stack/index.html` and `stack/<stage>.html`. Schema, loaders, pages and primers
-      done 2026-09-26; sourced figures land stage by stage as the research batches finish.
+      site pages `stack/index.html` and `stack/<stage>.html`. Done 2026-09-27: all nine stages have
+      sourced figures, players and conversions; the researchers' open questions (what no public
+      source states: CoWoS capacity, GPU list prices, tokens per user) are in the session notes.
 - [ ] Philbert: score each stage's `bottleneck_score` (1 to 5) in `stack/stages.csv` from the
       evidence on its page, and write the one-line `bottleneck_note`. These are calls.
 - [x] Nebius model in `companies/nebius.py` on the CoreWeave pattern (foreign private issuer:
@@ -67,8 +68,11 @@ Track: all three (the skeleton serves fluency first).
 
 Track: bottlenecks, with fluency as the by-product. US first.
 
-- [ ] Power supply dataset: EIA-860 and EIA-860M (operating and planned generators by fuel,
-      status and date), pulled by `scripts/refresh.py` like EDGAR, cached and tidied under `data/`.
+- [x] Power supply dataset: EIA-860M (operating, planned and retired generators by fuel, status
+      and date), `data/eia.py` and `scripts/pull_eia860m.py`, cached and tidied under `data/`
+      with summaries by fuel, year and state (2026-09-27). Still to do: run it from
+      `scripts/refresh.py` on a monthly cadence and show the planned-additions table on the
+      power stage page.
 - [ ] Interconnection queues: ERCOT, PJM, MISO, SPP, CAISO public queue files; years-to-connect
       by ISO; large-load requests where published.
 - [ ] Demand side: announced data-centre campuses in the US with MW, sponsor, power source and

@@ -1,0 +1,229 @@
+entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority,technology,energy_source,prime_mover,nameplate_mw,net_summer_mw,status,status_code,year,month
+56545,Pattern Operators LP,61014,Pattern Santa Isabel LLC,1,PR,NA,Onshore Wind Turbine,WND,WT,101.2,75.0,(OP) Operating,OP,2012,11
+60671,EcoElectrica LP,61034,EcoElectrica,CT1,PR,NA,Natural Gas Fired Combined Cycle,NG,CT,183.0,187.0,(OP) Operating,OP,2018,9
+60671,EcoElectrica LP,61034,EcoElectrica,CT2,PR,NA,Natural Gas Fired Combined Cycle,NG,CT,183.0,183.0,(OP) Operating,OP,2000,3
+60671,EcoElectrica LP,61034,EcoElectrica,STG,PR,NA,Natural Gas Fired Combined Cycle,NG,CA,214.0,214.0,(OP) Operating,OP,2000,3
+60673,"AES ILUMINA, LLC",61036,AES ILUMINA,ILUMI,PR,NA,Solar Photovoltaic,SUN,PV,20.0,15.0,(OP) Operating,OP,2012,11
+60689,"PV Properties, Inc.",61062,Coto Laurel Solar Farm,CLSF,PR,NA,Solar Photovoltaic,SUN,PV,10.0,10.0,(OP) Operating,OP,2020,2
+60689,"PV Properties, Inc.",61063,Martino,MATNO,PR,NA,Solar Photovoltaic,SUN,PV,3.6,3.6,(OP) Operating,OP,2011,1
+66984,Haleon Consumer Healthcare,61064,Pfizer Guayama,BES01,PR,NA,Batteries,MWH,BA,0.5,0.5,(OP) Operating,OP,2016,1
+66984,Haleon Consumer Healthcare,61064,Pfizer Guayama,CHP01,PR,NA,Petroleum Liquids,PG,IC,2.1,2.1,(OP) Operating,OP,2023,10
+66984,Haleon Consumer Healthcare,61064,Pfizer Guayama,PFGY,PR,NA,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2016,1
+60689,"PV Properties, Inc.",61065,Pfizer Vega Baja,PFVB,PR,NA,Solar Photovoltaic,SUN,PV,3.1,3.1,(OP) Operating,OP,2016,1
+60697,AES Puerto Rico LP,61082,AES Puerto Rico,UNIT1,PR,NA,Conventional Steam Coal,BIT,ST,255.0,227.2,(OP) Operating,OP,2001,11
+60697,AES Puerto Rico LP,61082,AES Puerto Rico,UNIT2,PR,NA,Conventional Steam Coal,BIT,ST,255.0,227.2,(OP) Operating,OP,2001,11
+60698,Oriana Energy LLC,61083,Oriana Energy Hybrid,BAT1,PR,NA,Batteries,MWH,BA,21.8,21.8,(OP) Operating,OP,2016,12
+60698,Oriana Energy LLC,61083,Oriana Energy Hybrid,G001,PR,NA,Solar Photovoltaic,SUN,PV,45.0,45.0,(OP) Operating,OP,2016,12
+57354,X-Elio North America Inc,61102,"GASNA 18P, LLC",UNIT1,PR,NA,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2014,4
+60726,"Landfill Gas Technologies of Fajardo, LLC",61109,Fajardo MSWL,PE558,PR,NA,Landfill Gas,LFG,IC,0.8,0.8,(OP) Operating,OP,2016,10
+60726,"Landfill Gas Technologies of Fajardo, LLC",61109,Fajardo MSWL,PE559,PR,NA,Landfill Gas,LFG,IC,1.6,1.6,(OP) Operating,OP,2016,10
+60725,San Fermin Solar Farm LLC,61110,San Fermin Solar Farm Hybrid,BESS,PR,NA,Batteries,MWH,BA,3.6,3.6,(OP) Operating,OP,2015,12
+60725,San Fermin Solar Farm LLC,61110,San Fermin Solar Farm Hybrid,DSL,PR,NA,Petroleum Liquids,DFO,IC,4.0,4.0,(OP) Operating,OP,2015,12
+60725,San Fermin Solar Farm LLC,61110,San Fermin Solar Farm Hybrid,PV,PR,NA,Solar Photovoltaic,SUN,PV,20.0,20.0,(OP) Operating,OP,2015,12
+60689,"PV Properties, Inc.",61112,El Yunque Filtration Plant,YUNQ,PR,NA,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2013,11
+60689,"PV Properties, Inc.",61113,Arecibo Filtration Plant,AREC,PR,NA,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2014,1
+60689,"PV Properties, Inc.",61114,Canovanas Filtration Plant,CANO,PR,NA,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2013,2
+60726,"Landfill Gas Technologies of Fajardo, LLC",61122,Toa Baja MSWL,PE563,PR,NA,Landfill Gas,LFG,IC,0.8,0.8,(OP) Operating,OP,2020,11
+60726,"Landfill Gas Technologies of Fajardo, LLC",61122,Toa Baja MSWL,PE564,PR,NA,Landfill Gas,LFG,IC,1.6,1.6,(OP) Operating,OP,2020,11
+60753,"Punta Lima Wind Farm, LLC",61132,Punta Lima Wind Farm,WTGS2,PR,NA,Onshore Wind Turbine,WND,WT,26.0,26.0,(OP) Operating,OP,2024,3
+60754,"Fonroche Energy America, Inc.",61133,"Humacao Solar Project, LLC",HUM01,PR,NA,Solar Photovoltaic,SUN,PV,20.0,20.0,(OP) Operating,OP,2016,12
+60760,Horizon Energy LLC,61136,Horizon Energy (PR) Hybrid,BAT1,PR,NA,Batteries,MWH,BA,5.1,5.1,(OP) Operating,OP,2015,8
+60760,Horizon Energy LLC,61136,Horizon Energy (PR) Hybrid,G001,PR,NA,Solar Photovoltaic,SUN,PV,10.0,10.0,(OP) Operating,OP,2015,8
+63359,"REA Investments, LLC",61137,Medtronic Solar,PV1,PR,NA,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2019,12
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,1,PR,NA,Petroleum Liquids,RFO,ST,450.0,424.9,(OP) Operating,OP,1975,5
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,2,PR,NA,Petroleum Liquids,RFO,ST,450.0,424.9,(OP) Operating,OP,1975,10
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CA-1,PR,NA,Petroleum Liquids,DFO,CA,96.0,92.3,(OP) Operating,OP,1977,7
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CA-2,PR,NA,Petroleum Liquids,DFO,CA,96.0,92.3,(OP) Operating,OP,1977,5
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CT1-1,PR,NA,Petroleum Liquids,DFO,CT,50.0,48.1,(OP) Operating,OP,1977,7
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CT1-2,PR,NA,Petroleum Liquids,DFO,CT,50.0,48.1,(OP) Operating,OP,1977,7
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CT1-3,PR,NA,Petroleum Liquids,DFO,CT,50.0,48.1,(OP) Operating,OP,1977,7
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CT1-4,PR,NA,Petroleum Liquids,DFO,CT,50.0,48.1,(OP) Operating,OP,1977,7
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CT2-1,PR,NA,Petroleum Liquids,DFO,CT,50.0,48.1,(OP) Operating,OP,1977,5
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CT2-2,PR,NA,Petroleum Liquids,DFO,CT,50.0,48.1,(OP) Operating,OP,1977,5
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CT2-3,PR,NA,Petroleum Liquids,DFO,CT,50.0,48.1,(OP) Operating,OP,1977,5
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,CT2-4,PR,NA,Petroleum Liquids,DFO,CT,50.0,48.1,(OP) Operating,OP,1977,5
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,GT2-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,7
+15497,Puerto Rico Electric Pwr Authority,61146,Aguirre Plant,GT2-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,7
+15497,Puerto Rico Electric Pwr Authority,61147,Costa Sur Plant,3,PR,NA,Petroleum Liquids,RFO,ST,85.0,80.8,(OP) Operating,OP,1962,3
+15497,Puerto Rico Electric Pwr Authority,61147,Costa Sur Plant,4,PR,NA,Petroleum Liquids,RFO,ST,85.0,78.1,(OP) Operating,OP,1963,12
+15497,Puerto Rico Electric Pwr Authority,61147,Costa Sur Plant,5,PR,NA,Natural Gas Steam Turbine,NG,ST,410.0,384.0,(OP) Operating,OP,1972,9
+15497,Puerto Rico Electric Pwr Authority,61147,Costa Sur Plant,6,PR,NA,Natural Gas Steam Turbine,NG,ST,410.0,381.6,(OP) Operating,OP,1973,9
+15497,Puerto Rico Electric Pwr Authority,61147,Costa Sur Plant,GT-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,5
+15497,Puerto Rico Electric Pwr Authority,61147,Costa Sur Plant,GT-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,5
+15497,Puerto Rico Electric Pwr Authority,61148,Central San Juan Plant,10,PR,NA,Petroleum Liquids,RFO,ST,100.0,78.6,(OP) Operating,OP,1969,2
+15497,Puerto Rico Electric Pwr Authority,61148,Central San Juan Plant,7,PR,NA,Petroleum Liquids,RFO,ST,100.0,91.5,(OP) Operating,OP,1965,5
+15497,Puerto Rico Electric Pwr Authority,61148,Central San Juan Plant,8,PR,NA,Petroleum Liquids,RFO,ST,100.0,92.7,(OP) Operating,OP,1966,8
+15497,Puerto Rico Electric Pwr Authority,61148,Central San Juan Plant,9,PR,NA,Petroleum Liquids,RFO,ST,100.0,91.7,(OP) Operating,OP,1968,6
+15497,Puerto Rico Electric Pwr Authority,61148,Central San Juan Plant,CA5,PR,NA,Petroleum Liquids,DFO,CA,60.0,58.6,(OP) Operating,OP,2008,10
+15497,Puerto Rico Electric Pwr Authority,61148,Central San Juan Plant,CA6,PR,NA,Petroleum Liquids,DFO,CA,60.0,58.6,(OP) Operating,OP,2008,10
+15497,Puerto Rico Electric Pwr Authority,61148,Central San Juan Plant,CT5,PR,NA,Petroleum Liquids,DFO,CT,160.0,156.1,(OP) Operating,OP,2008,10
+15497,Puerto Rico Electric Pwr Authority,61148,Central San Juan Plant,CT6,PR,NA,Petroleum Liquids,DFO,CT,160.0,156.1,(OP) Operating,OP,2008,10
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,1,PR,NA,Petroleum Liquids,RFO,ST,85.0,78.3,(OP) Operating,OP,1960,6
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,1-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,12
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,1-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,12
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,2,PR,NA,Petroleum Liquids,RFO,ST,85.0,78.8,(OP) Operating,OP,1961,3
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,2-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,12
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,2-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,12
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,3,PR,NA,Petroleum Liquids,RFO,ST,216.0,196.3,(OP) Operating,OP,1970,2
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,3-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1973,2
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,3-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1973,3
+15497,Puerto Rico Electric Pwr Authority,61149,Palo Seco Plant,4,PR,NA,Petroleum Liquids,RFO,ST,216.0,,(OP) Operating,OP,1970,7
+15497,Puerto Rico Electric Pwr Authority,61150,Cambalache Plant,GT-1,PR,NA,Petroleum Liquids,DFO,GT,82.5,80.5,(OP) Operating,OP,1997,4
+15497,Puerto Rico Electric Pwr Authority,61150,Cambalache Plant,GT-2,PR,NA,Petroleum Liquids,DFO,GT,82.5,80.5,(OP) Operating,OP,1997,5
+15497,Puerto Rico Electric Pwr Authority,61150,Cambalache Plant,GT-3,PR,NA,Petroleum Liquids,DFO,GT,82.5,80.5,(OP) Operating,OP,1997,6
+15497,Puerto Rico Electric Pwr Authority,61151,Mayaguez Plant,GT-1,PR,NA,Petroleum Liquids,DFO,GT,55.0,55.0,(OP) Operating,OP,2009,4
+15497,Puerto Rico Electric Pwr Authority,61151,Mayaguez Plant,GT-2,PR,NA,Petroleum Liquids,DFO,GT,55.0,55.0,(OP) Operating,OP,2009,4
+15497,Puerto Rico Electric Pwr Authority,61151,Mayaguez Plant,GT-3,PR,NA,Petroleum Liquids,DFO,GT,55.0,55.0,(OP) Operating,OP,2009,4
+15497,Puerto Rico Electric Pwr Authority,61151,Mayaguez Plant,GT-4,PR,NA,Petroleum Liquids,DFO,GT,55.0,55.0,(OP) Operating,OP,2009,4
+15497,Puerto Rico Electric Pwr Authority,61171,Jobos,GT-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1973,4
+15497,Puerto Rico Electric Pwr Authority,61171,Jobos,GT-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1973,4
+15497,Puerto Rico Electric Pwr Authority,61225,Caonillas,1,PR,NA,Conventional Hydroelectric,WAT,HY,9.0,9.0,(OP) Operating,OP,1949,1
+15497,Puerto Rico Electric Pwr Authority,61225,Caonillas,2,PR,NA,Conventional Hydroelectric,WAT,HY,9.0,9.0,(OP) Operating,OP,1949,1
+15497,Puerto Rico Electric Pwr Authority,61225,Caonillas,3,PR,NA,Conventional Hydroelectric,WAT,HY,4.0,4.0,(OP) Operating,OP,1952,9
+15497,Puerto Rico Electric Pwr Authority,61226,Culebra,1,PR,NA,Petroleum Liquids,RFO,IC,0.3,0.3,(OP) Operating,OP,1972,1
+15497,Puerto Rico Electric Pwr Authority,61226,Culebra,2,PR,NA,Petroleum Liquids,RFO,IC,0.3,0.3,(OP) Operating,OP,1972,1
+15497,Puerto Rico Electric Pwr Authority,61226,Culebra,3,PR,NA,Petroleum Liquids,RFO,IC,0.7,0.7,(OP) Operating,OP,1972,1
+15497,Puerto Rico Electric Pwr Authority,61226,Culebra,4,PR,NA,Petroleum Liquids,RFO,IC,0.8,0.8,(OP) Operating,OP,1972,1
+15497,Puerto Rico Electric Pwr Authority,61227,Daguao,GT-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,8
+15497,Puerto Rico Electric Pwr Authority,61227,Daguao,GT-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1972,8
+15497,Puerto Rico Electric Pwr Authority,61228,Dos Bocas,1,PR,NA,Conventional Hydroelectric,WAT,HY,5.0,5.0,(OP) Operating,OP,1942,8
+15497,Puerto Rico Electric Pwr Authority,61228,Dos Bocas,2,PR,NA,Conventional Hydroelectric,WAT,HY,5.0,5.0,(OP) Operating,OP,1944,11
+15497,Puerto Rico Electric Pwr Authority,61228,Dos Bocas,3,PR,NA,Conventional Hydroelectric,WAT,HY,5.0,5.0,(OP) Operating,OP,1945,11
+15497,Puerto Rico Electric Pwr Authority,61229,Garzas,1,PR,NA,Conventional Hydroelectric,WAT,HY,3.6,3.6,(OP) Operating,OP,1941,2
+15497,Puerto Rico Electric Pwr Authority,61229,Garzas,2,PR,NA,Conventional Hydroelectric,WAT,HY,3.6,3.6,(OP) Operating,OP,1941,2
+15497,Puerto Rico Electric Pwr Authority,61229,Garzas,3,PR,NA,Conventional Hydroelectric,WAT,HY,5.0,5.0,(OP) Operating,OP,1941,3
+15497,Puerto Rico Electric Pwr Authority,61230,Patillas,1,PR,NA,Conventional Hydroelectric,WAT,HY,0.8,0.8,(OP) Operating,OP,1985,4
+15497,Puerto Rico Electric Pwr Authority,61230,Patillas,2,PR,NA,Conventional Hydroelectric,WAT,HY,0.6,0.6,(OP) Operating,OP,1985,4
+15497,Puerto Rico Electric Pwr Authority,61231,Toro Negro,1,PR,NA,Conventional Hydroelectric,WAT,HY,1.4,1.4,(SB) Standby/Backup: available for service but not normally used,SB,1937,1
+15497,Puerto Rico Electric Pwr Authority,61231,Toro Negro,2,PR,NA,Conventional Hydroelectric,WAT,HY,1.4,1.4,(OP) Operating,OP,1937,1
+15497,Puerto Rico Electric Pwr Authority,61231,Toro Negro,3,PR,NA,Conventional Hydroelectric,WAT,HY,1.4,1.4,(OP) Operating,OP,1937,1
+15497,Puerto Rico Electric Pwr Authority,61231,Toro Negro,4,PR,NA,Conventional Hydroelectric,WAT,HY,4.3,4.3,(OP) Operating,OP,1937,1
+15497,Puerto Rico Electric Pwr Authority,61232,Vega Baja,GT-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1971,10
+15497,Puerto Rico Electric Pwr Authority,61232,Vega Baja,GT-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1971,10
+15497,Puerto Rico Electric Pwr Authority,61233,Vieques,1,PR,NA,Petroleum Liquids,RFO,IC,3.3,3.2,(OP) Operating,OP,2004,9
+15497,Puerto Rico Electric Pwr Authority,61233,Vieques,2,PR,NA,Petroleum Liquids,RFO,IC,3.3,3.2,(OP) Operating,OP,2004,9
+15497,Puerto Rico Electric Pwr Authority,61234,Yabucoa,GT-1,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1971,10
+15497,Puerto Rico Electric Pwr Authority,61234,Yabucoa,GT-2,PR,NA,Petroleum Liquids,DFO,GT,21.0,21.0,(OP) Operating,OP,1971,10
+15497,Puerto Rico Electric Pwr Authority,61235,Yauco,1,PR,NA,Conventional Hydroelectric,WAT,HY,4.5,4.5,(OP) Operating,OP,1956,2
+15497,Puerto Rico Electric Pwr Authority,61235,Yauco,2,PR,NA,Conventional Hydroelectric,WAT,HY,4.5,4.5,(OP) Operating,OP,1956,4
+15497,Puerto Rico Electric Pwr Authority,61235,Yauco,3,PR,NA,Conventional Hydroelectric,WAT,HY,25.0,25.0,(OP) Operating,OP,1956,2
+15497,Puerto Rico Electric Pwr Authority,61236,Rio Blanco,1,PR,NA,Conventional Hydroelectric,WAT,HY,2.5,2.5,(OP) Operating,OP,1929,12
+15497,Puerto Rico Electric Pwr Authority,61236,Rio Blanco,2,PR,NA,Conventional Hydroelectric,WAT,HY,2.5,2.5,(OP) Operating,OP,1929,12
+60866,Directorate Of Public Works USAG Fort Buchanan,61254,Fort Buchanan Distributed Generation,SOLAR,PR,NA,Solar Photovoltaic,SUN,PV,5.8,5.8,(OP) Operating,OP,2014,8
+60866,Directorate Of Public Works USAG Fort Buchanan,61254,Fort Buchanan Distributed Generation,WIND,PR,NA,Onshore Wind Turbine,WND,WT,0.6,0.6,(OP) Operating,OP,2014,8
+60887,United States Coast Guard Puerto Rico,61273,USCG Puerto Rico PV,865,PR,NA,Solar Photovoltaic,SUN,PV,2.3,1.7,(OS) Out of service and NOT expected to return to service in next calendar year,OS,2011,1
+61250,"Holsum de Puerto Rico, Inc.",61639,"Holsum de Puerto Rico, Inc.",EU16,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2021,12
+61250,"Holsum de Puerto Rico, Inc.",61639,"Holsum de Puerto Rico, Inc.",EU17,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2021,12
+61250,"Holsum de Puerto Rico, Inc.",61639,"Holsum de Puerto Rico, Inc.",EU18,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2021,12
+61250,"Holsum de Puerto Rico, Inc.",61639,"Holsum de Puerto Rico, Inc.",EU18A,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2021,12
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,2GEN1,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,2005,7
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,2GEN2,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,2004,8
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,2GEN3,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,2004,8
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,GEN-1,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1998,7
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,GEN-2,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1998,6
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,GEN-3,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1998,7
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,GEN-4,PR,NA,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,2007,8
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,GEN-5,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1997,6
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,J1POR,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2017,11
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,PGEN1,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,2007,4
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,PGEN2,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,2007,4
+61268,Janssen Ortho LLC,61659,Janssen Ortho LLC,SOLAR,PR,NA,Solar Photovoltaic,SUN,PV,2.2,2.2,(OP) Operating,OP,2015,12
+61437,HIMA San Pablo Caguas,61808,HIMA San Pablo - Caguas,CAG1,PR,,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,2007,10
+61437,HIMA San Pablo Caguas,61808,HIMA San Pablo - Caguas,CAG2,PR,,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,2007,10
+61437,HIMA San Pablo Caguas,61808,HIMA San Pablo - Caguas,CAG3,PR,,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,2007,10
+61437,HIMA San Pablo Caguas,61808,HIMA San Pablo - Caguas,CAG4,PR,,Petroleum Liquids,DFO,IC,2.0,2.0,(OA) Out of service but expected to return to service in next calendar year,OA,2007,10
+61437,HIMA San Pablo Caguas,61808,HIMA San Pablo - Caguas,CAG5,PR,,Petroleum Liquids,DFO,IC,2.0,2.0,(OA) Out of service but expected to return to service in next calendar year,OA,2007,10
+61940,Cervecera de Puerto Rico,62410,Cervecera de Puerto Rico,CDG01,PR,NA,Petroleum Liquids,DFO,IC,0.9,0.7,(SB) Standby/Backup: available for service but not normally used,SB,2024,6
+61940,Cervecera de Puerto Rico,62410,Cervecera de Puerto Rico,CDG02,PR,NA,Petroleum Liquids,DFO,IC,0.9,0.7,(SB) Standby/Backup: available for service but not normally used,SB,2024,6
+61940,Cervecera de Puerto Rico,62410,Cervecera de Puerto Rico,CHP01,PR,NA,Petroleum Liquids,PG,IC,0.9,0.9,(OP) Operating,OP,2020,7
+61940,Cervecera de Puerto Rico,62410,Cervecera de Puerto Rico,CHP02,PR,NA,Petroleum Liquids,PG,IC,0.9,0.9,(OP) Operating,OP,2020,7
+61940,Cervecera de Puerto Rico,62410,Cervecera de Puerto Rico,GCC01,PR,NA,Petroleum Liquids,DFO,IC,0.3,0.3,(SB) Standby/Backup: available for service but not normally used,SB,2005,1
+61940,Cervecera de Puerto Rico,62410,Cervecera de Puerto Rico,GDC01,PR,NA,Petroleum Liquids,DFO,IC,1.6,1.6,(SB) Standby/Backup: available for service but not normally used,SB,2005,1
+62725,HIMA San Pablo Bayamon,62841,HIMA San Pablo Bayamon,BAY1,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1996,1
+62725,HIMA San Pablo Bayamon,62841,HIMA San Pablo Bayamon,BAY2,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1996,1
+62725,HIMA San Pablo Bayamon,62841,HIMA San Pablo Bayamon,BAY3,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1996,1
+62728,HIMA San Pablo Fajardo,62850,HIMA San Pablo Fajardo,FAJ1,PR,NA,Petroleum Liquids,DFO,IC,1.3,1.3,(SB) Standby/Backup: available for service but not normally used,SB,1998,10
+62728,HIMA San Pablo Fajardo,62850,HIMA San Pablo Fajardo,FAJ2,PR,NA,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,2008,4
+62728,HIMA San Pablo Fajardo,62850,HIMA San Pablo Fajardo,FAJ3,PR,NA,Petroleum Liquids,DFO,IC,0.2,0.2,(SB) Standby/Backup: available for service but not normally used,SB,1998,10
+66838,San Lucas Metro Inc.,62851,HIMA San Pablo Cupey,CUP1,PR,NA,Petroleum Liquids,DFO,IC,0.6,0.6,(OS) Out of service and NOT expected to return to service in next calendar year,OS,2011,4
+66838,San Lucas Metro Inc.,62851,HIMA San Pablo Cupey,CUP2,PR,NA,Petroleum Liquids,DFO,IC,0.6,0.6,(SB) Standby/Backup: available for service but not normally used,SB,2018,12
+62729,HIMA San Pablo Humacao,62852,HIMA San Pablo Humacao,HUM1,PR,NA,Petroleum Liquids,DFO,IC,0.8,0.8,(SB) Standby/Backup: available for service but not normally used,SB,2018,6
+62729,HIMA San Pablo Humacao,62852,HIMA San Pablo Humacao,HUM2,PR,NA,Petroleum Liquids,DFO,IC,0.8,0.8,(SB) Standby/Backup: available for service but not normally used,SB,2018,6
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,BATT1,PR,,Batteries,MWH,BA,0.6,0.6,(OP) Operating,OP,2024,9
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,BATT2,PR,,Batteries,MWH,BA,0.6,0.6,(OP) Operating,OP,2024,9
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,G1,PR,,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1998,1
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,G2,PR,,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1998,1
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,G3,PR,,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1998,1
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,G4,PR,,Petroleum Liquids,DFO,IC,1.5,1.5,(SB) Standby/Backup: available for service but not normally used,SB,1998,1
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,G5,PR,,Petroleum Liquids,DFO,IC,0.2,0.2,(SB) Standby/Backup: available for service but not normally used,SB,2016,1
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,G7,PR,,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,2014,1
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,SOL1,PR,,Solar Photovoltaic,SUN,PV,2.5,2.5,(OP) Operating,OP,2024,9
+67085,"MSS Energy Holdings, LLC (d.b.a. Calibrant Energy)",64613,Eaton Corp - Arecibo - Puerto Rico Hybri,SOL2,PR,,Solar Photovoltaic,SUN,PV,2.5,2.5,(OP) Operating,OP,2024,9
+67921,"E-NEOL, INC",65392,Neolpharma CHP LLC,CHP-1,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.1,1.1,(OA) Out of service but expected to return to service in next calendar year,OA,2023,1
+67921,"E-NEOL, INC",65392,Neolpharma CHP LLC,CHP-2,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.1,1.1,(OP) Operating,OP,2023,1
+67921,"E-NEOL, INC",65392,Neolpharma CHP LLC,CHP-3,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.1,1.1,(OP) Operating,OP,2023,1
+65224,Hospital Auxilio Mutuo,66051,Hospital Auxilio Mutuo,GEN-4,PR,NA,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,1999,10
+65224,Hospital Auxilio Mutuo,66051,Hospital Auxilio Mutuo,GEN-5,PR,NA,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,1999,10
+65224,Hospital Auxilio Mutuo,66051,Hospital Auxilio Mutuo,GEN-6,PR,NA,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,1999,10
+65228,iPR Pharmaceuticals Inc,66056,iPR Pharmaceuticals Inc.,GSET1,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.6,1.6,(OP) Operating,OP,2018,4
+65228,iPR Pharmaceuticals Inc,66056,iPR Pharmaceuticals Inc.,GSET2,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.6,1.6,(OP) Operating,OP,2018,4
+65231,AbbVie LTD,66057,AbbVie LTD,AB07,PR,NA,Petroleum Liquids,DFO,IC,1.8,1.8,(SB) Standby/Backup: available for service but not normally used,SB,1994,5
+65231,AbbVie LTD,66057,AbbVie LTD,AB072,PR,NA,Petroleum Liquids,DFO,IC,2.5,2.5,(OP) Operating,OP,2026,4
+65231,AbbVie LTD,66057,AbbVie LTD,ABL1,PR,NA,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,2004,11
+65231,AbbVie LTD,66057,AbbVie LTD,ABL3,PR,NA,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,2011,11
+65231,AbbVie LTD,66057,AbbVie LTD,BS,PR,NA,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,1991,11
+65231,AbbVie LTD,66057,AbbVie LTD,CG1,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,9.2,9.2,(OP) Operating,OP,2020,1
+65231,AbbVie LTD,66057,AbbVie LTD,CG2,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,9.2,9.2,(OP) Operating,OP,2019,11
+65231,AbbVie LTD,66057,AbbVie LTD,EG1,PR,NA,Petroleum Liquids,DFO,IC,2.2,2.2,(SB) Standby/Backup: available for service but not normally used,SB,2020,1
+65231,AbbVie LTD,66057,AbbVie LTD,EG2,PR,NA,Petroleum Liquids,DFO,IC,2.2,2.2,(SB) Standby/Backup: available for service but not normally used,SB,2019,11
+65230,Stryker Puerto Rico LLC,66058,CoGen Stryker Puerto Rico,1,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.0,0.8,(OP) Operating,OP,2026,1
+65230,Stryker Puerto Rico LLC,66058,CoGen Stryker Puerto Rico,2,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.0,0.8,(OP) Operating,OP,2026,1
+65263,Bayamon Medical Center,66090,Bayamon Medical Center,CAT1,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2008,8
+65263,Bayamon Medical Center,66090,Bayamon Medical Center,CAT2,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2012,1
+65263,Bayamon Medical Center,66090,Bayamon Medical Center,GEN-R,PR,NA,Petroleum Liquids,DFO,IC,0.4,0.4,(SB) Standby/Backup: available for service but not normally used,SB,2007,7
+65263,Bayamon Medical Center,66090,Bayamon Medical Center,GENHL,PR,NA,Petroleum Liquids,DFO,IC,0.4,0.4,(SB) Standby/Backup: available for service but not normally used,SB,2022,8
+65264,"Dorado Health, Inc",66091,Puerto Rico Women's & Children's Hosp,CATPR,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2019,3
+65264,"Dorado Health, Inc",66091,Puerto Rico Women's & Children's Hosp,KATO,PR,NA,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2007,8
+65267,Hospital Caribbean Medical Center,66092,Caribbean Medical Center,1,PR,NA,Petroleum Liquids,DFO,IC,0.5,0.3,(SB) Standby/Backup: available for service but not normally used,SB,2018,7
+65267,Hospital Caribbean Medical Center,66092,Caribbean Medical Center,2,PR,NA,Petroleum Liquids,DFO,IC,0.4,0.3,(SB) Standby/Backup: available for service but not normally used,SB,2018,7
+65267,Hospital Caribbean Medical Center,66092,Caribbean Medical Center,3,PR,NA,Petroleum Liquids,DFO,IC,0.5,0.3,(SB) Standby/Backup: available for service but not normally used,SB,2001,11
+65267,Hospital Caribbean Medical Center,66092,Caribbean Medical Center,4,PR,NA,Petroleum Liquids,DFO,IC,0.5,0.3,(SB) Standby/Backup: available for service but not normally used,SB,2001,11
+65267,Hospital Caribbean Medical Center,66092,Caribbean Medical Center,OPD1,PR,NA,Petroleum Liquids,DFO,IC,0.2,0.1,(SB) Standby/Backup: available for service but not normally used,SB,2018,7
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P10,PR,NA,Petroleum Liquids,DFO,IC,0.3,0.3,(SB) Standby/Backup: available for service but not normally used,SB,1990,1
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P13,PR,NA,Petroleum Liquids,DFO,IC,0.4,0.4,(SB) Standby/Backup: available for service but not normally used,SB,2011,2
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P14,PR,NA,Petroleum Liquids,DFO,IC,0.1,0.1,(SB) Standby/Backup: available for service but not normally used,SB,2018,4
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P3,PR,NA,Petroleum Liquids,DFO,IC,0.3,0.3,(SB) Standby/Backup: available for service but not normally used,SB,2000,6
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P5,PR,NA,Petroleum Liquids,DFO,IC,0.1,0.1,(SB) Standby/Backup: available for service but not normally used,SB,2018,9
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P8,PR,NA,Petroleum Liquids,DFO,IC,0.1,0.1,(SB) Standby/Backup: available for service but not normally used,SB,1990,1
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P9,PR,NA,Petroleum Liquids,DFO,IC,0.3,0.3,(SB) Standby/Backup: available for service but not normally used,SB,1990,1
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,CHP,PR,NA,Petroleum Liquids,PG,GT,3.0,3.0,(OP) Operating,OP,2023,10
+65278,Mayaguez Medical Center,66101,Mayaguez Medical Center,2MCAT,PR,NA,Petroleum Liquids,DFO,IC,2.0,1.8,(SB) Standby/Backup: available for service but not normally used,SB,2019,8
+65278,Mayaguez Medical Center,66101,Mayaguez Medical Center,2MCUM,PR,NA,Petroleum Liquids,DFO,IC,2.0,1.9,(SB) Standby/Backup: available for service but not normally used,SB,2022,12
+65278,Mayaguez Medical Center,66101,Mayaguez Medical Center,4CUM,PR,NA,Petroleum Liquids,DFO,IC,0.4,0.4,(SB) Standby/Backup: available for service but not normally used,SB,2010,12
+65289,Hewlett Packard Puerto Rico B.V.,66127,Hewlett Packard Puerto Rico,CG1,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,2.0,2.0,(OP) Operating,OP,2022,11
+65289,Hewlett Packard Puerto Rico B.V.,66127,Hewlett Packard Puerto Rico,CG2,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,2.0,2.0,(OP) Operating,OP,2022,11
+65289,Hewlett Packard Puerto Rico B.V.,66127,Hewlett Packard Puerto Rico,ESS,PR,NA,Batteries,MWH,BA,2.0,2.0,(OP) Operating,OP,2022,11
+65294,Manati Medical Center,66134,Manati Medical Center,CAT1,PR,,Petroleum Liquids,DFO,IC,1.8,1.2,(SB) Standby/Backup: available for service but not normally used,SB,2018,7
+65294,Manati Medical Center,66134,Manati Medical Center,CUM2,PR,,Petroleum Liquids,DFO,IC,2.0,1.2,(SB) Standby/Backup: available for service but not normally used,SB,2010,1
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,511B,PR,,Petroleum Liquids,DFO,IC,0.8,0.8,(SB) Standby/Backup: available for service but not normally used,SB,1991,1
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,511C,PR,,Petroleum Liquids,DFO,IC,0.4,0.4,(SB) Standby/Backup: available for service but not normally used,SB,1991,1
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,511D,PR,,Petroleum Liquids,DFO,IC,1.6,1.6,(SB) Standby/Backup: available for service but not normally used,SB,2001,1
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,G-101,PR,,Petroleum Liquids,DFO,IC,2.3,2.3,(SB) Standby/Backup: available for service but not normally used,SB,2004,6
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,G-102,PR,,Petroleum Liquids,DFO,IC,2.3,2.3,(SB) Standby/Backup: available for service but not normally used,SB,2004,6
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,G-103,PR,,Petroleum Liquids,DFO,IC,2.3,2.3,(SB) Standby/Backup: available for service but not normally used,SB,2008,6
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,G-104,PR,,Petroleum Liquids,DFO,IC,2.5,2.5,(SB) Standby/Backup: available for service but not normally used,SB,2016,6
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,PV-1,PR,,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2023,6
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,U0242,PR,,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,2006,6
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,U0243,PR,,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,2006,6
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,U0244,PR,,Petroleum Liquids,DFO,IC,2.0,2.0,(SB) Standby/Backup: available for service but not normally used,SB,2006,6
+65407,Lilly del Caribe,66319,Lilly del Caribe PR01,Y6140,PR,,Natural Gas Internal Combustion Engine,NG,IC,9.4,9.4,(OP) Operating,OP,2021,4
+66558,Baxter Healthcare Corporation of Puerto Rico,68024,Baxter Healthcare Aibonito CHP Plant,CHP01,PR,,Natural Gas Internal Combustion Engine,NG,IC,1.4,1.4,(OP) Operating,OP,2023,7
+66558,Baxter Healthcare Corporation of Puerto Rico,68024,Baxter Healthcare Aibonito CHP Plant,CHP02,PR,,Natural Gas Internal Combustion Engine,NG,IC,1.4,1.4,(OP) Operating,OP,2023,7
+66558,Baxter Healthcare Corporation of Puerto Rico,68024,Baxter Healthcare Aibonito CHP Plant,CHP03,PR,,Natural Gas Internal Combustion Engine,NG,IC,1.4,1.4,(OP) Operating,OP,2023,7
+66558,Baxter Healthcare Corporation of Puerto Rico,68024,Baxter Healthcare Aibonito CHP Plant,ESTR1,PR,,Batteries,MWH,BA,2.0,2.0,(OP) Operating,OP,2023,7
+66626,Baxter Healthcare of Puerto Rico/Jayuya,68187,Baxter Jayuya,CG1,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.4,1.4,(OP) Operating,OP,2023,10
+66626,Baxter Healthcare of Puerto Rico/Jayuya,68187,Baxter Jayuya,CG2,PR,NA,Natural Gas Internal Combustion Engine,NG,IC,1.4,1.4,(OP) Operating,OP,2023,10
+66626,Baxter Healthcare of Puerto Rico/Jayuya,68187,Baxter Jayuya,ESS,PR,NA,Batteries,MWH,BA,2.0,2.0,(OP) Operating,OP,2023,10
+67116,Enernet CHP One LLC,68867,AMO Puerto Rico Manufacturing Inc.,EN101,PR,,Natural Gas Internal Combustion Engine,NG,IC,1.3,1.3,(OP) Operating,OP,2026,4
+67116,Enernet CHP One LLC,68867,AMO Puerto Rico Manufacturing Inc.,EN102,PR,,Natural Gas Internal Combustion Engine,NG,IC,1.3,1.3,(OP) Operating,OP,2026,4
+67161,PF Consumer Healthcare BV PR Operations LLC,68916,PF Consumer Healthcare BV PR Operations,CHP01,PR,NA,Petroleum Liquids,PG,IC,2.1,2.1,(OP) Operating,OP,2023,10

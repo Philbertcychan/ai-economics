@@ -1,0 +1,29 @@
+technology,units,nameplate_mw,net_summer_mw
+Natural Gas Fired Combined Cycle,1945,328283.3,295138.4
+Conventional Steam Coal,445,181316.5,167235.5
+Solar Photovoltaic,8281,167564.8,166612.9
+Onshore Wind Turbine,1573,165745.2,165059.3
+Natural Gas Fired Combustion Turbine,2261,161239.9,136670.9
+Nuclear,96,103698.4,98423.3
+Natural Gas Steam Turbine,550,83881.4,77143.3
+Conventional Hydroelectric,3983,80065.3,80046.2
+Batteries,1128,54450.7,54076.9
+Petroleum Liquids,3809,30495.3,26303.7
+Hydroelectric Pumped Storage,150,22224.1,23063.1
+Wood/Wood Waste Biomass,270,8006.1,7099.2
+Natural Gas Internal Combustion Engine,1875,7588.2,7313.2
+Geothermal,163,4049.2,2683.9
+Municipal Solid Waste,73,2264.8,1891.4
+Other Gases,66,1946.1,1772.3
+All Other,82,1650.0,1469.2
+Landfill Gas,1206,1579.7,1486.3
+Petroleum Coke,19,1490.9,1311.3
+Solar Thermal without Energy Storage,9,1000.0,986.4
+Offshore Wind Turbine,4,972.0,971.3
+Other Waste Biomass,201,662.1,580.0
+Solar Thermal with Energy Storage,3,405.0,405.6
+Other Natural Gas,177,344.2,337.4
+Coal Integrated Gasification Combined Cycle,1,331.5,555.0
+Natural Gas with Compressed Air Storage,1,110.0,25.0
+,1,60.5,75.7
+Flywheels,5,47.0,47.0

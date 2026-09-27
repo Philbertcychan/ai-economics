@@ -1,0 +1,11 @@
+entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority,technology,energy_source,prime_mover,nameplate_mw,net_summer_mw,status,status_code,year,month
+60753,"Punta Lima Wind Farm, LLC",61132,Punta Lima Wind Farm,WTGS,PR,NA,Onshore Wind Turbine,WND,WT,23.4,23.4,,,2017,9
+15497,Puerto Rico Electric Pwr Authority,61147,Costa Sur Plant,1,PR,NA,Petroleum Liquids,RFO,ST,50.0,50.0,,,2009,7
+15497,Puerto Rico Electric Pwr Authority,61147,Costa Sur Plant,2,PR,NA,Petroleum Liquids,RFO,ST,50.0,50.0,,,2009,7
+61250,"Holsum de Puerto Rico, Inc.",61639,"Holsum de Puerto Rico, Inc.",EU-16,PR,NA,Petroleum Liquids,DFO,IC,0.8,0.8,,,2021,12
+61250,"Holsum de Puerto Rico, Inc.",61639,"Holsum de Puerto Rico, Inc.",EU-17,PR,NA,Petroleum Liquids,DFO,IC,0.8,0.9,,,2021,6
+61250,"Holsum de Puerto Rico, Inc.",61639,"Holsum de Puerto Rico, Inc.",EU-18,PR,NA,Petroleum Liquids,DFO,IC,0.8,0.9,,,2021,6
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P1,PR,NA,Petroleum Liquids,DFO,IC,0.2,0.2,,,2025,4
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P2,PR,NA,Petroleum Liquids,DFO,IC,0.3,0.3,,,2025,4
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,67P4,PR,NA,Petroleum Liquids,DFO,IC,0.3,0.3,,,2025,4
+65229,Bacardi Corporation,66096,Bacardi Catano Plant,COGEN,PR,NA,Petroleum Liquids,RFO,ST,3.3,3.0,,,2022,12

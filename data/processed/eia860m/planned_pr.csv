@@ -1,0 +1,6 @@
+entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority,technology,energy_source,prime_mover,nameplate_mw,net_summer_mw,status,status_code,year,month
+60754,"Fonroche Energy America, Inc.",61133,"Humacao Solar Project, LLC",SSO01,PR,NA,Solar Photovoltaic,SUN,PV,20.0,20.0,"(TS) Construction complete, but not yet in commercial operation",TS,2027,2
+65563,"SRI Solar 4, LLC",66515,PR Bayamon Ave Zaya Verde,19639,PR,NA,Solar Photovoltaic,SUN,PV,2.0,2.0,"(V) Under construction, more than 50 percent complete",V,2026,11
+65563,"SRI Solar 4, LLC",66515,PR Bayamon Ave Zaya Verde,B9639,PR,NA,Batteries,MWH,BA,0.2,0.2,"(V) Under construction, more than 50 percent complete",V,2026,11
+61978,Convergent Energy and Power LP,66644,Convergent Coamo Energy Storage 1 LLC,COBA1,PR,NA,Batteries,MWH,BA,55.0,55.0,"(P) Planned for installation, but regulatory approvals not initiated",P,2027,3
+61978,Convergent Energy and Power LP,66644,Convergent Coamo Energy Storage 1 LLC,COPV1,PR,NA,Solar Photovoltaic,SUN,PV,100.0,100.0,"(P) Planned for installation, but regulatory approvals not initiated",P,2027,3

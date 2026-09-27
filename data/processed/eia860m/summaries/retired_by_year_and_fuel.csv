@@ -1,0 +1,420 @@
+year,technology,units,nameplate_mw,net_summer_mw
+1963,Nuclear,1,24.0,24.0
+1964,Nuclear,1,84.0,75.0
+1966,Nuclear,1,12.0,12.0
+1967,Nuclear,2,82.0,76.0
+1968,Nuclear,2,42.0,39.0
+1972,Nuclear,2,68.0,64.0
+1974,Nuclear,1,277.0,257.0
+1975,Nuclear,1,42.0,40.0
+1979,Nuclear,1,961.0,880.0
+1982,Nuclear,1,68.0,60.0
+1985,Nuclear,2,272.0,260.0
+1987,Nuclear,1,50.3,51.3
+1989,Nuclear,2,1191.0,1150.0
+1990,Nuclear,1,963.0,873.0
+1992,Nuclear,2,641.0,603.0
+1993,Nuclear,1,1216.0,1104.0
+1996,Nuclear,1,600.3,560.1
+1997,Nuclear,2,995.0,937.0
+1998,Nuclear,3,2857.5,2721.0
+2002,Natural Gas Steam Turbine,36,1981.1,1790.7
+2002,Conventional Steam Coal,35,1200.6,1056.2
+2002,Natural Gas Fired Combustion Turbine,23,1139.4,951.2
+2002,Petroleum Liquids,68,825.4,741.0
+2002,Natural Gas Fired Combined Cycle,12,221.0,197.9
+2002,Other Waste Biomass,4,47.6,44.2
+2002,Natural Gas Internal Combustion Engine,26,30.7,27.3
+2002,Wood/Wood Waste Biomass,5,29.3,28.3
+2002,All Other,2,21.9,17.5
+2002,Conventional Hydroelectric,6,14.2,14.8
+2002,Municipal Solid Waste,2,7.3,6.8
+2002,Landfill Gas,3,4.4,3.4
+2002,Other Natural Gas,3,4.4,4.4
+2003,Natural Gas Steam Turbine,34,2261.2,1775.6
+2003,Petroleum Liquids,83,1232.4,837.2
+2003,Conventional Steam Coal,19,993.0,875.4
+2003,Natural Gas Fired Combustion Turbine,18,409.2,372.3
+2003,Natural Gas Fired Combined Cycle,9,341.4,300.0
+2003,Conventional Hydroelectric,16,70.3,70.1
+2003,Geothermal,27,37.7,25.0
+2003,Wood/Wood Waste Biomass,2,33.0,24.2
+2003,Municipal Solid Waste,2,32.9,36.7
+2003,Natural Gas Internal Combustion Engine,22,15.7,15.1
+2003,Landfill Gas,9,9.9,8.2
+2003,Onshore Wind Turbine,2,6.9,6.9
+2003,Other Natural Gas,1,1.6,1.5
+2003,Other Waste Biomass,1,1.1,1.1
+2004,Natural Gas Steam Turbine,31,3971.8,3947.5
+2004,Petroleum Liquids,73,1148.8,996.1
+2004,Natural Gas Fired Combined Cycle,27,1007.7,961.0
+2004,Natural Gas Fired Combustion Turbine,60,837.3,629.7
+2004,Conventional Steam Coal,14,648.4,563.1
+2004,Conventional Hydroelectric,10,120.5,118.7
+2004,Natural Gas Internal Combustion Engine,45,70.7,59.4
+2004,Wood/Wood Waste Biomass,8,33.3,28.8
+2004,Onshore Wind Turbine,2,29.7,29.7
+2004,Other Waste Biomass,4,20.5,20.0
+2004,Landfill Gas,9,10.3,10.3
+2004,All Other,1,7.5,7.5
+2004,Other Gases,1,5.0,5.0
+2004,Municipal Solid Waste,1,3.5,2.3
+2005,Natural Gas Steam Turbine,47,2198.1,2086.6
+2005,Petroleum Liquids,86,818.1,777.0
+2005,Natural Gas Fired Combustion Turbine,40,764.0,643.6
+2005,Conventional Steam Coal,13,330.3,272.3
+2005,Natural Gas Fired Combined Cycle,8,182.5,176.1
+2005,Wood/Wood Waste Biomass,5,67.5,39.0
+2005,Other Gases,7,40.2,38.0
+2005,Natural Gas Internal Combustion Engine,32,33.3,30.9
+2005,Conventional Hydroelectric,10,15.5,14.0
+2005,Landfill Gas,10,13.3,10.4
+2005,Other Waste Biomass,2,6.5,6.1
+2005,Onshore Wind Turbine,3,4.8,4.8
+2006,Natural Gas Steam Turbine,15,1364.0,1299.2
+2006,Natural Gas Fired Combustion Turbine,29,836.8,693.5
+2006,Conventional Steam Coal,23,771.9,753.8
+2006,Petroleum Liquids,99,654.3,696.0
+2006,Geothermal,3,121.0,9.0
+2006,Natural Gas Fired Combined Cycle,6,109.9,109.5
+2006,Wood/Wood Waste Biomass,6,48.5,46.3
+2006,All Other,1,38.2,37.2
+2006,Natural Gas Internal Combustion Engine,33,36.8,35.8
+2006,Landfill Gas,20,35.7,32.7
+2006,Conventional Hydroelectric,26,28.0,24.3
+2006,Other Gases,4,22.8,21.3
+2006,Onshore Wind Turbine,1,9.2,9.2
+2006,Other Waste Biomass,1,3.0,2.5
+2007,Natural Gas Steam Turbine,35,2261.5,2220.4
+2007,Conventional Steam Coal,25,1316.4,1241.0
+2007,Natural Gas Fired Combustion Turbine,20,752.9,640.9
+2007,Petroleum Liquids,85,433.3,434.0
+2007,Natural Gas Fired Combined Cycle,4,186.9,162.6
+2007,Natural Gas Internal Combustion Engine,30,46.8,42.9
+2007,Other Waste Biomass,7,39.1,36.3
+2007,Wood/Wood Waste Biomass,8,37.5,23.1
+2007,Geothermal,20,24.0,18.0
+2007,All Other,1,23.5,19.9
+2007,Conventional Hydroelectric,10,14.9,15.2
+2007,Onshore Wind Turbine,3,12.4,7.9
+2007,Other Gases,2,11.7,10.4
+2007,Landfill Gas,9,8.9,8.5
+2008,Natural Gas Steam Turbine,16,966.6,901.8
+2008,Conventional Steam Coal,29,834.2,794.4
+2008,Natural Gas Fired Combustion Turbine,20,417.3,308.6
+2008,Petroleum Liquids,56,404.8,316.8
+2008,Natural Gas Fired Combined Cycle,8,215.3,186.9
+2008,Natural Gas Internal Combustion Engine,37,81.5,64.2
+2008,Landfill Gas,14,24.0,22.1
+2008,Conventional Hydroelectric,8,23.8,24.6
+2008,All Other,2,22.5,20.5
+2008,Municipal Solid Waste,2,5.5,2.5
+2008,Other Waste Biomass,4,3.6,3.6
+2008,Wood/Wood Waste Biomass,1,2.5,2.1
+2008,Onshore Wind Turbine,2,1.4,0.0
+2008,Geothermal,1,1.2,0.9
+2009,Natural Gas Steam Turbine,31,4033.5,3854.8
+2009,Petroleum Liquids,52,638.2,551.8
+2009,Conventional Steam Coal,14,568.2,548.1
+2009,Natural Gas Fired Combined Cycle,7,423.2,347.2
+2009,Natural Gas Fired Combustion Turbine,26,336.8,286.2
+2009,Wood/Wood Waste Biomass,6,83.5,53.2
+2009,Other Gases,3,51.2,46.0
+2009,Natural Gas Internal Combustion Engine,19,40.9,35.7
+2009,Landfill Gas,25,29.8,27.3
+2009,Geothermal,21,29.4,14.8
+2009,Other Waste Biomass,5,19.8,15.1
+2009,Municipal Solid Waste,1,13.0,9.5
+2009,Conventional Hydroelectric,3,9.9,0.0
+2009,All Other,2,1.6,1.4
+2010,Petroleum Liquids,72,1949.7,1860.8
+2010,Conventional Steam Coal,34,1628.2,1466.1
+2010,Natural Gas Steam Turbine,32,1445.5,1173.1
+2010,Natural Gas Fired Combustion Turbine,22,551.6,479.1
+2010,Wood/Wood Waste Biomass,15,159.3,160.5
+2010,Natural Gas Fired Combined Cycle,9,135.0,117.3
+2010,Conventional Hydroelectric,10,124.0,126.9
+2010,All Other,2,50.0,39.0
+2010,Landfill Gas,31,36.1,32.6
+2010,Natural Gas Internal Combustion Engine,15,26.3,22.1
+2010,Other Gases,2,8.0,6.0
+2010,Municipal Solid Waste,1,4.2,1.9
+2010,Onshore Wind Turbine,2,2.2,2.2
+2010,Other Waste Biomass,1,0.5,0.5
+2011,Conventional Steam Coal,40,2990.8,2738.8
+2011,Natural Gas Steam Turbine,30,2268.2,1755.4
+2011,Petroleum Liquids,140,1732.7,1515.0
+2011,Natural Gas Fired Combined Cycle,3,240.8,167.6
+2011,Natural Gas Fired Combustion Turbine,20,237.0,176.3
+2011,Conventional Hydroelectric,16,155.3,145.4
+2011,Wood/Wood Waste Biomass,12,75.5,66.1
+2011,Natural Gas Internal Combustion Engine,25,39.9,35.9
+2011,Onshore Wind Turbine,2,37.0,37.0
+2011,All Other,2,33.0,30.1
+2011,Landfill Gas,14,31.1,14.2
+2011,Other Gases,4,27.5,26.0
+2011,Municipal Solid Waste,2,10.3,3.7
+2011,Petroleum Coke,1,10.0,9.5
+2011,Geothermal,4,4.8,3.3
+2011,Solar Photovoltaic,4,2.0,2.0
+2011,Other Waste Biomass,3,1.7,1.6
+2011,Solar Thermal without Energy Storage,1,1.5,1.5
+2012,Conventional Steam Coal,90,11444.7,10431.5
+2012,Natural Gas Steam Turbine,34,3231.0,2633.7
+2012,Petroleum Liquids,111,2322.1,2024.9
+2012,Natural Gas Fired Combustion Turbine,42,1059.3,659.0
+2012,Natural Gas Fired Combined Cycle,11,363.3,313.2
+2012,Conventional Hydroelectric,29,315.4,314.3
+2012,Petroleum Coke,6,129.5,116.1
+2012,Other Gases,5,126.0,156.3
+2012,Wood/Wood Waste Biomass,7,72.7,65.1
+2012,Landfill Gas,31,39.5,37.5
+2012,Natural Gas Internal Combustion Engine,17,38.4,37.7
+2012,Municipal Solid Waste,1,22.0,18.0
+2012,Onshore Wind Turbine,2,14.2,12.2
+2012,Other Waste Biomass,3,3.6,3.5
+2012,Geothermal,1,1.2,0.9
+2013,Conventional Steam Coal,60,6713.5,6061.5
+2013,Natural Gas Steam Turbine,33,5507.2,4884.1
+2013,Nuclear,4,3704.5,3576.0
+2013,Petroleum Liquids,141,2278.2,2127.3
+2013,Natural Gas Fired Combustion Turbine,41,723.7,582.5
+2013,Natural Gas Fired Combined Cycle,13,468.0,354.2
+2013,Petroleum Coke,1,165.2,138.0
+2013,Conventional Hydroelectric,35,164.9,165.1
+2013,Wood/Wood Waste Biomass,9,98.0,79.9
+2013,Natural Gas Internal Combustion Engine,40,75.2,71.6
+2013,Landfill Gas,48,65.4,60.3
+2013,Geothermal,4,29.0,23.6
+2013,Batteries,3,24.0,24.0
+2013,Onshore Wind Turbine,5,15.4,15.4
+2013,Municipal Solid Waste,2,8.2,7.5
+2013,Solar Photovoltaic,2,2.0,2.0
+2013,Other Natural Gas,3,1.4,1.4
+2013,Solar Thermal without Energy Storage,1,1.0,1.0
+2014,Conventional Steam Coal,55,4849.4,4295.2
+2014,Natural Gas Steam Turbine,35,2341.3,2248.5
+2014,Petroleum Liquids,71,1448.6,1314.1
+2014,Natural Gas Fired Combined Cycle,19,1415.2,1220.8
+2014,Nuclear,1,563.4,612.4
+2014,Natural Gas Fired Combustion Turbine,16,515.4,436.0
+2014,Conventional Hydroelectric,5,133.4,134.8
+2014,Wood/Wood Waste Biomass,6,131.9,131.4
+2014,Onshore Wind Turbine,5,99.2,96.2
+2014,Other Gases,4,40.0,40.0
+2014,All Other,4,30.0,29.7
+2014,Landfill Gas,21,27.9,27.4
+2014,Natural Gas Internal Combustion Engine,17,24.3,23.8
+2014,Solar Thermal without Energy Storage,2,12.5,6.7
+2014,Geothermal,2,3.0,2.2
+2014,Other Waste Biomass,2,2.4,2.4
+2014,Other Natural Gas,8,2.0,2.0
+2014,Solar Photovoltaic,3,1.8,1.7
+2015,Conventional Steam Coal,115,16676.4,14866.4
+2015,Natural Gas Steam Turbine,31,3556.3,3116.8
+2015,Natural Gas Fired Combustion Turbine,66,2589.9,2355.9
+2015,Petroleum Liquids,75,1421.3,1307.4
+2015,Onshore Wind Turbine,12,419.0,417.8
+2015,Natural Gas Fired Combined Cycle,12,348.2,296.5
+2015,Wood/Wood Waste Biomass,15,245.0,211.9
+2015,Conventional Hydroelectric,11,121.9,119.5
+2015,Other Gases,5,114.0,110.0
+2015,Municipal Solid Waste,2,78.6,64.4
+2015,Solar Thermal without Energy Storage,2,43.8,43.8
+2015,Landfill Gas,27,43.2,33.5
+2015,Geothermal,2,24.4,0.0
+2015,Other Waste Biomass,16,16.3,16.2
+2015,Natural Gas Internal Combustion Engine,8,10.7,10.5
+2015,Batteries,2,2.0,2.0
+2015,Solar Photovoltaic,4,1.2,1.2
+2015,Flywheels,1,1.0,1.0
+2015,Other Natural Gas,1,1.0,1.0
+2016,Conventional Steam Coal,63,8695.7,7905.9
+2016,Natural Gas Steam Turbine,39,6093.7,5605.8
+2016,Natural Gas Fired Combustion Turbine,63,1661.4,1645.3
+2016,Petroleum Liquids,68,1073.3,906.2
+2016,Nuclear,1,502.0,482.8
+2016,Natural Gas Fired Combined Cycle,5,216.9,183.6
+2016,Wood/Wood Waste Biomass,9,157.0,107.0
+2016,Petroleum Coke,1,112.5,85.0
+2016,Conventional Hydroelectric,8,111.7,111.7
+2016,Landfill Gas,36,73.8,64.6
+2016,Other Waste Biomass,11,51.4,50.2
+2016,Natural Gas Internal Combustion Engine,30,48.5,45.8
+2016,Onshore Wind Turbine,4,42.7,42.7
+2016,Geothermal,2,38.0,0.0
+2016,All Other,4,24.0,24.0
+2016,Solar Photovoltaic,2,4.1,4.1
+2016,Flywheels,1,2.0,2.0
+2016,Other Natural Gas,1,1.7,1.6
+2016,Municipal Solid Waste,1,1.2,1.1
+2017,Conventional Steam Coal,30,6947.8,6309.7
+2017,Natural Gas Steam Turbine,34,4449.1,3779.4
+2017,Petroleum Liquids,75,864.6,741.2
+2017,Natural Gas Fired Combustion Turbine,21,647.3,454.7
+2017,Natural Gas Fired Combined Cycle,8,581.2,436.0
+2017,Conventional Hydroelectric,10,123.1,119.0
+2017,Wood/Wood Waste Biomass,9,101.1,83.2
+2017,Onshore Wind Turbine,7,59.9,58.1
+2017,Landfill Gas,29,34.6,31.1
+2017,All Other,1,31.3,26.0
+2017,Geothermal,24,28.8,17.6
+2017,Other Waste Biomass,4,25.6,14.7
+2017,Batteries,1,20.0,20.0
+2017,Natural Gas Internal Combustion Engine,8,15.4,14.5
+2017,Municipal Solid Waste,1,1.6,1.6
+2017,Other Natural Gas,2,1.2,1.2
+2018,Conventional Steam Coal,38,14611.8,13304.2
+2018,Natural Gas Steam Turbine,33,5541.9,4828.5
+2018,Petroleum Liquids,88,2425.9,2029.7
+2018,Natural Gas Fired Combined Cycle,26,1595.6,1373.6
+2018,Natural Gas Fired Combustion Turbine,29,822.7,688.7
+2018,Nuclear,1,550.0,607.7
+2018,Wood/Wood Waste Biomass,11,183.4,157.0
+2018,Other Waste Biomass,7,131.5,72.2
+2018,Landfill Gas,39,99.4,89.8
+2018,Geothermal,16,66.6,47.2
+2018,Conventional Hydroelectric,28,54.5,52.4
+2018,Natural Gas Internal Combustion Engine,19,40.0,37.9
+2018,Other Gases,2,17.5,15.9
+2018,Municipal Solid Waste,2,16.5,10.8
+2018,Onshore Wind Turbine,1,9.2,0.7
+2018,All Other,2,6.0,6.0
+2018,Batteries,3,4.7,4.7
+2018,Solar Photovoltaic,3,2.3,2.3
+2018,Other Natural Gas,4,1.2,1.2
+2019,Conventional Steam Coal,61,14455.6,12977.6
+2019,Natural Gas Steam Turbine,30,3436.7,3179.0
+2019,Natural Gas Fired Combustion Turbine,31,722.6,614.4
+2019,Nuclear,1,670.0,673.6
+2019,Wood/Wood Waste Biomass,19,585.0,545.0
+2019,Natural Gas Fired Combined Cycle,8,501.0,393.3
+2019,Petroleum Liquids,68,420.3,345.7
+2019,Onshore Wind Turbine,15,178.5,177.3
+2019,Conventional Hydroelectric,35,162.2,168.0
+2019,Municipal Solid Waste,5,129.9,108.4
+2019,Landfill Gas,53,77.9,71.3
+2019,Petroleum Coke,1,67.0,67.0
+2019,All Other,1,40.5,27.9
+2019,Other Gases,4,32.5,15.8
+2019,Natural Gas Internal Combustion Engine,18,29.6,28.1
+2019,Geothermal,7,15.6,7.4
+2019,Other Waste Biomass,8,11.0,8.8
+2019,Solar Photovoltaic,16,8.0,8.0
+2019,Batteries,4,4.9,4.8
+2019,Other Natural Gas,1,1.5,1.4
+2020,Conventional Steam Coal,40,12130.5,10996.7
+2020,Nuclear,2,1978.5,1612.9
+2020,Petroleum Liquids,58,1371.3,1152.2
+2020,Natural Gas Fired Combustion Turbine,45,1153.0,918.2
+2020,Natural Gas Fired Combined Cycle,9,981.0,813.3
+2020,Natural Gas Steam Turbine,23,977.0,899.6
+2020,Onshore Wind Turbine,25,242.6,242.4
+2020,Landfill Gas,33,110.5,103.4
+2020,Wood/Wood Waste Biomass,5,97.5,76.0
+2020,Natural Gas Internal Combustion Engine,16,25.4,26.5
+2020,Geothermal,2,21.8,14.6
+2020,All Other,2,18.9,19.2
+2020,Other Natural Gas,5,13.4,13.2
+2020,Conventional Hydroelectric,6,10.9,10.9
+2020,Other Waste Biomass,9,8.6,8.6
+2020,Batteries,3,5.4,5.2
+2020,Solar Photovoltaic,1,1.5,1.4
+2021,Conventional Steam Coal,24,6398.0,5561.8
+2021,Nuclear,1,1012.0,1039.4
+2021,Natural Gas Steam Turbine,15,1001.7,918.0
+2021,Petroleum Liquids,72,842.4,700.3
+2021,Natural Gas Fired Combustion Turbine,17,409.2,306.4
+2021,Natural Gas Fired Combined Cycle,21,402.6,328.1
+2021,Onshore Wind Turbine,12,303.1,303.4
+2021,Solar Thermal without Energy Storage,6,264.6,260.0
+2021,Wood/Wood Waste Biomass,6,228.5,167.9
+2021,Landfill Gas,39,63.8,61.3
+2021,Natural Gas Internal Combustion Engine,18,41.9,41.4
+2021,Conventional Hydroelectric,14,28.2,20.7
+2021,Other Waste Biomass,10,25.7,15.5
+2021,Other Gases,2,25.0,25.0
+2021,Other Natural Gas,6,17.5,13.3
+2021,Municipal Solid Waste,1,13.6,10.0
+2021,Batteries,6,12.5,12.5
+2021,Solar Photovoltaic,2,11.0,11.0
+2022,Conventional Steam Coal,41,15124.6,13679.8
+2022,Natural Gas Steam Turbine,16,1180.1,1115.4
+2022,Petroleum Liquids,68,695.0,580.3
+2022,Natural Gas Fired Combustion Turbine,15,673.1,510.2
+2022,Natural Gas Fired Combined Cycle,11,431.2,709.2
+2022,Onshore Wind Turbine,12,307.6,307.5
+2022,Wood/Wood Waste Biomass,9,144.8,137.3
+2022,Municipal Solid Waste,3,99.4,66.0
+2022,Landfill Gas,59,92.5,87.3
+2022,Geothermal,15,58.5,44.7
+2022,Batteries,7,56.6,56.6
+2022,All Other,1,34.0,30.7
+2022,Natural Gas Internal Combustion Engine,19,29.0,28.0
+2022,Conventional Hydroelectric,9,10.4,9.4
+2022,Other Gases,1,5.5,5.3
+2022,Solar Photovoltaic,4,5.3,5.2
+2022,Other Waste Biomass,2,3.2,3.2
+2022,Other Natural Gas,2,2.5,2.4
+2023,Conventional Steam Coal,25,9522.9,8598.9
+2023,Natural Gas Steam Turbine,26,5053.0,4471.0
+2023,Natural Gas Fired Combustion Turbine,36,1143.7,915.0
+2023,Wood/Wood Waste Biomass,17,369.3,299.7
+2023,Natural Gas Fired Combined Cycle,12,340.5,299.1
+2023,Petroleum Liquids,127,303.6,271.2
+2023,Onshore Wind Turbine,17,159.4,152.3
+2023,Municipal Solid Waste,2,77.0,71.6
+2023,Geothermal,3,71.0,46.8
+2023,Landfill Gas,43,67.9,64.8
+2023,Solar Photovoltaic,115,62.9,62.9
+2023,Conventional Hydroelectric,12,52.6,51.7
+2023,Other Gases,6,38.0,33.0
+2023,Petroleum Coke,1,27.3,20.0
+2023,Batteries,6,22.7,22.7
+2023,Natural Gas Internal Combustion Engine,8,17.1,12.8
+2023,Other Natural Gas,18,13.6,13.2
+2024,Conventional Steam Coal,12,4460.0,3958.6
+2024,Natural Gas Fired Combined Cycle,25,3197.7,2603.7
+2024,Natural Gas Steam Turbine,23,2009.4,1508.3
+2024,Natural Gas Fired Combustion Turbine,20,724.8,510.5
+2024,Petroleum Liquids,72,283.1,234.0
+2024,Wood/Wood Waste Biomass,7,241.9,202.5
+2024,Conventional Hydroelectric,21,149.2,156.6
+2024,Municipal Solid Waste,6,132.7,74.9
+2024,Onshore Wind Turbine,8,68.1,68.3
+2024,Landfill Gas,104,55.1,54.3
+2024,Hydroelectric Pumped Storage,2,42.0,42.0
+2024,Batteries,7,33.0,27.0
+2024,Other Waste Biomass,5,25.5,19.5
+2024,Geothermal,2,20.6,14.1
+2024,Natural Gas Internal Combustion Engine,12,16.9,16.4
+2024,All Other,2,8.5,6.2
+2024,Other Natural Gas,7,8.5,8.2
+2024,Solar Photovoltaic,3,4.5,4.5
+2025,Conventional Steam Coal,8,2626.0,2688.4
+2025,Petroleum Liquids,78,1075.7,782.5
+2025,Natural Gas Fired Combustion Turbine,23,863.1,659.6
+2025,Batteries,7,328.5,328.5
+2025,Wood/Wood Waste Biomass,12,310.9,292.8
+2025,Natural Gas Fired Combined Cycle,2,147.9,71.5
+2025,Natural Gas Steam Turbine,7,120.6,103.3
+2025,Other Gases,3,83.0,59.4
+2025,Geothermal,2,30.0,18.0
+2025,Natural Gas Internal Combustion Engine,15,29.2,25.2
+2025,Conventional Hydroelectric,8,27.4,27.0
+2025,Landfill Gas,22,27.4,26.1
+2025,Onshore Wind Turbine,11,21.9,20.0
+2025,Solar Photovoltaic,7,10.3,8.1
+2025,All Other,1,7.5,4.0
+2026,Natural Gas Fired Combustion Turbine,7,821.9,643.0
+2026,Natural Gas Steam Turbine,2,43.5,42.5
+2026,Batteries,1,10.0,5.0
+2026,Landfill Gas,5,8.0,7.7
+2026,Natural Gas Internal Combustion Engine,5,6.9,6.6
+2026,All Other,1,5.3,5.3
+2026,Wood/Wood Waste Biomass,1,5.0,4.7
+2026,Solar Photovoltaic,2,3.2,3.2
+2026,Petroleum Liquids,3,2.1,2.1
+2026,Onshore Wind Turbine,9,1.5,1.5
+2026,Other Waste Biomass,3,1.5,1.5
+2026,Other Gases,1,1.0,0.8

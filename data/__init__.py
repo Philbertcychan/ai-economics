@@ -18,6 +18,10 @@ PROCESSED_DIR = DATA_DIR / "processed"  # tidy CSVs derived from raw pulls; comm
 # structured data does not carry. Read from filings, each row pointing at its source.
 DISCLOSED_DIR = DATA_DIR / "disclosed"
 LAST_REFRESH_DIFF = DATA_DIR / "last_refresh_diff.md"
+# Dated pulls of EIA's monthly generator inventory (data/eia.py); gitignored except manifest.json.
+EIA_RAW_DIR = RAW_DIR / "EIA860M"
+# Tidy generator tables and summaries rebuilt from the newest EIA-860M workbook; committed.
+EIA_PROCESSED_DIR = PROCESSED_DIR / "eia860m"
 
 MODELS_DIR = REPO_ROOT / "models"  # generated .xlsx per company; committed build artifact
 
