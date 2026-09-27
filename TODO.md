@@ -1,100 +1,106 @@
 # TODO
 
-Staged plan. The scaffold landed on 2026-09-12; each stage is one working week. Tick items as
-they land and add a line to `log.md` per session.
+The only tracker. Tick items as they land and add a line to `log.md` per session.
 
-## Setup (before Sept 21)
+## The spine and the three tracks (agreed 2026-09-22)
 
-- [x] Set `EDGAR_USER_AGENT` locally (`Your Name you@example.com`) and as a repository secret of
-      the same name. The SEC asks for a real contact, and the scheduled refresh refuses to run
-      without the secret.
-- [x] GitHub: Settings -> Pages -> Source: GitHub Actions (`refresh.yml` deploys `site/build/`).
-      Live at <https://philbertcychan.github.io/ai-economics/>.
-- [x] Replace the `<owner>` placeholders with the real GitHub handle: `README.md`,
-      `REPO_OWNER` in `scripts/build_site.py`, `REPO_URL` in `scripts/export_xlsx.py`, and
-      `site/content/_template.md`.
-- [x] Run `uv run scripts/refresh.py --dry-run`, then a real refresh; read
-      `data/last_refresh_diff.md` and open `site/build/index.html`.
-- [x] Fill the tables in `notes/coreweave-s1.md` from the filing, page numbers included (done
-      2026-09-19: every figure was machine-checked against a verbatim snippet on its cited page).
-- [ ] Read the CoreWeave S-1 yourself with `notes/coreweave-s1.md` open. Start with its "Read this
-      first" section, and confirm the figures the model will rely on against the page.
+The project is built around one spine: the AI compute value chain, bottom-up, from power
+generation and fuel to the applications that consume tokens. Each stage is described the same
+way (unit, cost, price, capacity, lead time, players, bottleneck) in `stack/`. Three products
+sit on that spine:
 
-## Stage 1 — Sept 21–27, 2026: unit economics and CoreWeave
+- **Fluency** (recruiting): one studied page per stage with the numbers people who follow the
+  space know, each with its source.
+- **Bottlenecks** (investing): demand versus supply per stage in physical units with lead
+  times; prices as confirmation; listed players as the watch list; `calls.md` as the record.
+  The standard: the 2025 NAND move (Sandisk) should have been spottable from the memory page.
+- **Understanding** (where to build): how each stage works, who does what, and where a
+  finance-and-code skill set can contribute.
 
-How the work is split: Claude builds the model and explains it; Philbert owns every assumption and
-every call. Start with `docs/modeling-approach.md`, then `docs/code-tour.md`.
+The company models (`companies/`) are the top-down calibration of the GPU-hour and token
+stages and continue in parallel.
 
-Done:
+How the work is split: Claude builds the model and explains it; Philbert owns every assumption,
+every bottleneck score and every call.
 
-- [x] Unit-economics engine (`engine/unit_economics.py`): cost stack, rental and token revenue,
-      margin, payback, with tests.
-- [x] Assumptions register (`assumptions/`, `companies/assumptions.py`) and CoreWeave's first
-      register from the S-1.
+## Setup (done)
 
-Philbert's decisions:
+- [x] Repo, CI, daily refresh, Pages, `EDGAR_USER_AGENT`, CoreWeave S-1 notes.
 
-- [x] Read `docs/modeling-approach.md` (2026-09-21).
-- [ ] Open `assumptions/CRWV.csv` in Excel. For each row set `status` to `confirmed`, or change the
-      value and set `overridden`. The Sensitivities sheet in `models/CRWV.xlsx` ranks what
-      matters: for the cash floor, `debt_share_of_capex`, `mw_added_per_quarter`,
-      `capex_per_mw_usd_m` and `receivables_share_of_quarterly_revenue`; for payback per GPU,
-      `revenue_per_mw_year_usd_m`, `adjusted_ebitda_margin` and `prepayment_share_of_tcv`.
-      Two rows where the evidence disagrees with itself and the choice is yours:
+## Stage 1 (done 2026-09-22): engine, register, CoreWeave
+
+- [x] Unit-economics engine; assumptions register; CoreWeave history and ten-quarter forecast
+      with prepayments, three payback definitions and a sensitivity sheet; reviewed and revised.
+
+Philbert's open decisions from Stage 1:
+
+- [ ] `assumptions/CRWV.csv`: set each row's `status`. The Sensitivities sheet in
+      `models/CRWV.xlsx` ranks what matters. Two rows where the evidence disagrees with itself:
       `prepayment_share_of_tcv` (S-1 says 15-25%, cash since the IPO says about 8%; set to 10%)
       and `cost_of_debt` (expensed 7.4% versus contractual 9-10%; set to 7.5%).
-- [ ] Which debt measure the CoreWeave model uses: the Q2 2026 10-Q has no `us-gaap:LongTermDebt`
-      fact (the reported series stops at 2026Q1); the only current element is
-      `DebtInstrumentCarryingAmount`, which is gross of discounts and issuance costs. The model
-      now uses the gross principal (`debt_principal`), which is what the maturity ladder and
-      the interest cost are measured on; the site's long-term debt tile still shows the
+- [ ] Debt measure: the model uses gross principal (`debt_principal`); the site tile shows the
       carrying amount. Confirm or change.
 
-Claude's build list, in order:
+## Stage 2 — Sept 28 to Oct 4, 2026: the stack skeleton, and Nebius
 
-- [x] Quarterly history for CoreWeave (`companies/coreweave.py` v1): active power, contracted
-      power, backlog and adjusted EBITDA read from the earnings releases into
-      `data/disclosed/CRWV.csv`; revenue and capex from XBRL; per-MW and per-GPU-hour lines
-      for six quarters. Result: payback on the company's own cash flows is 4 to 5 years per MW
-      against the 2.5 it discloses per GPU; the guide explains the gap.
-- [x] Customer prepayments in the payback line: three definitions side by side (gross, the
-      company's net-of-prepayment definition, strict cash timing) against the disclosed 2.5.
-- [x] Forecast columns (`E`), ten quarters: contracts signed and capacity going live, revenue per
-      MW, EBITDA margin, capex per MW, prepayments and deferred revenue, receivables, net debt
-      against capex with the 10-Q maturity ladder refinanced, interest, cash, and the external
-      funding required to hold a minimum balance. Reviewed by three independent readers
-      (finance logic, code, docs) and revised; base case needs no outside money, debt reaches
-      $97bn by 2028 at 3x EBITDA.
-- [x] Sensitivities: every register row with a range at its low and high, one at a time, on the
-      workbook's Sensitivities sheet (funding required, minimum cash, leverage, payback,
-      final-year revenue). Not yet on the site.
+Track: all three (the skeleton serves fluency first).
+
+- [x] Stack skeleton across all nine stages: `stack/stages.csv` (units, what each sells, lead
+      time), `stack/metrics.csv` (6 to 12 sourced figures per stage), `stack/players.csv`,
+      `stack/conversions.csv` (how one stage's unit becomes the next), `stack/consumption_tiers.csv`
+      (applications split by tokens consumed), one primer per stage in `stack/primers/`, and the
+      site pages `stack/index.html` and `stack/<stage>.html`. Schema, loaders, pages and primers
+      done 2026-09-26; sourced figures land stage by stage as the research batches finish.
+- [ ] Philbert: score each stage's `bottleneck_score` (1 to 5) in `stack/stages.csv` from the
+      evidence on its page, and write the one-line `bottleneck_note`. These are calls.
+- [x] Nebius model in `companies/nebius.py` on the CoreWeave pattern (foreign private issuer:
+      20-F and 6-K cadence; every quarterly figure from the 6-K results exhibits, quote-checked
+      into `data/disclosed/NBIS.csv`; ARR-driven forecast; prepayments as a share of capex).
+- [ ] Philbert: review `assumptions/NBIS.csv` (17 proposed rows); the two that matter most are
+      `active_power_mw_2026q2` (inferred, not disclosed) and `arr_per_new_mw_year_usd_m`.
+- [ ] Nebius: a back-loaded 2026 ramp (or a go-live lag) so the model can hold both the ARR
+      and the revenue guidance at once; per-GPU lines once kW per GPU or GPU counts are disclosed.
+- [ ] A spend-to-live lag for capex in the CoreWeave forecast.
+- [ ] Prepaid revenue recognised by contract vintage in the CoreWeave forecast.
+
+## Stage 3 — Oct 5 to 11, 2026: power, deep
+
+Track: bottlenecks, with fluency as the by-product. US first.
+
+- [ ] Power supply dataset: EIA-860 and EIA-860M (operating and planned generators by fuel,
+      status and date), pulled by `scripts/refresh.py` like EDGAR, cached and tidied under `data/`.
+- [ ] Interconnection queues: ERCOT, PJM, MISO, SPP, CAISO public queue files; years-to-connect
+      by ISO; large-load requests where published.
+- [ ] Demand side: announced data-centre campuses in the US with MW, sponsor, power source and
+      status, each with a source; start from the nine campuses the data-centre research recorded
+      on 2026-09-26 (Stargate Abilene, Hyperion, Colossus, Fairwater, Rainier and others; in the
+      session scratchpad `stack/out/datacenter.json` under `campuses`, to be moved into `stack/`); the GW pipeline against firm supply additions by year.
+- [ ] Site map with a likelihood rubric per campus (power source secured, queue position, gas
+      access, water, permits, sponsor balance sheet), rendered on the site. What SemiAnalysis
+      adds beyond this (satellite imagery, permit scraping) is out of reach; say so on the page.
+- [ ] Gas turbine order books and lead times; nuclear restarts; the price of firm power.
+- [ ] Bottleneck verdict on power and grid, written by Philbert, with a falsifier in `calls.md`.
+
+## Stage 4 — Oct 12 to 18, 2026: memory, deep; first calls
+
+Track: bottlenecks.
+
+- [ ] Memory dataset: HBM capacity by supplier, HBM stacks and GB per GPU by generation, DRAM
+      and NAND contract prices (TrendForce releases), capex by supplier, enterprise SSD demand.
+- [ ] Bottom-up demand for HBM and NAND from GPU shipments and server content; supply from
+      announced capacity; the Sandisk test written up: what was visible when.
+- [ ] Every company as a source of tokens or capacity: extend `companies/` beyond the neoclouds
+      to the hyperscalers (capex, GPU-hours implied) and the labs (tokens, revenue run-rate).
+- [ ] First writeup with a Position and a falsifier; first rows in `calls.md`.
+
+## Later
+
+- [ ] Signals ledger: contracts, build-outs, energy, statements, rental prices; each entry
+      sourced, dated, rated for confidence and mapped to a stage or an assumption.
 - [ ] Sensitivity table on the site (the workbook has it).
-- [ ] Prepaid revenue recognised by contract vintage instead of a flat share of the balance
-      (contracts signed in 2024 unwind in 2027-28, inside the forecast window).
-- [ ] A spend-to-live lag for capex (spending lands one or two quarters before capacity
-      goes live) once the ramp is not held flat.
-- [ ] Signals ledger v0: contracts, build-outs, energy, statements, rental prices, each entry
-      sourced, dated, rated for confidence and mapped to an assumption.
-- [ ] External sources for the inputs the filings cannot give: electricity price, data-centre
-      lease cost per kW, rental prices by GPU generation, token throughput and prices.
 - [ ] Public dashboard with Philbert's signed-off assumptions as the default and toggles for
-      readers to change them (Philbert's request, 2026-09-21). Needs the engine mirrored in the
-      browser and checked against Python with shared test cases; after the forecast exists.
-- [ ] First writeup with a Position and a falsifier; first row in `calls.md`.
-
-## Stage 2 — Sept 28 – Oct 4, 2026: second neocloud and the supply side
-
-- [ ] Nebius drivers in `companies/nebius.py` (foreign private issuer: 20-F / 6-K cadence, USD and
-      RUB units).
-- [ ] Hyperscaler capex lines (MSFT, GOOGL, AMZN, META) from reported facts.
-- [ ] Dashboard: side-by-side company comparison.
-
-## Stage 3 — Oct 5–11, 2026
-
-- [ ] Supply against demand: reconcile the capacity being built across the three layers with the
-      revenue being guided to; industry writeup with a call in `calls.md`.
-
-## Stage 4 — Oct 12–18, 2026
-
-- [ ] Close the loop: grade the open rows in `calls.md` against reported numbers, revise drivers
-      with any new filings, and write the synthesis.
+      readers (needs the engine mirrored in the browser and checked against Python).
+- [ ] Data integrations beyond public sources, kept behind the `data/` package pattern so a
+      provider can be added without touching the models: earnings-call transcripts, GPU rental
+      price trackers, and near the end Philbert's Questrade account (its MCP: positions, prices,
+      a watch list of the listed players per stage).

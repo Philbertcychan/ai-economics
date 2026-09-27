@@ -33,3 +33,8 @@ ASSUMPTIONS_DIR = REPO_ROOT / "assumptions"
 
 NOTES_DIR = REPO_ROOT / "notes"
 CALLS_MD = REPO_ROOT / "calls.md"
+
+# The value chain as CSVs (stages, metrics, players, conversions) plus a markdown primer per
+# stage; bottleneck scores and status in stages.csv are Philbert's judgement (see data/stack.py).
+STACK_DIR = REPO_ROOT / "stack"
+STACK_PRIMERS_DIR = STACK_DIR / "primers"

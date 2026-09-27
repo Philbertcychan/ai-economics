@@ -12,7 +12,12 @@ hedge: "approximately", "more than", or blank), ``form``, ``filed``, ``accession
 and ``url``.
 The qualifier matters: "more than 850 MW" is a floor, not a measurement. A maturity ladder
 uses two more: "remainder of year" for the first, partial year and "thereafter" for the
-sum beyond the ladder, filed under the first year it can fall in.
+sum beyond the ladder, filed under the first year it can fall in. Four more describe how a
+figure was obtained rather than how the company hedged it: "comparative" (a prior-period
+figure taken from a later filing's comparative column), "not reported" (the statement has no
+such line, so the value is zero), "target" (a stated goal, not a measurement) and
+"range low" / "range high" (the ends of a range the company gave). The closed list is tested
+in ``tests/test_disclosed.py``.
 """
 
 from pathlib import Path

@@ -21,7 +21,7 @@ from typing import Any
 import pandas as pd
 import pytest
 from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
+from xlsx_eval import assert_formulas_recompute
 
 from companies import (
     FRAME_ORDER,
@@ -487,8 +487,10 @@ def test_subclass_may_override_or_supply_identity() -> None:
     assert isinstance(Outsider(), CompanyModel)
 
 
-def test_unbuilt_model_raises_not_implemented_with_a_pointer() -> None:
-    with pytest.raises(NotImplementedError, match=r"not written yet - TODO\.md"):
+def test_model_without_data_raises_not_implemented_with_a_pointer() -> None:
+    # build() before load_data(): no disclosed KPIs, so the model reports itself as pending
+    # and says where its data comes from.
+    with pytest.raises(NotImplementedError, match=r"data/disclosed/NBIS\.csv"):
         Nebius().build()
 
 
@@ -704,63 +706,14 @@ def test_coreweave_needs_a_complete_quarter(tmp_path: Path) -> None:
 
 
 def test_coreweave_workbook_formulas_recompute_to_the_python_values(tmp_path: Path) -> None:
-    # Evaluate the exported Excel formulas with a tiny interpreter (named inputs and same-sheet
-    # or cross-sheet cell references only) and compare with what Python computed. This is the
-    # check that the formulas a finance reader sees say the same thing as the engine.
+    # Evaluate the exported Excel formulas with a tiny interpreter (tests/xlsx_eval.py) and
+    # compare with what Python computed. This is the check that the formulas a finance reader
+    # sees say the same thing as the engine.
     model = CoreWeave()
     model.load_data()
     model.build()
     path = model.to_xlsx(tmp_path / "CRWV.xlsx")
-    wb = load_workbook(path)
-    names = {
-        name: wb["Inputs"][dn.attr_text.split("!")[1].replace("$", "")].value
-        for name, dn in wb.defined_names.items()
-    }
-
-    memo: dict[tuple[str, str], float] = {}
-
-    def cell_value(sheet: str, ref: str) -> float:
-        # Every estimate column refers to the previous one, so without a cache the
-        # evaluation is exponential in the number of periods.
-        if (sheet, ref) not in memo:
-            memo[(sheet, ref)] = _evaluate(sheet, ref)
-        return memo[(sheet, ref)]
-
-    def _evaluate(sheet: str, ref: str) -> float:
-        raw = wb[sheet][ref].value
-        if raw is None:
-            return math.nan
-        if not (isinstance(raw, str) and raw.startswith("=")):
-            return float(raw)
-        expr = raw[1:].replace("^", "**")
-        expr = re.sub(r"IF\(", "_if(", expr)
-        expr = re.sub(r"MAX\(", "max(", expr)
-        expr = re.sub(r"MIN\(", "min(", expr)
-        expr = re.sub(r"AND\(", "_and(", expr)
-        expr = re.sub(r"(Drivers|Outputs)!([A-Z]+[0-9]+)", r'_cell("\1","\2")', expr)
-        expr = re.sub(
-            r"(?<![A-Za-z_\"])([A-Z]+[0-9]+)(?![A-Za-z_\"(])", rf'_cell("{sheet}","\1")', expr
-        )
-        expr = re.sub(r"(?<![=<>])=(?!=)", "==", expr)
-        scope = {
-            "_cell": cell_value,
-            "_if": lambda c, a, b: a if c else b,
-            "_and": lambda *c: all(c),
-            "max": max,
-            "min": min,
-            **names,
-        }
-        return float(eval(expr, {"__builtins__": {}}, scope))  # noqa: S307 - our own formulas
-
-    for sheet, frame in (("Drivers", model.drivers), ("Outputs", model.outputs)):
-        for row, item in enumerate(frame.index, start=2):
-            for col, period in enumerate(frame.columns):
-                expected = frame.loc[item, period]
-                if math.isnan(expected):
-                    continue  # blank cells (a KPI the company did not disclose that quarter)
-                letter = get_column_letter(3 + col)
-                got = cell_value(sheet, f"{letter}{row}")
-                assert got == pytest.approx(expected, rel=1e-9), (item, period)
+    assert_formulas_recompute(path, {"Drivers": model.drivers, "Outputs": model.outputs})
 
 
 @pytest.mark.parametrize("cls", list(REGISTRY.values()), ids=list(REGISTRY))
@@ -853,7 +806,7 @@ def test_load_data_offline_from_processed_csvs(tmp_path: Path) -> None:
 
 
 def test_load_data_with_nothing_available_leaves_empty_state(tmp_path: Path) -> None:
-    model = Nebius(processed_dir=tmp_path)  # no NBIS/ directory at all
+    model = Nebius(processed_dir=tmp_path, disclosed_dir=tmp_path)  # nothing on disk
     model.load_data()
     model.load_data()  # idempotent
 
@@ -1006,9 +959,9 @@ def test_export_cli_reports_model_pending(tmp_path: Path, capsys: pytest.Capture
     # Registry lookup is covered by test_get_model_is_case_insensitive_and_names_known_tickers.
     code = export_main(
         ["nbis", "--out", str(tmp_path / "NBIS.xlsx")],
-        model_cls=lambda: Nebius(processed_dir=tmp_path),
+        model_cls=lambda: Nebius(processed_dir=tmp_path, disclosed_dir=tmp_path),
     )
     out = capsys.readouterr().out
     assert code == 2
-    assert re.search(r"NBIS: model pending - Nebius drivers not written yet", out)
+    assert re.search(r"NBIS: model pending - NBIS: no disclosed KPIs", out)
     assert not (tmp_path / "NBIS.xlsx").exists()

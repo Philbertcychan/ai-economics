@@ -2,11 +2,11 @@
 
 Self-contained: ``make_site`` writes a small fixture site (two fictional companies, one quarterly
 filer without a model and one annual filer with a built one, two published writeups, a draft, an
-underscore-prefixed template, a calls.md with an escaped pipe and a blank placeholder row) into
-``tmp_path`` and the tests build it and inspect the output. Templates and static assets come from
-the real ``site/templates`` and ``site/static``, so the tests also exercise the shipped HTML and
-hold it to the site's voice: labels, numbers, source lines and statuses, no explanatory prose.
-No network.
+underscore-prefixed template, a calls.md with an escaped pipe and a blank placeholder row, and
+the fixture stack from ``tests/test_stack.py``) into ``tmp_path`` and the tests build it and
+inspect the output. Templates and static assets come from the real ``site/templates`` and
+``site/static``, so the tests also exercise the shipped HTML and hold it to the site's voice:
+labels, numbers, source lines and statuses, no explanatory prose. No network.
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
+from test_stack import PRIMER_MD, STAGE_KEYS, STAGES_CSV, write_stack
 
 from data import REPO_ROOT, SITE_CONTENT_DIR, SITE_DIR, SITE_STATIC_DIR
 from scripts.build_site import (
@@ -34,6 +35,7 @@ from scripts.build_site import (
     change_direction,
     fmt_change,
     fmt_money,
+    fmt_number,
     fmt_timestamp,
     fmt_value,
     headline_figures,
@@ -246,7 +248,11 @@ status: published
 
 
 def make_site(tmp_path: Path) -> tuple[Path, Path, Path]:
-    """Write the fixture site; return (site_dir, out_dir, calls_md)."""
+    """Write the fixture site and, beside it, the fixture stack (``tmp_path / "stack"``).
+
+    Returns (site_dir, out_dir, calls_md); builds pass ``stack_dir=tmp_path / "stack"``.
+    """
+    write_stack(tmp_path)
     site = tmp_path / "site"
     (site / "data").mkdir(parents=True)
     (site / "content").mkdir()
@@ -266,7 +272,7 @@ def make_site(tmp_path: Path) -> tuple[Path, Path, Path]:
 @pytest.fixture
 def built(tmp_path: Path) -> tuple[Path, BuildReport]:
     site, out, calls = make_site(tmp_path)
-    return out, build(site_dir=site, out_dir=out, calls_md=calls)
+    return out, build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
 
 
 def read(path: Path) -> str:
@@ -341,13 +347,15 @@ def test_build_creates_expected_files(built: tuple[Path, BuildReport]) -> None:
         "writeups/what-an-alpha-cloud-gpu-hour-earns.html",
         "writeups/depreciation-the-gpu-hour.html",
         "writeups/index.html",
+        "stack/index.html",
+        *(f"stack/{key}.html" for key in STAGE_KEYS),
     ]
     for rel in expected:
         assert (out / rel).is_file(), rel
     assert sorted(report.pages) == sorted(expected)
     for rel in ("static/style.css", "static/dashboard.js", ".nojekyll", "data/calls.json"):
         assert (out / rel).is_file(), rel
-    assert (report.companies, report.writeups, report.calls) == (2, 2, 2)
+    assert (report.companies, report.writeups, report.calls, report.stages) == (2, 2, 2, 9)
     assert not report.warnings, report.warnings
 
 
@@ -446,7 +454,12 @@ def test_index_rows_sort_by_layer_then_ticker_and_blank_out_missing_figures(
         encoding="utf-8",
     )
     out = tmp_path / "build"
-    build(site_dir=site, out_dir=out, calls_md=tmp_path / "missing-calls.md")
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=tmp_path / "missing-calls.md",
+        stack_dir=tmp_path / "no-stack",
+    )
     rows = table_rows(read(out / "index.html"), "companies")[1:]
     assert [row[0].split()[0] for row in rows] == ["ANC", "ZNC", "CHP", "HYA", "HYB", "PWR"]
     assert rows[0][2:8] == ["2025Q2", "$500m", MISSING, MISSING, MISSING, MISSING]
@@ -484,7 +497,7 @@ def test_empty_sections_and_their_nav_links_are_left_out(tmp_path: Path) -> None
         path.unlink()
     no_calls = tmp_path / "no-calls.md"
     no_calls.write_text(CALLS_MD.split("| 2026-09-21", 1)[0], encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=no_calls)
+    report = build(site_dir=site, out_dir=out, calls_md=no_calls, stack_dir=tmp_path / "stack")
     assert (report.writeups, report.calls) == (0, 0) and not report.warnings
     for page in ("index.html", "companies/AAA.html", "companies/BBB.html"):
         text = read(out / page)
@@ -502,7 +515,7 @@ def test_index_shows_only_newest_five_writeups(tmp_path: Path) -> None:
             '"Depreciation & the GPU-hour"', f"Writeup number {day}"
         )
         (site / "content" / f"2026-10-{day:02d}-n{day}.md").write_text(text, encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=calls)
+    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
     assert report.writeups == 8
     index = read(out / "index.html")
     assert "Writeup number 6" in index and "Writeup number 2" in index
@@ -680,7 +693,7 @@ def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> No
     snapshot["outputs"]["toy_output"]["points"] = [["2024Q4", 500.0]]
     snapshot["outputs"]["toy_ratio"]["points"] = [["2024Q4", 0.55]]
     (site / "data" / "BBB.json").write_text(json.dumps(snapshot), encoding="utf-8")
-    build(site_dir=site, out_dir=out, calls_md=calls)
+    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
     page = read(out / "companies" / "BBB.html")
     model = page.split('<section id="model"', 1)[1].split("</section>", 1)[0]
     assert 'data-charts="outputs"' not in page and 'class="charts"' not in model
@@ -699,7 +712,7 @@ def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> No
     # Outputs that end in different periods: a Period column, not one period in the caption.
     snapshot["outputs"]["toy_ratio"]["points"] = [["2025Q1", 0.55]]
     (site / "data" / "BBB.json").write_text(json.dumps(snapshot), encoding="utf-8")
-    build(site_dir=site, out_dir=out, calls_md=calls)
+    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
     page = read(out / "companies" / "BBB.html")
     assert "<caption>Outputs</caption>" in page and 'data-charts="outputs"' not in page
     assert table_rows(page, "outputs") == [
@@ -728,7 +741,7 @@ def test_model_content_is_hidden_until_the_status_says_built(tmp_path: Path) -> 
     companies = json.loads(json.dumps(COMPANIES_JSON))
     companies["companies"][1]["model_status"] = "pending"
     (site / "data" / "companies.json").write_text(json.dumps(companies), encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=calls)
+    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
     page = read(out / "companies" / "BBB.html")
     assert 'id="model"' not in page and "toy_price" not in page.split("<script", 1)[0]
     assert "Toy output" not in page.split("<script", 1)[0]
@@ -742,7 +755,7 @@ def test_status_labels_shown_to_readers(tmp_path: Path) -> None:
         {"ticker": "CCC", "name": "Gamma Chips Corp", "layer": "chip", "model_status": "no-model"}
     )
     (site / "data" / "companies.json").write_text(json.dumps(companies), encoding="utf-8")
-    build(site_dir=site, out_dir=out, calls_md=calls)
+    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
     rows = table_rows(read(out / "index.html"), "companies")[1:]
     assert {row[0].split()[0]: row[-1] for row in rows} == {
         "AAA": "model in progress",
@@ -809,7 +822,12 @@ def test_company_page_data_only(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     out = tmp_path / "build"
-    build(site_dir=site, out_dir=out, calls_md=tmp_path / "missing-calls.md")
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=tmp_path / "missing-calls.md",
+        stack_dir=tmp_path / "no-stack",
+    )
     index = read(out / "index.html")
     page = read(out / "companies" / "CCC.html")
     assert 'class="badge badge-no-model">reported data</span>' in index
@@ -859,11 +877,13 @@ def test_empty_state_build_succeeds_with_warning(tmp_path: Path) -> None:
         site_dir=tmp_path / "nothing-here",
         out_dir=out,
         calls_md=tmp_path / "missing-calls.md",
+        stack_dir=tmp_path / "no-stack",
     )
     assert "index.html" in report.pages and "writeups/index.html" in report.pages
-    assert (report.companies, report.writeups, report.calls) == (0, 0, 0)
+    assert (report.companies, report.writeups, report.calls, report.stages) == (0, 0, 0, 0)
     assert any("companies.json" in w for w in report.warnings), report.warnings
     assert any("missing-calls.md" in w for w in report.warnings), report.warnings
+    assert any("stack pages not built" in w for w in report.warnings), report.warnings
     index = read(out / "index.html")
     # A minimal page: the header, the table with its columns and no rows, the footer.
     assert "<h1>AI economics</h1>" in index
@@ -913,7 +933,7 @@ BANNED_PHRASES = (
 def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
     """Every page of three builds: the full fixture, a data-only company, and no data at all."""
     site, full, calls = make_site(tmp_path)
-    build(site_dir=site, out_dir=full, calls_md=calls)
+    build(site_dir=site, out_dir=full, calls_md=calls, stack_dir=tmp_path / "stack")
 
     bare = tmp_path / "bare-site"
     (bare / "data").mkdir(parents=True)
@@ -922,11 +942,22 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
         json.dumps({"companies": [company | {"model_status": "no-model", "has_data": True}]}),
         encoding="utf-8",
     )
-    build(site_dir=bare, out_dir=tmp_path / "bare", calls_md=tmp_path / "missing-calls.md")
-    build(site_dir=tmp_path / "nothing", out_dir=tmp_path / "empty", calls_md=tmp_path / "x.md")
+    build(
+        site_dir=bare,
+        out_dir=tmp_path / "bare",
+        calls_md=tmp_path / "missing-calls.md",
+        stack_dir=tmp_path / "no-stack",
+    )
+    build(
+        site_dir=tmp_path / "nothing",
+        out_dir=tmp_path / "empty",
+        calls_md=tmp_path / "x.md",
+        stack_dir=tmp_path / "no-stack",
+    )
 
+    # The full build has the stack index and nine stage pages; the other two have no stack.
     pages = [p for d in ("build", "bare", "empty") for p in (tmp_path / d).rglob("*.html")]
-    assert len(pages) == 6 + 3 + 2
+    assert len(pages) == 16 + 3 + 2
     for page in pages:
         text = read(page)
         for phrase in BANNED_PHRASES:
@@ -940,20 +971,21 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
 
 def test_rebuild_is_byte_identical(tmp_path: Path) -> None:
     site, out, calls = make_site(tmp_path)
-    build(site_dir=site, out_dir=out, calls_md=calls)
+    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
     first = {p.relative_to(out): p.read_bytes() for p in out.rglob("*") if p.is_file()}
-    build(site_dir=site, out_dir=out, calls_md=calls)
+    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
     second = {p.relative_to(out): p.read_bytes() for p in out.rglob("*") if p.is_file()}
     assert first == second
 
 
 def test_main_cli(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     site, out, calls = make_site(tmp_path)
-    code = main(["--site-dir", str(site), "--out", str(out), "--calls", str(calls)])
+    argv = ["--site-dir", str(site), "--out", str(out), "--calls", str(calls)]
+    code = main([*argv, "--stack", str(tmp_path / "stack")])
     assert code == 0
     printed = capsys.readouterr().out
-    assert "built 6 pages" in printed and "2 companies" in printed
-    assert (out / "index.html").exists()
+    assert "built 16 pages" in printed and "2 companies" in printed and "9 stages" in printed
+    assert (out / "index.html").exists() and (out / "stack" / "power.html").exists()
 
 
 # --------------------------------------------------------------------------------------------
@@ -975,7 +1007,9 @@ def test_build_refuses_an_out_dir_that_overlaps_the_sources(tmp_path: Path, targ
     (site / "static" / "style.css").write_text("/* source */\n", encoding="utf-8")
     before = site_files(site)
     with pytest.raises(ValueError, match="refusing to build into"):
-        build(site_dir=site, out_dir=tmp_path / target, calls_md=calls)
+        build(
+            site_dir=site, out_dir=tmp_path / target, calls_md=calls, stack_dir=tmp_path / "stack"
+        )
     assert site_files(site) == before
     assert not (site / "index.html").exists() and not (tmp_path / "index.html").exists()
 
@@ -983,7 +1017,9 @@ def test_build_refuses_an_out_dir_that_overlaps_the_sources(tmp_path: Path, targ
 def test_build_allows_the_default_layout_of_a_build_dir_inside_the_site_dir(tmp_path: Path) -> None:
     site, _, calls = make_site(tmp_path)
     before = site_files(site)
-    report = build(site_dir=site, out_dir=site / "build", calls_md=calls)
+    report = build(
+        site_dir=site, out_dir=site / "build", calls_md=calls, stack_dir=tmp_path / "stack"
+    )
     assert "index.html" in report.pages and (site / "build" / "data" / "AAA.json").is_file()
     assert {p: b for p, b in site_files(site).items() if p.parts[0] != "build"} == before
 
@@ -1005,7 +1041,7 @@ def test_build_also_protects_the_repo_site_dir_when_site_dir_is_custom(
     monkeypatch.setattr(build_site, "SITE_DIR", repo_site)
     for target in (repo_site, repo_site.parent):
         with pytest.raises(ValueError, match="refusing to build into"):
-            build(site_dir=site, out_dir=target, calls_md=calls)
+            build(site_dir=site, out_dir=target, calls_md=calls, stack_dir=tmp_path / "stack")
     assert (repo_site / "data" / "AAA.json").is_file()
 
 
@@ -1023,8 +1059,9 @@ def test_main_cli_reports_a_refused_out_dir(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     site, _, calls = make_site(tmp_path)
+    argv = ["--site-dir", str(site), "--out", str(site), "--calls", str(calls)]
     with pytest.raises(SystemExit) as excinfo:
-        main(["--site-dir", str(site), "--out", str(site), "--calls", str(calls)])
+        main([*argv, "--stack", str(tmp_path / "stack")])
     assert excinfo.value.code == 2
     assert "refusing to build into" in capsys.readouterr().err
     assert (site / "data" / "AAA.json").is_file()
@@ -1039,7 +1076,7 @@ def test_writeup_slug_index_is_reserved_for_the_listing_page(tmp_path: Path) -> 
     site, out, calls = make_site(tmp_path)
     text = WRITEUP_INDUSTRY.replace('"Depreciation & the GPU-hour"', "Index")
     (site / "content" / "2026-10-01-index.md").write_text(text, encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=calls)
+    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
     assert report.writeups == 3
     assert len(report.pages) == len(set(report.pages))
     assert "writeups/index-writeup.html" in report.pages
@@ -1481,3 +1518,316 @@ def test_content_template_is_draft_and_ends_with_required_sections() -> None:
     last_section = body.split("## What would prove this wrong", 1)[1]
     assert "| claim | falsifying number | deadline |" in last_section
     assert "calls.md" in last_section
+
+
+# --------------------------------------------------------------------------------------------
+# Stack pages: the chain as one table, one page per stage
+# --------------------------------------------------------------------------------------------
+
+STAGES_HEADER = [
+    "#",
+    "Stage",
+    "Unit",
+    "Sells",
+    "Lead time (years)",
+    "Bottleneck",
+    "Key figures",
+    "Players",
+]
+
+
+def facts(page: str) -> list[tuple[str, str]]:
+    """The (label, value) pairs of a stage page's facts list."""
+    return re.findall(r"<dt>(.*?)</dt><dd>(.*?)</dd>", page)
+
+
+def stage_nav(page: str) -> str:
+    return page.split('<p class="stage-nav">', 1)[1].split("</p>", 1)[0]
+
+
+def test_stack_index_lists_all_nine_stages_in_order(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    page = read(out / "stack" / "index.html")
+    assert "<title>Stack · AI economics</title>" in page and "<h1>Stack</h1>" in page
+    assert '<p class="meta">9 stages</p>' in page
+    rows = table_rows(page, "stages")
+    assert rows[0] == STAGES_HEADER
+    assert [row[0] for row in rows[1:]] == [str(n) for n in range(1, 10)]  # by order, not file
+    assert [row[1] for row in rows[1:]] == [
+        "Power",
+        "Grid",
+        "Data centre",
+        "Wafers & <packaging>",
+        "Memory",
+        "Systems",
+        "GPU-hours",
+        "Tokens",
+        "Applications",
+    ]
+    for key in STAGE_KEYS:
+        assert f'href="../stack/{key}.html"' in page, key
+    # Power: unit, sells, lead time, score, the first two metrics and the first four players.
+    assert rows[1][2:6] == ["MW", "firm electricity", "3", "4"]
+    assert rows[1][6] == "1,500,000 MW Example capacity 0.06 USD/kWh Example price"
+    assert "Example third metric" not in page
+    assert rows[1][7] == "AAA, Gamma <Chips> & Co, PT3, PF4"
+    assert "PF5" not in page
+    assert '<a href="../companies/AAA.html">AAA</a>' in page  # a company the site knows
+    assert "PT3</td>" in page or "PT3, " in page  # one it does not: text, no link
+    # A blank lead time or score, and a stage with no figures or players, show an en dash.
+    assert rows[9][4:8] == [MISSING, MISSING, MISSING, MISSING]  # applications
+    assert rows[3][4:8] == ["1.5", MISSING, MISSING, MISSING]  # datacenter
+    assert rows[6][4:8] == ["0.75", "2", "32,000.5 USD per GPU Example GPU price", "BBB"]
+    # Names with & and < are escaped, in the table and in the players column.
+    assert "Wafers &amp; &lt;packaging&gt;" in page and "<packaging>" not in page
+    assert "Gamma &lt;Chips&gt; &amp; Co" in page and "<Chips>" not in page
+    # The nav carries the section on every page, relative to that page.
+    assert 'href="../stack/index.html">Stack</a>' in page
+    assert 'href="stack/index.html">Stack</a>' in read(out / "index.html")
+    assert 'href="../stack/index.html">Stack</a>' in read(out / "companies" / "AAA.html")
+    index = read(out / "index.html")
+    assert index.index("Companies</a>") < index.index("Stack</a>") < index.index("Writeups</a>")
+
+
+def test_stack_index_lists_consumption_tiers_under_the_chain(
+    built: tuple[Path, BuildReport],
+) -> None:
+    out, _ = built
+    page = read(out / "stack" / "index.html")
+    assert page.index('id="stages"') < page.index('id="consumption-tiers"')
+    assert '<section id="consumption-tiers" class="section"><h2>Consumption tiers</h2>' in page
+    assert table_rows(page, "tiers") == [
+        ["Tier", "Name", "Examples", "Tokens per user per day", "Revenue model"],
+        ["heavy", "Example heavy tier", "agents, long runs", ">1000000", "usage"],
+        ["light", "Example light tier", "chat", "5000-50000", "subscription"],
+    ]
+    assert "&gt;1000000" in page
+    # Tables and headings only between the chain and the end of the page body: no prose.
+    body = page.split('id="stages"', 1)[1].split("</main>", 1)[0]
+    assert "<p" not in body
+
+
+def test_stage_page_header_primer_figures_conversions_and_players(
+    built: tuple[Path, BuildReport],
+) -> None:
+    out, _ = built
+    page = read(out / "stack" / "power.html")
+    assert "<title>Power · AI economics</title>" in page
+    assert '<p class="eyebrow">Stage 1 of 9</p>' in page
+    assert '<h1>Power <span class="ticker">power</span></h1>' in page
+    assert '<p class="lede">Example power summary.</p>' in page
+    assert facts(page) == [
+        ("Unit", "MW"),
+        ("Sells", "firm electricity"),
+        ("Lead time", "3 years"),
+        ("Bottleneck", "4 / 5 · Example bottleneck note."),
+        ("Status", '<span class="badge badge-deep">deep</span>'),
+    ]  # no "Buys from": power buys from nothing
+    # Primer, figures, conversions, players, then the stage nav.
+    order = [
+        page.index(marker)
+        for marker in (
+            '<section id="primer" class="section"><h2>Primer</h2><div class="prose">',
+            '<section id="figures" class="section"><h2>Figures</h2>',
+            '<section id="conversions" class="section"><h2>Conversions</h2>',
+            '<section id="players" class="section"><h2>Players</h2>',
+            'class="stage-nav"',
+        )
+    ]
+    assert order == sorted(order)
+    # The primer goes through the writeup pipeline: heading ids, emphasis, scrolling tables.
+    assert '<h2 id="why-power-comes-first">Why power comes first</h2>' in page
+    assert "<strong>emphasis</strong>" in page and '<div class="table-scroll"><table>' in page
+    assert table_rows(page, "figures") == [
+        ["Metric", "Value", "Unit", "As of", "Scope", "Confidence", "Source", "Note"],
+        [
+            "Example capacity",
+            "1,500,000",
+            "MW",
+            "2026-06",
+            "US",
+            "high",
+            "Example source",
+            "Toy value & <note>",
+        ],
+        [
+            "Example price",
+            "0.06",
+            "USD/kWh",
+            "2026Q2",
+            "US industrial",
+            "medium",
+            "Example filing p.3",
+            "",
+        ],
+        [
+            "Example third metric",
+            "42",
+            "GW",
+            "2026",
+            "world",
+            "low",
+            "example.com",
+            "Only two show on the index",
+        ],
+    ]
+    assert '<a href="https://example.com/power" rel="noopener">Example source</a>' in page
+    assert "Example filing p.3</td>" in page  # a source with no URL is text
+    assert '<a href="https://example.com/third" rel="noopener">example.com</a>' in page  # no text
+    assert "Toy value &amp; &lt;note&gt;" in page and "<note>" not in page
+    assert '<td class="confidence confidence-high">high</td>' in page
+    assert table_rows(page, "conversions") == [
+        ["From → To", "Factor", "Unit", "As of", "Confidence", "Source", "Note"],
+        [
+            "Power → Grid",
+            "0.9",
+            "MW connected per MW",
+            "2026",
+            "medium",
+            "Example source",
+            "Toy factor",
+        ],
+    ]
+    assert '<a href="../stack/grid.html">Grid</a>' in page
+    assert table_rows(page, "players") == [
+        ["Company", "Ticker", "Role", "Listed", "Note"],
+        ["Alpha Cloud", "AAA", "buyer", "yes", "Example note"],
+        ["Gamma <Chips> & Co", "", "turbines", "no", ""],
+        ["Player Three", "PT3", "fuel", "yes", ""],
+        ["Player Four", "PF4", "nuclear", "no", ""],
+        ["Player Five", "PF5", "solar", "no", ""],
+    ]
+    assert '<a href="https://example.com/aaa" rel="noopener">Alpha Cloud</a>' in page
+    assert '<a href="../companies/AAA.html">AAA</a>' in page
+    assert "<td>PT3</td>" in page
+    assert "Gamma &lt;Chips&gt; &amp; Co" in page and "<Chips>" not in page
+    # First stage: no previous link; the chain and the next stage.
+    assert stage_nav(page) == (
+        '<a href="../stack/index.html">Stack</a>'
+        '<a class="next" href="../stack/grid.html">2 Grid →</a>'
+    )
+
+
+def test_stage_pages_omit_empty_sections_and_facts(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    # A conversion is listed at both ends.
+    grid = read(out / "stack" / "grid.html")
+    assert [row[0] for row in table_rows(grid, "conversions")[1:]] == ["Power → Grid"]
+    assert ("Buys from", '<a href="../stack/power.html">Power</a>') in facts(grid)
+    for gone in ('id="primer"', 'id="figures"', 'id="players"'):
+        assert gone not in grid, gone
+    # Nothing about datacenter but the chain: header, facts and nav, no heading, no "none" line.
+    page = read(out / "stack" / "datacenter.html")
+    for gone in ('id="primer"', 'id="figures"', 'id="conversions"', 'id="players"', "<h2>"):
+        assert gone not in page, gone
+    assert '<p class="lede">' not in page  # blank summary
+    assert facts(page) == [
+        ("Unit", "MW of IT load"),
+        ("Sells", "rack-ready megawatts"),
+        ("Buys from", '<a href="../stack/grid.html">Grid</a>'),
+        ("Lead time", "1.5 years"),
+        ("Status", '<span class="badge badge-skeleton">skeleton</span>'),
+    ]
+    # Two suppliers, a fractional lead time, a singular year.
+    systems = facts(read(out / "stack" / "systems.html"))
+    assert (
+        "Buys from",
+        '<a href="../stack/silicon.html">Wafers &amp; &lt;packaging&gt;</a> · '
+        '<a href="../stack/memory.html">Memory</a>',
+    ) in systems
+    assert ("Lead time", "0.75 years") in systems and ("Bottleneck", "2 / 5") in systems
+    assert ("Lead time", "1 year") in facts(read(out / "stack" / "compute.html"))
+    # Last stage: a note without a score, no lead time, no next link.
+    last = read(out / "stack" / "applications.html")
+    assert ("Bottleneck", "Note without a score.") in facts(last)
+    assert "<dt>Lead time</dt>" not in last
+    assert stage_nav(last) == (
+        '<a class="prev" href="../stack/models.html">← 8 Tokens</a>'
+        '<a href="../stack/index.html">Stack</a>'
+    )
+
+
+def test_stage_page_escapes_the_name(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    page = read(out / "stack" / "silicon.html")
+    assert "<title>Wafers &amp; &lt;packaging&gt; · AI economics</title>" in page
+    assert '<h1>Wafers &amp; &lt;packaging&gt; <span class="ticker">silicon</span></h1>' in page
+    assert "<packaging>" not in page
+    assert "Wafers &amp; &lt;packaging&gt; →</a>" in read(out / "stack" / "datacenter.html")
+
+
+def test_primer_section_is_omitted_without_a_primer_file(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    (tmp_path / "stack" / "primers" / "power.md").unlink()
+    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    assert not report.warnings
+    page = read(out / "stack" / "power.html")
+    assert 'id="primer"' not in page and "Primer" not in page
+    assert 'id="figures"' in page and PRIMER_MD.splitlines()[0].lstrip("# ") not in page
+
+
+def test_build_without_a_stack_dir_warns_and_leaves_the_stack_out(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "no-stack")
+    assert report.stages == 0 and not any(p.startswith("stack/") for p in report.pages)
+    assert not (out / "stack" / "index.html").exists()
+    assert len(report.warnings) == 1
+    assert "stages.csv missing" in report.warnings[0]
+    assert "stack pages not built" in report.warnings[0]
+    for page in ("index.html", "companies/AAA.html", "writeups/index.html"):
+        text = read(out / page)
+        assert "Stack</a>" not in text and "stack/index.html" not in text, page
+
+
+def test_malformed_stack_tables_warn_and_leave_that_table_empty(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    stack = tmp_path / "stack"
+    header = "stage,metric,value,unit,as_of,scope,source_url,source,confidence,note\n"
+    (stack / "metrics.csv").write_text(
+        header + "power,Broken,lots,MW,,,,,high,\n", encoding="utf-8"
+    )
+    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=stack)
+    assert report.stages == 9 and len(report.warnings) == 1
+    assert report.warnings[0].startswith("metrics.csv: row 2 (power / Broken): value 'lots'")
+    assert report.warnings[0].endswith("; stack metrics left empty")
+    power = read(out / "stack" / "power.html")
+    assert 'id="figures"' not in power and 'id="players"' in power  # the rest still renders
+    rows = table_rows(read(out / "stack" / "index.html"), "stages")
+    assert rows[1][6] == MISSING and rows[1][7] == "AAA, Gamma <Chips> & Co, PT3, PF4"
+    # A malformed stages.csv takes the whole stack out, naming the row.
+    bad = STAGES_CSV.replace("1,power,", "one,power,")
+    (stack / "stages.csv").write_text(bad, encoding="utf-8")
+    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=stack)
+    assert report.stages == 0 and not (out / "stack" / "index.html").exists()
+    assert len(report.warnings) == 1
+    assert "row 3 (power): order 'one' is not a number" in report.warnings[0]
+    assert report.warnings[0].endswith("; stack pages not built")
+    assert "Stack</a>" not in read(out / "index.html")
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (1500000, "1,500,000"),
+        (32000.5, "32,000.5"),
+        (0.75, "0.75"),
+        (3.0, "3"),
+        (0.125, "0.12"),  # an exact binary tie rounds to even
+        (-1250, "-1,250"),
+        (-0.001, "0"),  # never "-0"
+        ("42", "42"),
+        ("n/a", MISSING),
+        (None, MISSING),
+        (float("nan"), MISSING),
+    ],
+)
+def test_fmt_number_uses_separators_and_at_most_two_decimals(value: object, expected: str) -> None:
+    assert fmt_number(value) == expected
+    assert "$" not in fmt_number(value) and "bn" not in fmt_number(value)
+
+
+def test_stylesheet_lets_stage_names_wrap_and_lays_out_the_facts() -> None:
+    css = read(SITE_STATIC_DIR / "style.css")
+    assert "white-space: normal" in css_block(css, '.conversions th[scope="row"]')
+    assert "grid-template-columns" in css_block(css, ".facts")
+    assert "display: block" in css_block(css, ".figure")

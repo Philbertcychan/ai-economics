@@ -13,7 +13,7 @@ from companies.assumptions import (
     unconfirmed,
 )
 from data import ASSUMPTIONS_DIR
-from engine.unit_economics import GPUEconomicsInputs, margin_per_gpu_hour
+from engine.unit_economics import INPUT_FIELDS, GPUEconomicsInputs, margin_per_gpu_hour
 
 HEADER = ",".join(ASSUMPTION_COLUMNS)
 GOOD_ROWS = [
@@ -110,6 +110,8 @@ def test_missing_column_is_an_error(tmp_path: Path) -> None:
 def test_committed_registers_load_and_run_the_engine(path: Path) -> None:
     frame = load_assumptions(path.stem, ASSUMPTIONS_DIR)
     assert frame is not None
+    if not set(frame["name"]) & set(INPUT_FIELDS):
+        pytest.skip(f"{path.stem} does not use the per-GPU engine (no kW per GPU disclosed)")
     inputs = engine_inputs(frame)
     mode = "rental" if inputs.price_per_gpu_hour > 0 else "tokens"
     assert margin_per_gpu_hour(inputs, mode) == margin_per_gpu_hour(inputs, mode)  # not NaN

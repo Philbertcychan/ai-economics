@@ -3,5 +3,10 @@
     "fingerprint": "f9f39934fd60c86b051447548d4b0e701644e9ffdf25a0a53d82d33d28c5148b",
     "exported_at": "2026-09-22T15:29:24Z",
     "as_of": "2026-08-12"
+  },
+  "NBIS": {
+    "fingerprint": "6be9736f9564f3511f1de16eeda301abe4515dc02c555b2f0a5ccc87dda19422",
+    "exported_at": "2026-09-26T23:12:30Z",
+    "as_of": "2026-09-08"
   }
 }

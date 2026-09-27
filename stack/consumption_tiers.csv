@@ -1,0 +1,6 @@
+tier,name,examples,tokens_per_user_day,revenue_model,note
+heavy,Agentic coding and autonomous agents,coding agents that run for hours; research agents,>1000000,usage or high seat price,"A single power user can consume millions of tokens a day; the fastest-growing slice of inference demand."
+high,Video and image generation,text-to-video and image models,n/a (per output),per generation,"Compute per output is large; demand is bursty and price-sensitive."
+medium,Enterprise copilots and search,office copilots; customer-service agents; AI search,50000-500000,per seat,"Broad but shallow per user; volume comes from seat counts in the hundreds of millions."
+light,Consumer chat assistants,general chat assistants,5000-50000,subscription or free with ads,"Largest user counts, lowest tokens per user; free tiers set the floor on price per token."
+edge,On-device and robotics,"phones, cars, robots",n/a,hardware,"Runs on local silicon; shifts demand away from data-centre GPU-hours."

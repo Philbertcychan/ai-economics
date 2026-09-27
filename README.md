@@ -24,6 +24,10 @@ data for all seven.
 ```
 engine/       the economics of one GPU: cost stack, rental and token revenue, margin, payback
 assumptions/  one CSV per company: every non-reported number with its source, range and sign-off status
+signals/      ledger.csv: dated, sourced events from outside the filings (contracts, build-outs, energy,
+              financing, statements, prices), rated confirmed | reported | speculated and mapped to a stage or assumption
+stack/        the value chain, bottom-up: stages.csv (unit, lead time, bottleneck score), metrics.csv,
+              players.csv, conversions.csv, consumption_tiers.csv, primers/ (one page per stage)
 companies/    one model class per company on shared plumbing; loads the assumptions register
 data/         EDGAR client, interfaces for transcripts and GPU prices; raw/ (dated pulls, gitignored
               except manifests), processed/ (tidy CSVs, committed), last_refresh_diff.md
@@ -194,9 +198,16 @@ As of 2026-09-22:
   capacity, revenue, EBITDA, capex, prepayments, receivables, debt, interest and cash, with
   three definitions of payback per GPU and a one-at-a-time sensitivity sheet. Operating KPIs
   come from the earnings releases; assumptions from the register built from the S-1 and 10-Qs.
+- Nebius has the same shape of model on less disclosure: six quarters read from its 6-K results
+  exhibits (no XBRL), an ARR-driven ten-quarter forecast, prepayments as a share of capex, the
+  company's ARR and revenue guidance as check lines, and a sensitivity sheet.
+- The stack has its schema, loaders, primers and site pages; sourced figures are in for power,
+  the grid and data centres, with the other six stages being researched.
 
-Next, in order (see `TODO.md`): a spend-to-live lag for capex, the signals ledger of evidence
-from outside filings, the first writeup and call; then Nebius in Stage 2.
+The spine of the project from here is the value chain itself, bottom-up: nine stages from
+power generation to applications in `stack/`, each with its unit, sourced figures, players,
+lead time and a bottleneck score. Next, in order (see `TODO.md`): finish the stack figures,
+then power in depth (US supply, interconnection queues, a site map), then memory.
 
 Division of labour: the modelling and code are built with Claude; every assumption and every call
 is reviewed and owned by the author.

@@ -29,9 +29,12 @@ One command runs the whole chain: `uv run scripts/refresh.py`. GitHub runs it ev
 | `data/raw/` | files exactly as downloaded, in a folder per company per day | never edited by hand; too big for git, so only a manifest (a list of files with fingerprints) is committed |
 | `data/processed/` | tidy CSVs built from raw: `filings.csv`, `reported.csv` | always rebuilt by code, so it can be deleted and regenerated |
 | `data/edgar.py` | the SEC client and the functions that tidy reported facts | knows about the SEC; knows nothing about models |
+| `data/disclosed.py`, `data/stack.py`, `data/signals.py` | loaders for the hand-kept tables: KPIs stated in prose, the stack, the ledger | validate on load; a malformed row is an error, never a warning |
 | `engine/` | the economics of one GPU | pure arithmetic: numbers in, numbers out, no files, no internet |
 | `assumptions/` | one CSV per company of every non-reported number, with source and status | the only place assumptions live; edited by hand, in Excel if you like |
 | `companies/` | one module per company, all with the same four steps | reads processed data and assumptions; produces tables |
+| `stack/` | the value chain: one row per stage, sourced figures, players, conversions, primers | edited by hand; every figure carries a URL; bottleneck scores are the owner's |
+| `signals/` | dated events from outside the filings, each sourced and rated | a signal never changes a number directly; it prompts a logged change to an assumption |
 | `models/` | the Excel workbook per company | generated; never edited by hand |
 | `scripts/` | the commands: refresh, export a workbook, build the site | orchestration only; the thinking is in `engine/` and `companies/` |
 | `site/` | templates, styles, writeups, and the JSON the charts read | `site/build/` is generated |
@@ -102,7 +105,9 @@ on every change pushed to GitHub, and locally with `uv run pytest`. Two ideas ma
   that loses cash never pays back." These protect the meaning of the model when formulas are
   later refined.
 
-No test touches the internet; they use small saved copies of real SEC responses.
+No test touches the internet; they use small saved copies of real SEC responses. One helper,
+`tests/xlsx_eval.py`, re-evaluates every Excel formula in an exported workbook and compares it
+with the Python value, so the formulas a finance reader sees are proven to say what the code says.
 
 ## 6. Everyday commands
 

@@ -636,6 +636,93 @@ tbody tr:hover {
   overflow-wrap: anywhere;
 }
 
+/* ---- stack ----------------------------------------------------------------------------- */
+
+/* Stage names are phrases, not tickers, so unlike other row headers they wrap; the chain table
+   then shows the unit and the lead time on a phone before it scrolls. */
+.stages th[scope="row"],
+.conversions th[scope="row"] {
+  white-space: normal;
+  min-width: 9rem;
+}
+
+.stages .order {
+  color: var(--muted);
+}
+
+/* Free text ("sells", tier examples, notes) needs a floor or the numeric columns squeeze it into
+   a one-word-per-line ribbon. */
+.stages .sells,
+.tiers .examples,
+.figures td:last-child,
+.conversions td:last-child,
+.players td:last-child {
+  min-width: 14rem;
+}
+
+/* A key figure in the chain table: the number on its own line, the metric under it in small
+   type, so two figures stack instead of running together. */
+.figure {
+  display: block;
+  white-space: nowrap;
+}
+
+.figure-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* The facts under a stage heading: label and value in two columns, the value free to wrap. */
+.facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.2rem 1rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+}
+
+.facts dt {
+  color: var(--muted);
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Work status of a stage: a deep dive is highlighted, a skeleton outlined. */
+.badge-deep {
+  color: var(--accent);
+}
+
+.badge-skeleton {
+  border-style: dashed;
+}
+
+.confidence {
+  color: var(--muted);
+}
+
+.confidence-high {
+  color: var(--ink);
+}
+
+.confidence-low {
+  color: var(--warn);
+}
+
+/* Previous stage on the left, next on the right, whichever of them exist. */
+.stage-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.stage-nav .next {
+  margin-left: auto;
+}
+
 /* ---- charts ---------------------------------------------------------------------------- */
 
 .charts {

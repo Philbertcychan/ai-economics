@@ -6,9 +6,11 @@ Purpose
 the human writes essays into ``site/content/``. This module turns both into a small static site
 that GitHub Pages can serve: an index with one comparison table of the companies (plus the calls
 table and the writeups list once either has entries); one page per company with a key-figures
-strip, server-rendered tables and Chart.js charts layered on top; and one page per published
-writeup. There is no framework and no bundler: templates are ``string.Template`` files in
-``site/templates/`` and the browser assets are copied verbatim from ``site/static/``.
+strip, server-rendered tables and Chart.js charts layered on top; one page per published
+writeup; and the stack (``stack/*.csv``, loaded by ``data/stack.py``) as one table of the chain
+plus a page per stage with its primer, figures, conversions and players. There is no framework
+and no bundler: templates are ``string.Template`` files in ``site/templates/`` and the browser
+assets are copied verbatim from ``site/static/``.
 
 Design notes
 ------------
@@ -28,7 +30,7 @@ Design notes
   refresh.py already published (change on a year earlier, capex / revenue); nothing here models
   or forecasts.
 
-CLI: ``uv run scripts/build_site.py [--out DIR] [--site-dir DIR] [--calls FILE]``
+CLI: ``uv run scripts/build_site.py [--out DIR] [--site-dir DIR] [--calls FILE] [--stack DIR]``
 """
 
 from __future__ import annotations
@@ -42,15 +44,26 @@ import re
 import shutil
 import sys
 import unicodedata
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
 from string import Template
 from typing import Any
+from urllib.parse import urlsplit
 
 import markdown
 
-from data import CALLS_MD, SITE_BUILD_DIR, SITE_DIR, SITE_STATIC_DIR, SITE_TEMPLATES_DIR
+from data import CALLS_MD, SITE_BUILD_DIR, SITE_DIR, SITE_STATIC_DIR, SITE_TEMPLATES_DIR, STACK_DIR
+from data.stack import (
+    load_consumption_tiers,
+    load_conversions,
+    load_metrics,
+    load_players,
+    load_primer,
+    load_stages,
+    split_stages,
+)
 
 log = logging.getLogger(__name__)
 
@@ -109,7 +122,19 @@ INDEX_WRITEUPS = 5
 # Shown where a figure or a comparison does not exist.
 MISSING = "–"
 
-TEMPLATE_NAMES = ("base", "index", "company", "writeup", "writeups_index")
+# The chain table shows this many metrics (the first in metrics.csv) and players per stage.
+INDEX_KEY_FIGURES = 2
+INDEX_PLAYERS = 4
+
+TEMPLATE_NAMES = (
+    "base",
+    "index",
+    "company",
+    "writeup",
+    "writeups_index",
+    "stack_index",
+    "stack_stage",
+)
 
 # Tolerates a UTF-8 BOM (Windows editors add one) and CRLF line endings.
 _BOM = chr(0xFEFF)
@@ -131,6 +156,7 @@ class BuildReport:
     writeups: int = 0
     companies: int = 0
     calls: int = 0
+    stages: int = 0
     warnings: list[str] = field(default_factory=list)
 
 
@@ -889,6 +915,328 @@ def _inline_json(data: Any) -> str:
 
 
 # --------------------------------------------------------------------------------------------
+# The stack: one table of the chain, one page per stage. Rows arrive as plain dicts from
+# data/stack.py, already validated; this section only formats them.
+# --------------------------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Stack:
+    """The value chain as loaded from ``stack/``: stages in order, and the tables about them.
+
+    Rows are plain dicts (``DataFrame.to_dict("records")``) so the renderers stay free of
+    pandas. A secondary table that failed to load is empty here, with the reason in the build
+    warnings, and the empty-section rule hides it on the pages.
+    """
+
+    stages: list[dict[str, Any]]
+    metrics: list[dict[str, Any]]
+    players: list[dict[str, Any]]
+    conversions: list[dict[str, Any]]
+    tiers: list[dict[str, Any]]
+    primers: dict[str, str]  # stage key -> rendered HTML, for the stages that have one
+
+    def name_of(self, key: str) -> str:
+        """The display name of a stage key; the key itself when it is not in the chain."""
+        return next((str(s["name"]) for s in self.stages if s["stage"] == key), key)
+
+
+_STACK_TABLES: tuple[tuple[str, Callable[[Path], Any]], ...] = (
+    ("metrics", load_metrics),
+    ("players", load_players),
+    ("conversions", load_conversions),
+    ("tiers", load_consumption_tiers),
+)
+
+
+def load_stack(stack_dir: Path, warnings: list[str]) -> Stack | None:
+    """Read the stack tables; ``None``, with a warning, when there is no usable ``stages.csv``.
+
+    Without stages there is nothing to hang the other tables on, so the stack is left out and
+    its nav link with it. A secondary table that is missing or malformed is left empty and
+    named in ``warnings``: the chain still renders. Primers are rendered with the writeup
+    pipeline, since they are the author's own markdown.
+    """
+    try:
+        stages = load_stages(stack_dir)
+    except FileNotFoundError:
+        warnings.append(f"stages.csv missing from {stack_dir}; stack pages not built")
+        return None
+    except ValueError as exc:
+        warnings.append(f"{exc}; stack pages not built")
+        return None
+    tables: dict[str, list[dict[str, Any]]] = {}
+    for name, loader in _STACK_TABLES:
+        try:
+            tables[name] = loader(stack_dir).to_dict("records")
+        except (FileNotFoundError, ValueError) as exc:
+            warnings.append(f"{exc}; stack {name} left empty")
+            tables[name] = []
+    primers: dict[str, str] = {}
+    for key in stages["stage"]:
+        text = load_primer(str(key), stack_dir / "primers")
+        if text is not None:
+            primers[str(key)] = render_markdown(text)
+    return Stack(stages=stages.to_dict("records"), primers=primers, **tables)
+
+
+def fmt_number(value: Any) -> str:
+    """A plain number for the stack tables: thousands separators, up to two decimals, no unit.
+
+    ``1500000 -> '1,500,000'``, ``0.75 -> '0.75'``, ``3.0 -> '3'``. The unit column says what
+    the number is, so there is no currency symbol and no abbreviation guessed from a unit label.
+    An en dash for a missing value.
+    """
+    number = _as_float(value)
+    if number is None:
+        return MISSING
+    text = f"{number:,.2f}".rstrip("0").rstrip(".")
+    return "0" if text == "-0" else text
+
+
+def _stage_href(root: str, key: Any) -> str:
+    return f"{root}stack/{key}.html"
+
+
+def _company_link(ticker: Any, root: str, known: set[str]) -> str:
+    """A ticker linked to its company page when the site has one, else the ticker as text."""
+    text = str(ticker or "")
+    if text.upper() in known:
+        return f'<a href="{_e(root + "companies/" + text.upper() + ".html")}">{_e(text)}</a>'
+    return _e(text)
+
+
+def _source_link(url: Any, text: Any) -> str:
+    """``source`` linked to ``source_url``; the host stands in when the text is blank."""
+    if not url:
+        return _e(text)
+    label = str(text or "").strip() or urlsplit(str(url)).netloc or "source"
+    return f'<a href="{_e(url)}" rel="noopener">{_e(label)}</a>'
+
+
+def _confidence_cell(confidence: Any) -> str:
+    level = str(confidence or "").lower()
+    return f'<td class="confidence confidence-{_e(level)}">{_e(level)}</td>'
+
+
+def _table(table_class: str, head: list[tuple[str, bool]], rows: list[str]) -> str:
+    """A ``.table-scroll`` table, or nothing without rows; ``head`` is (label, numeric)."""
+    if not rows:
+        return ""
+    header = "".join(
+        f'<th scope="col" class="num">{_e(label)}</th>'
+        if numeric
+        else f'<th scope="col">{_e(label)}</th>'
+        for label, numeric in head
+    )
+    return (
+        f'<div class="table-scroll"><table class="{_e(table_class)}">'
+        f"<thead><tr>{header}</tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
+    )
+
+
+_STAGES_HEAD = [
+    ("#", True),
+    ("Stage", False),
+    ("Unit", False),
+    ("Sells", False),
+    ("Lead time (years)", True),
+    ("Bottleneck", True),
+    ("Key figures", False),
+    ("Players", False),
+]
+
+
+def _stages_table(stack: Stack, root: str, known: set[str]) -> str:
+    """The chain as one table in stage order: the two first metrics and four first players of
+    each stage ride along so the index says what a stage is measured in and who is in it."""
+    rows = []
+    for stage in stack.stages:
+        key = str(stage["stage"])
+        figures = [m for m in stack.metrics if m["stage"] == key][:INDEX_KEY_FIGURES]
+        # The spaces around the label span are collapsed by the block layout but keep the cell
+        # readable as plain text ("1,500,000 MW Example capacity").
+        figures_html = " ".join(
+            f'<span class="figure">{_e(fmt_number(m["value"]))} {_e(m["unit"])} '
+            f'<span class="figure-label">{_e(m["metric"])}</span></span>'
+            for m in figures
+        )
+        players = [p for p in stack.players if p["stage"] == key][:INDEX_PLAYERS]
+        players_html = ", ".join(
+            _company_link(p["ticker"], root, known) if p["ticker"] else _e(p["company"])
+            for p in players
+        )
+        rows.append(
+            "<tr>"
+            f'<td class="num order">{_e(stage["order"])}</td>'
+            f'<th scope="row"><a href="{_e(_stage_href(root, key))}">{_e(stage["name"])}</a></th>'
+            f'<td class="unit">{_e(stage["unit"])}</td>'
+            f'<td class="sells">{_e(stage["sells"])}</td>'
+            f'<td class="num">{_e(fmt_number(stage["lead_time_years"]))}</td>'
+            f'<td class="num">{_e(fmt_number(stage["bottleneck_score"]))}</td>'
+            f"<td>{figures_html or MISSING}</td>"
+            f"<td>{players_html or MISSING}</td>"
+            "</tr>"
+        )
+    return _table("stages", _STAGES_HEAD, rows)
+
+
+_TIERS_HEAD = [
+    ("Tier", False),
+    ("Name", False),
+    ("Examples", False),
+    ("Tokens per user per day", False),
+    ("Revenue model", False),
+]
+
+
+def _tiers_table(tiers: list[dict[str, Any]]) -> str:
+    rows = [
+        "<tr>"
+        f'<th scope="row">{_e(t["tier"])}</th>'
+        f"<td>{_e(t['name'])}</td>"
+        f'<td class="examples">{_e(t["examples"])}</td>'
+        f'<td class="nowrap">{_e(t["tokens_per_user_day"])}</td>'
+        f"<td>{_e(t['revenue_model'])}</td>"
+        "</tr>"
+        for t in tiers
+    ]
+    return _table("tiers", _TIERS_HEAD, rows)
+
+
+def _stage_facts(stack: Stack, stage: dict[str, Any], root: str) -> str:
+    """The ``dt``/``dd`` pairs under a stage heading; a fact with no value is left out."""
+    buys_from = " · ".join(
+        f'<a href="{_e(_stage_href(root, key))}">{_e(stack.name_of(key))}</a>'
+        for key in split_stages(stage["buys_from"])
+    )
+    lead = _as_float(stage["lead_time_years"])
+    lead_text = "" if lead is None else f"{fmt_number(lead)} {'year' if lead == 1 else 'years'}"
+    score = fmt_number(stage["bottleneck_score"])
+    bottleneck = " · ".join(
+        part
+        for part in (
+            f"{score} / 5" if score != MISSING else "",
+            _e(stage["bottleneck_note"]),
+        )
+        if part
+    )
+    status = str(stage["status"] or "")
+    facts = (
+        ("Unit", _e(stage["unit"])),
+        ("Sells", _e(stage["sells"])),
+        ("Buys from", buys_from),
+        ("Lead time", _e(lead_text)),
+        ("Bottleneck", bottleneck),
+        ("Status", f'<span class="badge badge-{_e(status)}">{_e(status)}</span>' if status else ""),
+    )
+    return "\n".join(f"      <dt>{label}</dt><dd>{value}</dd>" for label, value in facts if value)
+
+
+_FIGURES_HEAD = [
+    ("Metric", False),
+    ("Value", True),
+    ("Unit", False),
+    ("As of", False),
+    ("Scope", False),
+    ("Confidence", False),
+    ("Source", False),
+    ("Note", False),
+]
+
+
+def _figures_table(metrics: list[dict[str, Any]]) -> str:
+    rows = [
+        "<tr>"
+        f'<th scope="row">{_e(m["metric"])}</th>'
+        f'<td class="num">{_e(fmt_number(m["value"]))}</td>'
+        f'<td class="unit">{_e(m["unit"])}</td>'
+        f'<td class="nowrap">{_e(m["as_of"])}</td>'
+        f"<td>{_e(m['scope'])}</td>"
+        f"{_confidence_cell(m['confidence'])}"
+        f"<td>{_source_link(m['source_url'], m['source'])}</td>"
+        f"<td>{_e(m['note'])}</td>"
+        "</tr>"
+        for m in metrics
+    ]
+    return _table("figures", _FIGURES_HEAD, rows)
+
+
+_CONVERSIONS_HEAD = [
+    ("From → To", False),
+    ("Factor", True),
+    ("Unit", False),
+    ("As of", False),
+    ("Confidence", False),
+    ("Source", False),
+    ("Note", False),
+]
+
+
+def _conversions_table(stack: Stack, conversions: list[dict[str, Any]], root: str) -> str:
+    rows = []
+    for c in conversions:
+        ends = " → ".join(
+            f'<a href="{_e(_stage_href(root, key))}">{_e(stack.name_of(str(key)))}</a>'
+            for key in (c["from_stage"], c["to_stage"])
+        )
+        rows.append(
+            "<tr>"
+            f'<th scope="row">{ends}</th>'
+            f'<td class="num">{_e(fmt_number(c["factor"]))}</td>'
+            f'<td class="unit">{_e(c["unit"])}</td>'
+            f'<td class="nowrap">{_e(c["as_of"])}</td>'
+            f"{_confidence_cell(c['confidence'])}"
+            f"<td>{_source_link(c['source_url'], c['source'])}</td>"
+            f"<td>{_e(c['note'])}</td>"
+            "</tr>"
+        )
+    return _table("conversions", _CONVERSIONS_HEAD, rows)
+
+
+_PLAYERS_HEAD = [
+    ("Company", False),
+    ("Ticker", False),
+    ("Role", False),
+    ("Listed", False),
+    ("Note", False),
+]
+
+
+def _players_table(players: list[dict[str, Any]], root: str, known: set[str]) -> str:
+    rows = [
+        "<tr>"
+        f'<th scope="row">{_source_link(p["source_url"], p["company"])}</th>'
+        f"<td>{_company_link(p['ticker'], root, known)}</td>"
+        f"<td>{_e(p['role'])}</td>"
+        f"<td>{'yes' if p['listed'] else 'no'}</td>"
+        f"<td>{_e(p['note'])}</td>"
+        "</tr>"
+        for p in players
+    ]
+    return _table("players", _PLAYERS_HEAD, rows)
+
+
+def _stage_nav(stack: Stack, index: int, root: str) -> str:
+    """Previous stage, the chain, next stage: whichever neighbours exist."""
+    parts = []
+    if index > 0:
+        prev = stack.stages[index - 1]
+        parts.append(
+            f'<a class="prev" href="{_e(_stage_href(root, prev["stage"]))}">'
+            f"← {_e(prev['order'])} {_e(prev['name'])}</a>"
+        )
+    parts.append(f'<a href="{_e(root + "stack/index.html")}">Stack</a>')
+    if index + 1 < len(stack.stages):
+        nxt = stack.stages[index + 1]
+        parts.append(
+            f'<a class="next" href="{_e(_stage_href(root, nxt["stage"]))}">'
+            f"{_e(nxt['order'])} {_e(nxt['name'])} →</a>"
+        )
+    return "".join(parts)
+
+
+# --------------------------------------------------------------------------------------------
 # Output validation
 # --------------------------------------------------------------------------------------------
 
@@ -1070,26 +1418,26 @@ class _SiteWriter:
 def _check_out_dir(out_dir: Path, source_dirs: list[Path]) -> None:
     """Raise ``ValueError`` when resetting ``out_dir`` could delete the build's own inputs.
 
-    ``_reset_out_dir`` removes ``<out>/data`` and ``<out>/static`` among others, so ``--out site``
-    would wipe the refresh JSON and the stylesheet, and ``--out .`` the ``data`` package itself.
-    Refused: a source dir, anything inside one, and any ancestor of one (the site dir, the repo
-    root). ``site/build`` is none of these.
+    ``_reset_out_dir`` removes ``<out>/data``, ``<out>/static`` and ``<out>/stack`` among others,
+    so ``--out site`` would wipe the refresh JSON and the stylesheet, and ``--out .`` the ``data``
+    package and the stack CSVs themselves. Refused: a source dir, anything inside one, and any
+    ancestor of one (the site dir, the repo root). ``site/build`` is none of these.
     """
     out = out_dir.resolve()
     for source in source_dirs:
         source = source.resolve()
         if out == source or source in out.parents or out in source.parents:
             raise ValueError(
-                f"refusing to build into {out_dir}: it is, contains, or lies inside the site "
+                f"refusing to build into {out_dir}: it is, contains, or lies inside the "
                 f"source directory {source}, and a build first deletes <out>/companies, "
-                "<out>/writeups, <out>/data and <out>/static. Use a separate directory such as "
-                "site/build."
+                "<out>/writeups, <out>/stack, <out>/data and <out>/static. Use a separate "
+                "directory such as site/build."
             )
 
 
 def _reset_out_dir(out_dir: Path) -> None:
     # Only the generated subtrees are cleared so a stray .gitkeep or CNAME survives a rebuild.
-    for sub in ("companies", "writeups", "data", "static"):
+    for sub in ("companies", "writeups", "stack", "data", "static"):
         shutil.rmtree(out_dir / sub, ignore_errors=True)
         (out_dir / sub).mkdir(parents=True, exist_ok=True)
 
@@ -1101,23 +1449,25 @@ def build(
     calls_md: Path = CALLS_MD,
     templates_dir: Path | None = None,
     static_dir: Path | None = None,
+    stack_dir: Path = STACK_DIR,
 ) -> BuildReport:
     """Render the whole site into ``out_dir`` and return what was built.
 
     ``site_dir`` holds ``data/`` and ``content/``; templates and static assets come from it too
-    when present, otherwise from the repo's ``site/templates`` and ``site/static``. Missing inputs
-    produce an empty-state site plus warnings, never an exception. The one refusal is an
-    ``out_dir`` that overlaps the sources (``ValueError`` from ``_check_out_dir``), raised before
-    anything is deleted or written.
+    when present, otherwise from the repo's ``site/templates`` and ``site/static``. ``stack_dir``
+    holds the chain's CSVs and primers. Missing inputs produce an empty-state site plus warnings,
+    never an exception. The one refusal is an ``out_dir`` that overlaps the sources
+    (``ValueError`` from ``_check_out_dir``), raised before anything is deleted or written.
     """
     templates_src = templates_dir or _pick_dir(site_dir / "templates", SITE_TEMPLATES_DIR)
     static_src = static_dir or _pick_dir(site_dir / "static", SITE_STATIC_DIR)
     # The repo's own site dir is guarded as well as ``site_dir``: templates and static assets
-    # fall back to it, and its ``data/`` holds the refresh output.
+    # fall back to it, and its ``data/`` holds the refresh output. The stack dir is a source
+    # too, and a build deletes <out>/stack.
     _check_out_dir(
         out_dir,
         [root / sub for root in (site_dir, SITE_DIR) for sub in SOURCE_SUBDIRS]
-        + [templates_src, static_src],
+        + [templates_src, static_src, stack_dir],
     )
     templates = _load_templates(templates_src)
     data_dir = site_dir / "data"
@@ -1150,6 +1500,7 @@ def build(
         data_by_ticker[ticker] = data
 
     writeups = load_writeups(content_dir, warnings)
+    stack = load_stack(stack_dir, warnings)
 
     if calls_md.exists():
         calls = parse_calls(calls_md.read_text(encoding="utf-8"))
@@ -1159,6 +1510,8 @@ def build(
 
     # A link to a section that was left out would go nowhere, so the nav follows the content.
     nav = [("Companies", "index.html#companies")]
+    if stack:
+        nav.append(("Stack", "stack/index.html"))
     if writeups:
         nav.append(("Writeups", "writeups/index.html"))
     if calls:
@@ -1258,6 +1611,45 @@ def build(
     )
     writer.page("writeups/index.html", title="Writeups", content=writeups_index)
 
+    # Stack -----------------------------------------------------------------------------------
+    if stack:
+        index_content = templates["stack_index"].substitute(
+            root="../",
+            meta=f"{len(stack.stages)} stages",
+            stages_table=_stages_table(stack, "../", known),
+            tiers_section=_section(
+                "consumption-tiers", "Consumption tiers", _tiers_table(stack.tiers)
+            ),
+        )
+        writer.page("stack/index.html", title="Stack", content=index_content)
+        for i, stage in enumerate(stack.stages):
+            key = str(stage["stage"])
+            metrics = [m for m in stack.metrics if m["stage"] == key]
+            players = [p for p in stack.players if p["stage"] == key]
+            conversions = [c for c in stack.conversions if key in (c["from_stage"], c["to_stage"])]
+            primer = stack.primers.get(key, "")
+            summary = str(stage["summary"] or "")
+            content = templates["stack_stage"].substitute(
+                root="../",
+                eyebrow=f"Stage {_e(stage['order'])} of {len(stack.stages)}",
+                name=_e(stage["name"]),
+                stage=_e(key),
+                summary=f'    <p class="lede">{_e(summary)}</p>' if summary else "",
+                facts=_stage_facts(stack, stage, "../"),
+                primer_section=_section(
+                    "primer", "Primer", f'<div class="prose">{primer}</div>' if primer else ""
+                ),
+                figures_section=_section("figures", "Figures", _figures_table(metrics)),
+                conversions_section=_section(
+                    "conversions", "Conversions", _conversions_table(stack, conversions, "../")
+                ),
+                players_section=_section(
+                    "players", "Players", _players_table(players, "../", known)
+                ),
+                stage_nav=_stage_nav(stack, i, "../"),
+            )
+            writer.page(f"stack/{key}.html", title=str(stage["name"]), content=content)
+
     # Data, static assets, Pages marker -------------------------------------------------------
     if data_dir.is_dir():
         for src in sorted(data_dir.glob("*.json")):
@@ -1277,6 +1669,7 @@ def build(
     writer.report.writeups = len(writeups)
     writer.report.companies = len(companies)
     writer.report.calls = len(calls)
+    writer.report.stages = len(stack.stages) if stack else 0
     return writer.report
 
 
@@ -1288,16 +1681,21 @@ def main(argv: list[str] | None = None) -> int:
         "--site-dir", type=Path, default=SITE_DIR, help="dir with data/ and content/"
     )
     parser.add_argument("--calls", type=Path, default=CALLS_MD, help="path to calls.md")
+    parser.add_argument(
+        "--stack", type=Path, default=STACK_DIR, help="dir with stages.csv and the stack tables"
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
     try:
-        report = build(site_dir=args.site_dir, out_dir=args.out, calls_md=args.calls)
+        report = build(
+            site_dir=args.site_dir, out_dir=args.out, calls_md=args.calls, stack_dir=args.stack
+        )
     except ValueError as exc:  # an --out that overlaps the sources; nothing was touched
         parser.error(str(exc))
     print(
         f"built {len(report.pages)} pages into {args.out}: {report.companies} companies, "
-        f"{report.writeups} writeups, {report.calls} calls"
+        f"{report.writeups} writeups, {report.calls} calls, {report.stages} stages"
     )
     for warning in report.warnings:
         print(f"  warning: {warning}")

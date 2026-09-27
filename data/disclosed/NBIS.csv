@@ -1,0 +1,96 @@
+period,kpi,value,unit,qualifier,form,filed,accession,page,url
+2025Q4,active_power_mw,170,MW,approximately,6-K EX-99.2,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-2.htm
+2025Q3,active_power_target_ye2025_mw,100,MW,target,6-K EX-99.2,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-2.htm
+2025Q1,adjusted_ebitda_usd_m,-62.6,USD m,,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q2,adjusted_ebitda_usd_m,-21.0,USD m,,6-K EX-99.1,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-1.htm
+2025Q3,adjusted_ebitda_usd_m,-5.2,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,adjusted_ebitda_usd_m,15.0,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,adjusted_ebitda_usd_m,129.5,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,adjusted_ebitda_usd_m,236.2,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2025Q4,ai_cloud_revenue_usd_m,214.2,USD m,,6-K EX-99.2,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-2.htm
+2026Q1,ai_cloud_revenue_usd_m,389.7,USD m,,6-K EX-99.2,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-2.htm
+2026Q2,ai_cloud_revenue_usd_m,574.9,USD m,,6-K EX-99.2,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-2.htm
+2025Q3,arr_guidance_ye2026_high_usd_m,9000,USD m,range high,6-K EX-99.2,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-2.htm
+2025Q3,arr_guidance_ye2026_low_usd_m,7000,USD m,range low,6-K EX-99.2,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-2.htm
+2025Q1,arr_usd_m,249,USD m,,6-K EX-99.2,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-2.htm
+2025Q2,arr_usd_m,430,USD m,,6-K EX-99.2,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-2.htm
+2025Q3,arr_usd_m,551,USD m,approximately,6-K EX-99.2,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-2.htm
+2025Q4,arr_usd_m,1250,USD m,,6-K EX-99.2,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-2.htm
+2026Q1,arr_usd_m,1900,USD m,,6-K EX-99.2,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-2.htm
+2026Q2,arr_usd_m,3000,USD m,,6-K EX-99.2,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-2.htm
+2025Q1,capex_usd_m,543.9,USD m,comparative,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2025Q2,capex_usd_m,510.6,USD m,,6-K EX-99.1,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-1.htm
+2025Q3,capex_usd_m,955.5,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,capex_usd_m,2056.0,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,capex_usd_m,2472.9,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,capex_usd_m,5657.4,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2024Q4,cash_usd_m,2449.6,USD m,comparative,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q1,cash_usd_m,1447.0,USD m,,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q2,cash_usd_m,1679.3,USD m,,6-K EX-99.1,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-1.htm
+2025Q3,cash_usd_m,4794.8,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,cash_usd_m,3678.1,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,cash_usd_m,9298.2,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,cash_usd_m,8042.1,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2025Q2,connected_power_target_ye2025_mw,220,MW,target,6-K EX-99.2,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-2.htm
+2025Q3,connected_power_target_ye2026_mw,1000,MW,range high,6-K EX-99.2,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-2.htm
+2026Q1,connected_power_target_ye2026_mw,1000,MW,range high,6-K EX-99.2,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-2.htm
+2025Q4,contracted_power_gw,2,GW,more than,6-K EX-99.2,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-2.htm
+2026Q1,contracted_power_gw,3.5,GW,more than,6-K EX-99.2,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-2.htm
+2025Q2,contracted_power_target_ye2026_gw,1,GW,target,6-K EX-99.2,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-2.htm
+2025Q3,contracted_power_target_ye2026_gw,2.5,GW,more than,6-K EX-99.2,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-2.htm
+2025Q4,contracted_power_target_ye2026_gw,3,GW,more than,6-K EX-99.2,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-2.htm
+2026Q1,contracted_power_target_ye2026_gw,4,GW,more than,6-K EX-99.2,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-2.htm
+2026Q2,contracted_power_target_ye2026_gw,5,GW,target,6-K EX-99.2,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-2.htm
+2024Q4,debt_current_usd_m,6.1,USD m,comparative,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q1,debt_current_usd_m,6.2,USD m,,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q2,debt_current_usd_m,8.0,USD m,,6-K EX-99.1,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-1.htm
+2025Q3,debt_current_usd_m,16.0,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,debt_current_usd_m,24.5,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,debt_current_usd_m,18.4,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,debt_current_usd_m,46.7,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2024Q4,debt_non_current_usd_m,0,USD m,not reported,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q1,debt_non_current_usd_m,0,USD m,not reported,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q2,debt_non_current_usd_m,978.2,USD m,,6-K EX-99.1,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-1.htm
+2025Q3,debt_non_current_usd_m,4090.8,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,debt_non_current_usd_m,4103.2,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,debt_non_current_usd_m,8432.0,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,debt_non_current_usd_m,8499.0,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2025Q3,deferred_revenue_change_usd_m,-3.8,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,deferred_revenue_change_usd_m,1566.5,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,deferred_revenue_change_usd_m,3198.0,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,deferred_revenue_change_usd_m,1197.0,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2024Q4,deferred_revenue_current_usd_m,16.5,USD m,comparative,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q1,deferred_revenue_current_usd_m,19.0,USD m,,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q2,deferred_revenue_current_usd_m,19.3,USD m,,6-K EX-99.1,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-1.htm
+2025Q3,deferred_revenue_current_usd_m,15.6,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,deferred_revenue_current_usd_m,275.5,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,deferred_revenue_current_usd_m,685.6,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,deferred_revenue_current_usd_m,979.4,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2024Q4,deferred_revenue_non_current_usd_m,0,USD m,not reported,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q1,deferred_revenue_non_current_usd_m,0,USD m,not reported,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q2,deferred_revenue_non_current_usd_m,0,USD m,not reported,6-K EX-99.1,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-1.htm
+2025Q3,deferred_revenue_non_current_usd_m,0,USD m,not reported,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,deferred_revenue_non_current_usd_m,1302.0,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,deferred_revenue_non_current_usd_m,4092.5,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,deferred_revenue_non_current_usd_m,4995.8,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2025Q3,financing_cash_flow_usd_m,4200.6,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,financing_cash_flow_usd_m,106.4,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,financing_cash_flow_usd_m,6295.5,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,financing_cash_flow_usd_m,2864.9,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2026Q2,new_deal_payback_months,22,months,,6-K EX-99.2,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-2.htm
+2025Q1,operating_cash_flow_usd_m,-184.1,USD m,comparative,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2025Q2,operating_cash_flow_usd_m,-167.9,USD m,comparative,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2025Q3,operating_cash_flow_usd_m,-80.6,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,operating_cash_flow_usd_m,834.3,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,operating_cash_flow_usd_m,2258.0,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,operating_cash_flow_usd_m,2246.1,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm
+2026Q2,prepayments_expected_2026_usd_bn,9,USD bn,more than,6-K EX-99.2,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-2.htm
+2026Q1,revenue_guidance_2026_high_usd_m,3400,USD m,range high,6-K EX-99.2,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-2.htm
+2026Q1,revenue_guidance_2026_low_usd_m,3000,USD m,range low,6-K EX-99.2,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-2.htm
+2024Q4,revenue_usd_m,11.4,USD m,comparative,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q1,revenue_usd_m,55.3,USD m,,6-K EX-99.1,2025-05-20,0001104659-25-050975,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925050975/tm2515580d1_ex99-1.htm
+2025Q2,revenue_usd_m,105.1,USD m,,6-K EX-99.1,2025-08-07,0001104659-25-075028,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925075028/tm2522866d1_ex99-1.htm
+2025Q3,revenue_usd_m,146.1,USD m,,6-K EX-99.1,2025-11-12,0001104659-25-109806,,https://www.sec.gov/Archives/edgar/data/1513845/000110465925109806/tm2530882d1_ex99-1.htm
+2025Q4,revenue_usd_m,227.7,USD m,,6-K EX-99.1,2026-02-12,0001104659-26-013946,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926013946/tm266173d1_ex99-1.htm
+2026Q1,revenue_usd_m,399.0,USD m,,6-K EX-99.1,2026-05-13,0001104659-26-059872,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926059872/tm2614392d1_ex99-1.htm
+2026Q2,revenue_usd_m,582.3,USD m,,6-K EX-99.1,2026-08-12,0001104659-26-094568,,https://www.sec.gov/Archives/edgar/data/1513845/000110465926094568/tm2622968d1_ex99-1.htm

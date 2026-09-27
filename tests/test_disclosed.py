@@ -59,5 +59,10 @@ def test_committed_datasets_load(path: Path) -> None:
         "nearly",
         "remainder of year",
         "thereafter",
+        "comparative",
+        "not reported",
+        "target",
+        "range low",
+        "range high",
     }
     assert frame["url"].str.startswith("https://www.sec.gov/Archives/edgar/data/").all()
