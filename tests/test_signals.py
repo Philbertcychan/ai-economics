@@ -68,3 +68,18 @@ def test_committed_ledger_loads() -> None:
         pytest.skip("no ledger committed yet")
     assert not frame.empty
     assert frame["source_url"].str.startswith("http").all()
+
+
+def test_stages_file_is_read_like_the_stack_loader_reads_it(tmp_path: Path) -> None:
+    # A BOM and padded header cells are what Excel leaves behind; data/stack.py accepts them, so
+    # the ledger's stage check must too, or a build that survives the stack dies on the ledger.
+    ledger = write(tmp_path, ROWS)
+    stages = tmp_path / "stack" / "stages.csv"
+    stages.write_text(
+        "\ufefforder, stage, name\n1, power, Power\n5, memory, Memory\n7, compute, GPU-hours\n",
+        encoding="utf-8",
+    )
+    assert len(load_signals(ledger, stack_dir=tmp_path / "stack")) == 3
+    stages.write_text("order,name\n1,Power\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="no 'stage' column"):
+        load_signals(ledger, stack_dir=tmp_path / "stack")

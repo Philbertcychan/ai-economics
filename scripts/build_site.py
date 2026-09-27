@@ -7,10 +7,12 @@ the human writes essays into ``site/content/``. This module turns both into a sm
 that GitHub Pages can serve: an index with one comparison table of the companies (plus the calls
 table and the writeups list once either has entries); one page per company with a key-figures
 strip, server-rendered tables and Chart.js charts layered on top; one page per published
-writeup; and the stack (``stack/*.csv``, loaded by ``data/stack.py``) as one table of the chain
-plus a page per stage with its primer, figures, conversions and players. There is no framework
-and no bundler: templates are ``string.Template`` files in ``site/templates/`` and the browser
-assets are copied verbatim from ``site/static/``.
+writeup; the stack (``stack/*.csv``, loaded by ``data/stack.py``) as one table of the chain
+plus a page per stage with its primer, figures, conversions and players; and the signals ledger
+(``signals/ledger.csv``, loaded by ``data/signals.py``) as one table of every signal, with the
+rows for a stage or a company repeated on that page. There is no framework and no bundler:
+templates are ``string.Template`` files in ``site/templates/`` and the browser assets are copied
+verbatim from ``site/static/``.
 
 Design notes
 ------------
@@ -30,7 +32,8 @@ Design notes
   refresh.py already published (change on a year earlier, capex / revenue); nothing here models
   or forecasts.
 
-CLI: ``uv run scripts/build_site.py [--out DIR] [--site-dir DIR] [--calls FILE] [--stack DIR]``
+CLI: ``uv run scripts/build_site.py [--out DIR] [--site-dir DIR] [--calls FILE] [--stack DIR]
+[--signals DIR]``
 """
 
 from __future__ import annotations
@@ -44,6 +47,7 @@ import re
 import shutil
 import sys
 import unicodedata
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
@@ -54,7 +58,16 @@ from urllib.parse import urlsplit
 
 import markdown
 
-from data import CALLS_MD, SITE_BUILD_DIR, SITE_DIR, SITE_STATIC_DIR, SITE_TEMPLATES_DIR, STACK_DIR
+from data import (
+    CALLS_MD,
+    SIGNALS_DIR,
+    SITE_BUILD_DIR,
+    SITE_DIR,
+    SITE_STATIC_DIR,
+    SITE_TEMPLATES_DIR,
+    STACK_DIR,
+)
+from data.signals import CONFIDENCE, load_signals
 from data.stack import (
     load_consumption_tiers,
     load_conversions,
@@ -134,6 +147,7 @@ TEMPLATE_NAMES = (
     "writeups_index",
     "stack_index",
     "stack_stage",
+    "signals_index",
 )
 
 # Tolerates a UTF-8 BOM (Windows editors add one) and CRLF line endings.
@@ -157,6 +171,7 @@ class BuildReport:
     companies: int = 0
     calls: int = 0
     stages: int = 0
+    signals: int = 0
     warnings: list[str] = field(default_factory=list)
 
 
@@ -1237,6 +1252,193 @@ def _stage_nav(stack: Stack, index: int, root: str) -> str:
 
 
 # --------------------------------------------------------------------------------------------
+# The signals ledger: every row on signals/index.html, a stage's rows on its page, a company's
+# rows on its page. Rows arrive validated from data/signals.py; this section only formats them.
+# --------------------------------------------------------------------------------------------
+
+
+def load_ledger(signals_dir: Path, stack_dir: Path, warnings: list[str]) -> list[dict[str, Any]]:
+    """The ledger as plain dicts, newest first; an empty list when there is nothing to show.
+
+    No ledger is not a problem to report: ``data/signals.py`` treats it as "none yet", and the
+    empty-section rule hides the signals and their nav link. A malformed ledger is named in
+    ``warnings`` and the site is built without signals, on the stack's rule: the loader refuses
+    the file so a bad row cannot reach a page, and the builder never fails on an input.
+    Rows are dicts (``DataFrame.to_dict("records")``) so the renderers stay free of pandas; a
+    blank ``value`` arrives as NaN, which ``fmt_number`` shows as the en dash.
+    """
+    try:
+        frame = load_signals(signals_dir, stack_dir=stack_dir)
+    except (ValueError, KeyError, OSError) as exc:
+        # pandas' parser errors are ValueErrors; an unreadable file is an OSError. The loader
+        # prefixes its own messages with the file name; pandas and the OS do not.
+        message = str(exc)
+        if "ledger.csv" not in message:
+            message = f"ledger.csv: {message}"
+        warnings.append(f"{message}; signals left empty")
+        return []
+    return [] if frame is None else frame.to_dict("records")
+
+
+def _stage_link(stack: Stack | None, key: Any, root: str) -> str:
+    """A stage key as its display name linked to the stage page; the key as text without one.
+
+    The ledger can be built without a stack (or name a stage the stack does not have), and a
+    link to a page that was not built would go nowhere.
+    """
+    text = str(key or "")
+    if stack is not None and any(s["stage"] == text for s in stack.stages):
+        return f'<a href="{_e(_stage_href(root, text))}">{_e(stack.name_of(text))}</a>'
+    return _e(text)
+
+
+def _signal_value(signal: dict[str, Any]) -> str:
+    """``25 USD bn``: the plain number with its unit; the en dash when the signal has no number."""
+    number = fmt_number(signal["value"])
+    if number == MISSING:
+        return MISSING
+    return " ".join(part for part in (number, str(signal["unit"] or "").strip()) if part)
+
+
+def _maps_to_parts(maps_to: Any) -> tuple[str, str]:
+    """``("CRWV", "cost_of_debt")`` from ``CRWV: cost_of_debt``; ``("", text)`` without a colon.
+
+    The one place the ticker is read out of ``maps_to``, so the index link, the company-page
+    filter and the "Bears on" column cannot disagree about a row (case and spacing forgiven).
+    """
+    text = str(maps_to or "")
+    head, sep, tail = text.partition(":")
+    if not sep:
+        return "", text.strip()
+    return head.strip().upper(), tail.strip()
+
+
+def _maps_to_html(maps_to: Any, root: str, known: set[str]) -> str:
+    """``maps_to`` as written, with a leading ticker linked to its company page when one exists.
+
+    ``CRWV: cost_of_debt`` links CRWV; ``stack: compute/price`` and ``watch`` are text.
+    """
+    text = str(maps_to or "")
+    ticker, tail = _maps_to_parts(text)
+    if ticker in known:
+        # Shown as the ledger wrote it (case included); the link is to the canonical page.
+        return f"{_company_link(text.partition(':')[0].strip(), root, known)}: {_e(tail)}"
+    return _e(text)
+
+
+def _bears_on(maps_to: Any) -> str:
+    """What follows the ticker in ``maps_to``: the assumption a company-page signal bears on."""
+    return _maps_to_parts(maps_to)[1]
+
+
+def company_signals(signals: list[dict[str, Any]], ticker: str) -> list[dict[str, Any]]:
+    """The rows mapped to ``ticker``: ``maps_to`` opens with the ticker and a colon, any case."""
+    wanted = ticker.upper()
+    return [s for s in signals if _maps_to_parts(s["maps_to"])[0] == wanted]
+
+
+def signals_meta(signals: list[dict[str, Any]]) -> str:
+    """``6 signals · 5 confirmed · 1 reported · 0 speculated``, in the ledger's level order."""
+    counts = Counter(str(s["confidence"]).lower() for s in signals)
+    total = len(signals)
+    parts = [f"{total} signal{'' if total == 1 else 's'}"]
+    parts += [f"{counts.get(level, 0)} {level}" for level in CONFIDENCE]
+    return " · ".join(parts)
+
+
+# Column key -> (header, numeric). The three tables pick from these: a stage page needs no Stage
+# column (the stage is the page) and no Bears-on (that is the ledger owner's business); a
+# company page adds what each signal bears on; the index adds the stage and drops the
+# counterparty, which the claim already names, to keep nine columns.
+_SIGNALS_HEAD: dict[str, tuple[str, bool]] = {
+    "date": ("Date", False),
+    "kind": ("Kind", False),
+    "stage": ("Stage", False),
+    "actor": ("Actor", False),
+    "counterparty": ("Counterparty", False),
+    "claim": ("Claim", False),
+    "value": ("Value", True),
+    "confidence": ("Confidence", False),
+    "bears_on": ("Bears on", False),  # the assumption named after the ticker (company pages)
+    "maps_to": ("Bears on", False),  # the whole maps_to, ticker linked (the index)
+    "source": ("Source", False),
+}
+STAGE_SIGNAL_COLUMNS = (
+    "date",
+    "kind",
+    "actor",
+    "counterparty",
+    "claim",
+    "value",
+    "confidence",
+    "source",
+)
+COMPANY_SIGNAL_COLUMNS = (
+    "date",
+    "kind",
+    "actor",
+    "counterparty",
+    "claim",
+    "value",
+    "confidence",
+    "bears_on",
+    "source",
+)
+INDEX_SIGNAL_COLUMNS = (
+    "date",
+    "kind",
+    "stage",
+    "actor",
+    "claim",
+    "value",
+    "confidence",
+    "maps_to",
+    "source",
+)
+
+
+def _signal_cell(
+    column: str, signal: dict[str, Any], root: str, known: set[str], stack: Stack | None
+) -> str:
+    match column:
+        case "date":
+            return f'<td class="nowrap">{_e(signal["date"])}</td>'
+        case "kind":
+            return f'<td class="kind">{_e(signal["kind"])}</td>'
+        case "stage":
+            return f"<td>{_stage_link(stack, signal['stage'], root)}</td>"
+        case "claim":
+            return f'<td class="claim">{_e(signal["claim"])}</td>'
+        case "value":
+            return f'<td class="num">{_e(_signal_value(signal))}</td>'
+        case "confidence":
+            return _confidence_cell(signal["confidence"])
+        case "bears_on":
+            return f"<td>{_e(_bears_on(signal['maps_to']))}</td>"
+        case "maps_to":
+            return f"<td>{_maps_to_html(signal['maps_to'], root, known)}</td>"
+        case "source":
+            return f"<td>{_source_link(signal['source_url'], signal['source'])}</td>"
+        case _:  # actor, counterparty: text as written
+            return f"<td>{_e(signal[column])}</td>"
+
+
+def _signals_table(
+    signals: list[dict[str, Any]],
+    columns: tuple[str, ...],
+    root: str,
+    known: set[str],
+    stack: Stack | None = None,
+) -> str:
+    """The ledger rows given, in the order given, as one ``.table-scroll`` table; "" for none."""
+    rows = [
+        "<tr>" + "".join(_signal_cell(c, s, root, known, stack) for c in columns) + "</tr>"
+        for s in signals
+    ]
+    return _table("signals", [_SIGNALS_HEAD[c] for c in columns], rows)
+
+
+# --------------------------------------------------------------------------------------------
 # Output validation
 # --------------------------------------------------------------------------------------------
 
@@ -1418,10 +1620,11 @@ class _SiteWriter:
 def _check_out_dir(out_dir: Path, source_dirs: list[Path]) -> None:
     """Raise ``ValueError`` when resetting ``out_dir`` could delete the build's own inputs.
 
-    ``_reset_out_dir`` removes ``<out>/data``, ``<out>/static`` and ``<out>/stack`` among others,
-    so ``--out site`` would wipe the refresh JSON and the stylesheet, and ``--out .`` the ``data``
-    package and the stack CSVs themselves. Refused: a source dir, anything inside one, and any
-    ancestor of one (the site dir, the repo root). ``site/build`` is none of these.
+    ``_reset_out_dir`` removes ``<out>/data``, ``<out>/static``, ``<out>/stack`` and
+    ``<out>/signals`` among others, so ``--out site`` would wipe the refresh JSON and the
+    stylesheet, and ``--out .`` the ``data`` package, the stack CSVs and the ledger themselves.
+    Refused: a source dir, anything inside one, and any ancestor of one (the site dir, the repo
+    root). ``site/build`` is none of these.
     """
     out = out_dir.resolve()
     for source in source_dirs:
@@ -1430,14 +1633,14 @@ def _check_out_dir(out_dir: Path, source_dirs: list[Path]) -> None:
             raise ValueError(
                 f"refusing to build into {out_dir}: it is, contains, or lies inside the "
                 f"source directory {source}, and a build first deletes <out>/companies, "
-                "<out>/writeups, <out>/stack, <out>/data and <out>/static. Use a separate "
-                "directory such as site/build."
+                "<out>/writeups, <out>/stack, <out>/signals, <out>/data and <out>/static. Use "
+                "a separate directory such as site/build."
             )
 
 
 def _reset_out_dir(out_dir: Path) -> None:
     # Only the generated subtrees are cleared so a stray .gitkeep or CNAME survives a rebuild.
-    for sub in ("companies", "writeups", "stack", "data", "static"):
+    for sub in ("companies", "writeups", "stack", "signals", "data", "static"):
         shutil.rmtree(out_dir / sub, ignore_errors=True)
         (out_dir / sub).mkdir(parents=True, exist_ok=True)
 
@@ -1450,24 +1653,26 @@ def build(
     templates_dir: Path | None = None,
     static_dir: Path | None = None,
     stack_dir: Path = STACK_DIR,
+    signals_dir: Path = SIGNALS_DIR,
 ) -> BuildReport:
     """Render the whole site into ``out_dir`` and return what was built.
 
     ``site_dir`` holds ``data/`` and ``content/``; templates and static assets come from it too
     when present, otherwise from the repo's ``site/templates`` and ``site/static``. ``stack_dir``
-    holds the chain's CSVs and primers. Missing inputs produce an empty-state site plus warnings,
-    never an exception. The one refusal is an ``out_dir`` that overlaps the sources
-    (``ValueError`` from ``_check_out_dir``), raised before anything is deleted or written.
+    holds the chain's CSVs and primers, ``signals_dir`` the ledger. Missing inputs produce an
+    empty-state site plus warnings, never an exception. The one refusal is an ``out_dir`` that
+    overlaps the sources (``ValueError`` from ``_check_out_dir``), raised before anything is
+    deleted or written.
     """
     templates_src = templates_dir or _pick_dir(site_dir / "templates", SITE_TEMPLATES_DIR)
     static_src = static_dir or _pick_dir(site_dir / "static", SITE_STATIC_DIR)
     # The repo's own site dir is guarded as well as ``site_dir``: templates and static assets
-    # fall back to it, and its ``data/`` holds the refresh output. The stack dir is a source
-    # too, and a build deletes <out>/stack.
+    # fall back to it, and its ``data/`` holds the refresh output. The stack and signals dirs
+    # are sources too, and a build deletes <out>/stack and <out>/signals.
     _check_out_dir(
         out_dir,
         [root / sub for root in (site_dir, SITE_DIR) for sub in SOURCE_SUBDIRS]
-        + [templates_src, static_src, stack_dir],
+        + [templates_src, static_src, stack_dir, signals_dir],
     )
     templates = _load_templates(templates_src)
     data_dir = site_dir / "data"
@@ -1501,6 +1706,8 @@ def build(
 
     writeups = load_writeups(content_dir, warnings)
     stack = load_stack(stack_dir, warnings)
+    # The ledger's stage column is checked against this build's stack, not the repo's.
+    signals = load_ledger(signals_dir, stack_dir, warnings)
 
     if calls_md.exists():
         calls = parse_calls(calls_md.read_text(encoding="utf-8"))
@@ -1512,6 +1719,8 @@ def build(
     nav = [("Companies", "index.html#companies")]
     if stack:
         nav.append(("Stack", "stack/index.html"))
+    if signals:
+        nav.append(("Signals", "signals/index.html"))
     if writeups:
         nav.append(("Writeups", "writeups/index.html"))
     if calls:
@@ -1574,6 +1783,13 @@ def build(
             key_figures=_key_figures_html(data),
             model_section=_model_section(data, company.get("model_status")),
             reported_html=_reported_html(data),
+            signals_section=_section(
+                "signals",
+                "Signals",
+                _signals_table(
+                    company_signals(signals, ticker), COMPANY_SIGNAL_COLUMNS, "../", known
+                ),
+            ),
             writeups_section=_section(
                 "company-writeups", "Writeups", _writeups_list(mine, "../", known)
             ),
@@ -1646,9 +1862,28 @@ def build(
                 players_section=_section(
                     "players", "Players", _players_table(players, "../", known)
                 ),
+                signals_section=_section(
+                    "signals",
+                    "Signals",
+                    _signals_table(
+                        [s for s in signals if s["stage"] == key],
+                        STAGE_SIGNAL_COLUMNS,
+                        "../",
+                        known,
+                    ),
+                ),
                 stage_nav=_stage_nav(stack, i, "../"),
             )
             writer.page(f"stack/{key}.html", title=str(stage["name"]), content=content)
+
+    # Signals ---------------------------------------------------------------------------------
+    if signals:
+        content = templates["signals_index"].substitute(
+            root="../",
+            meta=signals_meta(signals),
+            signals_table=_signals_table(signals, INDEX_SIGNAL_COLUMNS, "../", known, stack),
+        )
+        writer.page("signals/index.html", title="Signals", content=content)
 
     # Data, static assets, Pages marker -------------------------------------------------------
     if data_dir.is_dir():
@@ -1670,6 +1905,7 @@ def build(
     writer.report.companies = len(companies)
     writer.report.calls = len(calls)
     writer.report.stages = len(stack.stages) if stack else 0
+    writer.report.signals = len(signals)
     return writer.report
 
 
@@ -1684,18 +1920,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--stack", type=Path, default=STACK_DIR, help="dir with stages.csv and the stack tables"
     )
+    parser.add_argument(
+        "--signals", type=Path, default=SIGNALS_DIR, help="dir with the ledger.csv of signals"
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
     try:
         report = build(
-            site_dir=args.site_dir, out_dir=args.out, calls_md=args.calls, stack_dir=args.stack
+            site_dir=args.site_dir,
+            out_dir=args.out,
+            calls_md=args.calls,
+            stack_dir=args.stack,
+            signals_dir=args.signals,
         )
     except ValueError as exc:  # an --out that overlaps the sources; nothing was touched
         parser.error(str(exc))
     print(
         f"built {len(report.pages)} pages into {args.out}: {report.companies} companies, "
-        f"{report.writeups} writeups, {report.calls} calls, {report.stages} stages"
+        f"{report.writeups} writeups, {report.calls} calls, {report.stages} stages, "
+        f"{report.signals} signals"
     )
     for warning in report.warnings:
         print(f"  warning: {warning}")

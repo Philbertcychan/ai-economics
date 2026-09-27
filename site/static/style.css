@@ -700,16 +700,33 @@ tbody tr:hover {
   border-style: dashed;
 }
 
+/* Two vocabularies, one scale: the stack rates figures high / medium / low, the ledger rates
+   signals confirmed / reported / speculated. The firm end is ink, the middle muted, the soft end
+   the warning colour, so a reader learns the scale once. */
 .confidence {
   color: var(--muted);
 }
 
-.confidence-high {
+.confidence-high,
+.confidence-confirmed {
   color: var(--ink);
 }
 
-.confidence-low {
+.confidence-low,
+.confidence-speculated {
   color: var(--warn);
+}
+
+/* ---- signals --------------------------------------------------------------------------- */
+
+/* A claim is a sentence with its number in it; without a floor the eight short columns beside
+   it squeeze it into a one-word-per-line ribbon. */
+.signals .claim {
+  min-width: 18rem;
+}
+
+.signals .kind {
+  white-space: nowrap;
 }
 
 /* Previous stage on the left, next on the right, whichever of them exist. */

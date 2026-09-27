@@ -38,9 +38,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from data import REPO_ROOT
+from data import REPO_ROOT, SIGNALS_DIR
 
-SIGNALS_DIR = REPO_ROOT / "signals"
 LEDGER_COLUMNS = (
     "date",
     "kind",
@@ -61,11 +60,26 @@ CONFIDENCE = ("confirmed", "reported", "speculated")
 
 
 def _known_stages(stack_dir: Path) -> set[str]:
+    """The stage keys in ``stack/stages.csv``; empty when there is no stack yet.
+
+    Read the way ``data/stack.py`` reads it (a BOM and padded header cells are tolerated), so a
+    stack the stack loader accepts is never rejected here. A stages file without a ``stage``
+    column is a malformed stack, reported as a ValueError like every other bad input.
+    """
     path = stack_dir / "stages.csv"
     if not path.exists():
         return set()
-    with path.open(encoding="utf-8", newline="") as fh:
-        return {row["stage"] for row in csv.DictReader(fh)}
+    with path.open(encoding="utf-8-sig", newline="") as fh:
+        rows = list(csv.reader(fh))
+    if not rows:
+        return set()
+    header = [cell.strip() for cell in rows[0]]
+    if "stage" not in header:
+        raise ValueError(
+            f"{path.name}: no 'stage' column, so the ledger's stages cannot be checked"
+        )
+    column = header.index("stage")
+    return {row[column].strip() for row in rows[1:] if len(row) > column and row[column].strip()}
 
 
 def load_signals(

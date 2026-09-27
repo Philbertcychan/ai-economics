@@ -2,11 +2,11 @@
 
 Self-contained: ``make_site`` writes a small fixture site (two fictional companies, one quarterly
 filer without a model and one annual filer with a built one, two published writeups, a draft, an
-underscore-prefixed template, a calls.md with an escaped pipe and a blank placeholder row, and
-the fixture stack from ``tests/test_stack.py``) into ``tmp_path`` and the tests build it and
-inspect the output. Templates and static assets come from the real ``site/templates`` and
-``site/static``, so the tests also exercise the shipped HTML and hold it to the site's voice:
-labels, numbers, source lines and statuses, no explanatory prose. No network.
+underscore-prefixed template, a calls.md with an escaped pipe and a blank placeholder row, the
+fixture stack from ``tests/test_stack.py`` and a five-row signals ledger) into ``tmp_path`` and
+the tests build it and inspect the output. Templates and static assets come from the real
+``site/templates`` and ``site/static``, so the tests also exercise the shipped HTML and hold it to
+the site's voice: labels, numbers, source lines and statuses, no explanatory prose. No network.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
-from test_stack import PRIMER_MD, STAGE_KEYS, STAGES_CSV, write_stack
+from test_stack import PRIMER_MD, STAGE_KEYS, STAGES_CSV, variant, write_stack
 
 from data import REPO_ROOT, SITE_CONTENT_DIR, SITE_DIR, SITE_STATIC_DIR
 from scripts.build_site import (
@@ -46,6 +46,7 @@ from scripts.build_site import (
     parse_frontmatter,
     prior_year_period,
     series_figure,
+    signals_meta,
     slugify,
     split_basis,
     value_at,
@@ -246,13 +247,36 @@ status: published
 ## Position
 """
 
+# Five toy signals against the fixture stack and the two fixture companies, out of date order so
+# the "newest first" rule is exercised: two on power (one with no number, one whose claim has the
+# two characters the site must escape), two mapped to AAA on compute, one mapped to BBB with its
+# ticker in lower case and no source text. Fictional throughout, like the rest of the fixture.
+LEDGER_CSV = """\
+date,kind,stage,actor,counterparty,claim,value,unit,source_url,source,confidence,maps_to,note
+2026-08-11,contract,compute,Alpha Cloud,Beta Labs,Beta commits $4 billion over five years,4,USD bn,https://example.com/aaa-contract,Example 8-K,confirmed,AAA: toy_price,Example note
+2026-09-01,statement,power,Utility Co,,Says 2 GW of data-centre load <requested> & queued in its territory,2,GW,https://example.com/power-statement,Example press release,reported,stack: power/demand_pipeline_gw,
+2026-07-15,price,power,Tracker,,Contract power prices flat quarter on quarter,,,https://example.com/power-price,Example tracker,speculated,watch,No number
+2026-06-30,financing,systems,Beta Compute,lenders,Borrows $1.5 billion against servers,1.5,USD bn,https://example.com/bbb-loan,,confirmed,bbb: toy_life,Lower-case ticker on purpose
+2026-05-01,buildout,compute,Alpha Cloud,,Second site of 300 MW under construction,300,MW,https://example.com/aaa-site,Example release,reported,AAA: toy_share,
+"""  # noqa: E501  (CSV rows are one line each by definition)
+
+
+def write_ledger(root: Path, text: str = LEDGER_CSV) -> Path:
+    """Write ``text`` as ``root/signals/ledger.csv`` and return the signals dir."""
+    signals = root / "signals"
+    signals.mkdir(exist_ok=True)
+    (signals / "ledger.csv").write_text(text, encoding="utf-8", newline="\n")
+    return signals
+
 
 def make_site(tmp_path: Path) -> tuple[Path, Path, Path]:
-    """Write the fixture site and, beside it, the fixture stack (``tmp_path / "stack"``).
+    """Write the fixture site and, beside it, the fixture stack and ledger.
 
-    Returns (site_dir, out_dir, calls_md); builds pass ``stack_dir=tmp_path / "stack"``.
+    Returns (site_dir, out_dir, calls_md); builds pass ``stack_dir=tmp_path / "stack"`` and
+    ``signals_dir=tmp_path / "signals"`` explicitly, so no test reads the repo's own tables.
     """
     write_stack(tmp_path)
+    write_ledger(tmp_path)
     site = tmp_path / "site"
     (site / "data").mkdir(parents=True)
     (site / "content").mkdir()
@@ -272,7 +296,13 @@ def make_site(tmp_path: Path) -> tuple[Path, Path, Path]:
 @pytest.fixture
 def built(tmp_path: Path) -> tuple[Path, BuildReport]:
     site, out, calls = make_site(tmp_path)
-    return out, build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    return out, build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
 
 
 def read(path: Path) -> str:
@@ -349,13 +379,15 @@ def test_build_creates_expected_files(built: tuple[Path, BuildReport]) -> None:
         "writeups/index.html",
         "stack/index.html",
         *(f"stack/{key}.html" for key in STAGE_KEYS),
+        "signals/index.html",
     ]
     for rel in expected:
         assert (out / rel).is_file(), rel
     assert sorted(report.pages) == sorted(expected)
     for rel in ("static/style.css", "static/dashboard.js", ".nojekyll", "data/calls.json"):
         assert (out / rel).is_file(), rel
-    assert (report.companies, report.writeups, report.calls, report.stages) == (2, 2, 2, 9)
+    counts = (report.companies, report.writeups, report.calls, report.stages, report.signals)
+    assert counts == (2, 2, 2, 9, 5)
     assert not report.warnings, report.warnings
 
 
@@ -459,6 +491,7 @@ def test_index_rows_sort_by_layer_then_ticker_and_blank_out_missing_figures(
         out_dir=out,
         calls_md=tmp_path / "missing-calls.md",
         stack_dir=tmp_path / "no-stack",
+        signals_dir=tmp_path / "no-signals",
     )
     rows = table_rows(read(out / "index.html"), "companies")[1:]
     assert [row[0].split()[0] for row in rows] == ["ANC", "ZNC", "CHP", "HYA", "HYB", "PWR"]
@@ -497,7 +530,13 @@ def test_empty_sections_and_their_nav_links_are_left_out(tmp_path: Path) -> None
         path.unlink()
     no_calls = tmp_path / "no-calls.md"
     no_calls.write_text(CALLS_MD.split("| 2026-09-21", 1)[0], encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=no_calls, stack_dir=tmp_path / "stack")
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=no_calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     assert (report.writeups, report.calls) == (0, 0) and not report.warnings
     for page in ("index.html", "companies/AAA.html", "companies/BBB.html"):
         text = read(out / page)
@@ -515,7 +554,13 @@ def test_index_shows_only_newest_five_writeups(tmp_path: Path) -> None:
             '"Depreciation & the GPU-hour"', f"Writeup number {day}"
         )
         (site / "content" / f"2026-10-{day:02d}-n{day}.md").write_text(text, encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     assert report.writeups == 8
     index = read(out / "index.html")
     assert "Writeup number 6" in index and "Writeup number 2" in index
@@ -693,7 +738,13 @@ def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> No
     snapshot["outputs"]["toy_output"]["points"] = [["2024Q4", 500.0]]
     snapshot["outputs"]["toy_ratio"]["points"] = [["2024Q4", 0.55]]
     (site / "data" / "BBB.json").write_text(json.dumps(snapshot), encoding="utf-8")
-    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     page = read(out / "companies" / "BBB.html")
     model = page.split('<section id="model"', 1)[1].split("</section>", 1)[0]
     assert 'data-charts="outputs"' not in page and 'class="charts"' not in model
@@ -712,7 +763,13 @@ def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> No
     # Outputs that end in different periods: a Period column, not one period in the caption.
     snapshot["outputs"]["toy_ratio"]["points"] = [["2025Q1", 0.55]]
     (site / "data" / "BBB.json").write_text(json.dumps(snapshot), encoding="utf-8")
-    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     page = read(out / "companies" / "BBB.html")
     assert "<caption>Outputs</caption>" in page and 'data-charts="outputs"' not in page
     assert table_rows(page, "outputs") == [
@@ -741,7 +798,13 @@ def test_model_content_is_hidden_until_the_status_says_built(tmp_path: Path) -> 
     companies = json.loads(json.dumps(COMPANIES_JSON))
     companies["companies"][1]["model_status"] = "pending"
     (site / "data" / "companies.json").write_text(json.dumps(companies), encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     page = read(out / "companies" / "BBB.html")
     assert 'id="model"' not in page and "toy_price" not in page.split("<script", 1)[0]
     assert "Toy output" not in page.split("<script", 1)[0]
@@ -755,7 +818,13 @@ def test_status_labels_shown_to_readers(tmp_path: Path) -> None:
         {"ticker": "CCC", "name": "Gamma Chips Corp", "layer": "chip", "model_status": "no-model"}
     )
     (site / "data" / "companies.json").write_text(json.dumps(companies), encoding="utf-8")
-    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     rows = table_rows(read(out / "index.html"), "companies")[1:]
     assert {row[0].split()[0]: row[-1] for row in rows} == {
         "AAA": "model in progress",
@@ -827,6 +896,7 @@ def test_company_page_data_only(tmp_path: Path) -> None:
         out_dir=out,
         calls_md=tmp_path / "missing-calls.md",
         stack_dir=tmp_path / "no-stack",
+        signals_dir=tmp_path / "no-signals",
     )
     index = read(out / "index.html")
     page = read(out / "companies" / "CCC.html")
@@ -878,6 +948,7 @@ def test_empty_state_build_succeeds_with_warning(tmp_path: Path) -> None:
         out_dir=out,
         calls_md=tmp_path / "missing-calls.md",
         stack_dir=tmp_path / "no-stack",
+        signals_dir=tmp_path / "no-signals",
     )
     assert "index.html" in report.pages and "writeups/index.html" in report.pages
     assert (report.companies, report.writeups, report.calls, report.stages) == (0, 0, 0, 0)
@@ -933,7 +1004,13 @@ BANNED_PHRASES = (
 def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
     """Every page of three builds: the full fixture, a data-only company, and no data at all."""
     site, full, calls = make_site(tmp_path)
-    build(site_dir=site, out_dir=full, calls_md=calls, stack_dir=tmp_path / "stack")
+    build(
+        site_dir=site,
+        out_dir=full,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
 
     bare = tmp_path / "bare-site"
     (bare / "data").mkdir(parents=True)
@@ -947,17 +1024,20 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
         out_dir=tmp_path / "bare",
         calls_md=tmp_path / "missing-calls.md",
         stack_dir=tmp_path / "no-stack",
+        signals_dir=tmp_path / "no-signals",
     )
     build(
         site_dir=tmp_path / "nothing",
         out_dir=tmp_path / "empty",
         calls_md=tmp_path / "x.md",
         stack_dir=tmp_path / "no-stack",
+        signals_dir=tmp_path / "no-signals",
     )
 
-    # The full build has the stack index and nine stage pages; the other two have no stack.
+    # The full build has the stack index, nine stage pages and the signals index; the other two
+    # have neither a stack nor a ledger.
     pages = [p for d in ("build", "bare", "empty") for p in (tmp_path / d).rglob("*.html")]
-    assert len(pages) == 16 + 3 + 2
+    assert len(pages) == 17 + 3 + 2
     for page in pages:
         text = read(page)
         for phrase in BANNED_PHRASES:
@@ -971,9 +1051,21 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
 
 def test_rebuild_is_byte_identical(tmp_path: Path) -> None:
     site, out, calls = make_site(tmp_path)
-    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     first = {p.relative_to(out): p.read_bytes() for p in out.rglob("*") if p.is_file()}
-    build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     second = {p.relative_to(out): p.read_bytes() for p in out.rglob("*") if p.is_file()}
     assert first == second
 
@@ -981,11 +1073,14 @@ def test_rebuild_is_byte_identical(tmp_path: Path) -> None:
 def test_main_cli(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     site, out, calls = make_site(tmp_path)
     argv = ["--site-dir", str(site), "--out", str(out), "--calls", str(calls)]
-    code = main([*argv, "--stack", str(tmp_path / "stack")])
+    argv += ["--stack", str(tmp_path / "stack"), "--signals", str(tmp_path / "signals")]
+    code = main(argv)
     assert code == 0
     printed = capsys.readouterr().out
-    assert "built 16 pages" in printed and "2 companies" in printed and "9 stages" in printed
+    assert "built 17 pages" in printed and "2 companies" in printed and "9 stages" in printed
+    assert "5 signals" in printed
     assert (out / "index.html").exists() and (out / "stack" / "power.html").exists()
+    assert (out / "signals" / "index.html").exists()
 
 
 # --------------------------------------------------------------------------------------------
@@ -999,7 +1094,17 @@ def site_files(site: Path) -> dict[Path, bytes]:
 
 @pytest.mark.parametrize(
     "target",
-    ["site", "site/data", "site/content", "site/static", "site/templates", "site/data/x", "."],
+    [
+        "site",
+        "site/data",
+        "site/content",
+        "site/static",
+        "site/templates",
+        "site/data/x",
+        "stack",
+        "signals",
+        ".",
+    ],
 )
 def test_build_refuses_an_out_dir_that_overlaps_the_sources(tmp_path: Path, target: str) -> None:
     site, _, calls = make_site(tmp_path)
@@ -1008,9 +1113,14 @@ def test_build_refuses_an_out_dir_that_overlaps_the_sources(tmp_path: Path, targ
     before = site_files(site)
     with pytest.raises(ValueError, match="refusing to build into"):
         build(
-            site_dir=site, out_dir=tmp_path / target, calls_md=calls, stack_dir=tmp_path / "stack"
+            site_dir=site,
+            out_dir=tmp_path / target,
+            calls_md=calls,
+            stack_dir=tmp_path / "stack",
+            signals_dir=tmp_path / "signals",
         )
     assert site_files(site) == before
+    assert (tmp_path / "signals" / "ledger.csv").is_file()
     assert not (site / "index.html").exists() and not (tmp_path / "index.html").exists()
 
 
@@ -1018,7 +1128,11 @@ def test_build_allows_the_default_layout_of_a_build_dir_inside_the_site_dir(tmp_
     site, _, calls = make_site(tmp_path)
     before = site_files(site)
     report = build(
-        site_dir=site, out_dir=site / "build", calls_md=calls, stack_dir=tmp_path / "stack"
+        site_dir=site,
+        out_dir=site / "build",
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
     )
     assert "index.html" in report.pages and (site / "build" / "data" / "AAA.json").is_file()
     assert {p: b for p, b in site_files(site).items() if p.parts[0] != "build"} == before
@@ -1041,7 +1155,13 @@ def test_build_also_protects_the_repo_site_dir_when_site_dir_is_custom(
     monkeypatch.setattr(build_site, "SITE_DIR", repo_site)
     for target in (repo_site, repo_site.parent):
         with pytest.raises(ValueError, match="refusing to build into"):
-            build(site_dir=site, out_dir=target, calls_md=calls, stack_dir=tmp_path / "stack")
+            build(
+                site_dir=site,
+                out_dir=target,
+                calls_md=calls,
+                stack_dir=tmp_path / "stack",
+                signals_dir=tmp_path / "signals",
+            )
     assert (repo_site / "data" / "AAA.json").is_file()
 
 
@@ -1060,8 +1180,9 @@ def test_main_cli_reports_a_refused_out_dir(
 ) -> None:
     site, _, calls = make_site(tmp_path)
     argv = ["--site-dir", str(site), "--out", str(site), "--calls", str(calls)]
+    argv += ["--stack", str(tmp_path / "stack"), "--signals", str(tmp_path / "signals")]
     with pytest.raises(SystemExit) as excinfo:
-        main([*argv, "--stack", str(tmp_path / "stack")])
+        main(argv)
     assert excinfo.value.code == 2
     assert "refusing to build into" in capsys.readouterr().err
     assert (site / "data" / "AAA.json").is_file()
@@ -1076,7 +1197,13 @@ def test_writeup_slug_index_is_reserved_for_the_listing_page(tmp_path: Path) -> 
     site, out, calls = make_site(tmp_path)
     text = WRITEUP_INDUSTRY.replace('"Depreciation & the GPU-hour"', "Index")
     (site / "content" / "2026-10-01-index.md").write_text(text, encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     assert report.writeups == 3
     assert len(report.pages) == len(set(report.pages))
     assert "writeups/index-writeup.html" in report.pages
@@ -1759,7 +1886,13 @@ def test_stage_page_escapes_the_name(built: tuple[Path, BuildReport]) -> None:
 def test_primer_section_is_omitted_without_a_primer_file(tmp_path: Path) -> None:
     site, out, calls = make_site(tmp_path)
     (tmp_path / "stack" / "primers" / "power.md").unlink()
-    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "stack")
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
     assert not report.warnings
     page = read(out / "stack" / "power.html")
     assert 'id="primer"' not in page and "Primer" not in page
@@ -1768,7 +1901,13 @@ def test_primer_section_is_omitted_without_a_primer_file(tmp_path: Path) -> None
 
 def test_build_without_a_stack_dir_warns_and_leaves_the_stack_out(tmp_path: Path) -> None:
     site, out, calls = make_site(tmp_path)
-    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=tmp_path / "no-stack")
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "no-stack",
+        signals_dir=tmp_path / "signals",
+    )
     assert report.stages == 0 and not any(p.startswith("stack/") for p in report.pages)
     assert not (out / "stack" / "index.html").exists()
     assert len(report.warnings) == 1
@@ -1777,6 +1916,11 @@ def test_build_without_a_stack_dir_warns_and_leaves_the_stack_out(tmp_path: Path
     for page in ("index.html", "companies/AAA.html", "writeups/index.html"):
         text = read(out / page)
         assert "Stack</a>" not in text and "stack/index.html" not in text, page
+    # The ledger still loads (there is no chain to check its stages against) and the signals
+    # index names each stage as text: there is no stage page to link to.
+    assert report.signals == 5 and "signals/index.html" in report.pages
+    signals = read(out / "signals" / "index.html")
+    assert "<td>power</td>" in signals and "stack/power.html" not in signals
 
 
 def test_malformed_stack_tables_warn_and_leave_that_table_empty(tmp_path: Path) -> None:
@@ -1786,7 +1930,13 @@ def test_malformed_stack_tables_warn_and_leave_that_table_empty(tmp_path: Path) 
     (stack / "metrics.csv").write_text(
         header + "power,Broken,lots,MW,,,,,high,\n", encoding="utf-8"
     )
-    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=stack)
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=stack,
+        signals_dir=tmp_path / "signals",
+    )
     assert report.stages == 9 and len(report.warnings) == 1
     assert report.warnings[0].startswith("metrics.csv: row 2 (power / Broken): value 'lots'")
     assert report.warnings[0].endswith("; stack metrics left empty")
@@ -1797,7 +1947,13 @@ def test_malformed_stack_tables_warn_and_leave_that_table_empty(tmp_path: Path) 
     # A malformed stages.csv takes the whole stack out, naming the row.
     bad = STAGES_CSV.replace("1,power,", "one,power,")
     (stack / "stages.csv").write_text(bad, encoding="utf-8")
-    report = build(site_dir=site, out_dir=out, calls_md=calls, stack_dir=stack)
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=stack,
+        signals_dir=tmp_path / "signals",
+    )
     assert report.stages == 0 and not (out / "stack" / "index.html").exists()
     assert len(report.warnings) == 1
     assert "row 3 (power): order 'one' is not a number" in report.warnings[0]
@@ -1831,3 +1987,272 @@ def test_stylesheet_lets_stage_names_wrap_and_lays_out_the_facts() -> None:
     assert "white-space: normal" in css_block(css, '.conversions th[scope="row"]')
     assert "grid-template-columns" in css_block(css, ".facts")
     assert "display: block" in css_block(css, ".figure")
+
+
+# --------------------------------------------------------------------------------------------
+# Signals: the ledger on signals/index.html, a stage's rows on its page, a company's on its page
+# --------------------------------------------------------------------------------------------
+
+SIGNALS_HEADER = [
+    "Date",
+    "Kind",
+    "Actor",
+    "Counterparty",
+    "Claim",
+    "Value",
+    "Confidence",
+    "Source",
+]
+INDEX_SIGNALS_HEADER = [
+    "Date",
+    "Kind",
+    "Stage",
+    "Actor",
+    "Claim",
+    "Value",
+    "Confidence",
+    "Bears on",
+    "Source",
+]
+ESCAPED_CLAIM = "Says 2 GW of data-centre load &lt;requested&gt; &amp; queued in its territory"
+
+
+def signals_section(page: str) -> str:
+    return page.split('<section id="signals"', 1)[1].split("</section>", 1)[0]
+
+
+def test_stage_page_lists_its_signals_newest_first(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    power = read(out / "stack" / "power.html")
+    assert '<section id="signals" class="section"><h2>Signals</h2>' in power
+    rows = table_rows(power, "signals")
+    assert rows[0] == SIGNALS_HEADER
+    # File order is August, September, July; the page shows September then July.
+    assert rows[1:] == [
+        [
+            "2026-09-01",
+            "statement",
+            "Utility Co",
+            "",
+            "Says 2 GW of data-centre load <requested> & queued in its territory",
+            "2 GW",
+            "reported",
+            "Example press release",
+        ],
+        [
+            "2026-07-15",
+            "price",
+            "Tracker",
+            "",
+            "Contract power prices flat quarter on quarter",
+            MISSING,  # a signal without a number
+            "speculated",
+            "Example tracker",
+        ],
+    ]
+    assert "Beta commits" not in power  # a compute signal, not power's
+    assert ESCAPED_CLAIM in power and "<requested>" not in power
+    assert '<td class="confidence confidence-reported">reported</td>' in power
+    assert '<td class="confidence confidence-speculated">speculated</td>' in power
+    assert (
+        '<a href="https://example.com/power-statement" rel="noopener">Example press release</a>'
+        in power
+    )
+    # Players, then signals, then the stage nav; tables only, no prose.
+    order = [
+        power.index(marker)
+        for marker in ('<section id="players"', '<section id="signals"', 'class="stage-nav"')
+    ]
+    assert order == sorted(order)
+    assert "<p" not in signals_section(power)
+    compute = table_rows(read(out / "stack" / "compute.html"), "signals")
+    assert [row[0] for row in compute[1:]] == ["2026-08-11", "2026-05-01"]
+    assert compute[1][3:6] == ["Beta Labs", "Beta commits $4 billion over five years", "4 USD bn"]
+    assert compute[2][5] == "300 MW"
+    # A stage with no signals: no section, no heading, no "none" line (the nav link stays).
+    datacenter = read(out / "stack" / "datacenter.html")
+    assert 'id="signals"' not in datacenter and "<h2>Signals</h2>" not in datacenter
+    assert 'href="../signals/index.html">Signals</a>' in datacenter
+
+
+def test_company_page_lists_the_signals_mapped_to_it(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    aaa = read(out / "companies" / "AAA.html")
+    assert '<section id="signals" class="section"><h2>Signals</h2>' in aaa
+    rows = table_rows(aaa, "signals")
+    assert rows[0] == [*SIGNALS_HEADER[:-1], "Bears on", "Source"]
+    # Newest first, and "Bears on" is the text after the ticker, not the whole maps_to.
+    assert [(row[0], row[7]) for row in rows[1:]] == [
+        ("2026-08-11", "toy_price"),
+        ("2026-05-01", "toy_share"),
+    ]
+    assert rows[1][2:6] == [
+        "Alpha Cloud",
+        "Beta Labs",
+        "Beta commits $4 billion over five years",
+        "4 USD bn",
+    ]
+    assert "AAA: toy_price" not in aaa
+    # Rows mapped to the stack, to "watch" or to the other company are not this company's.
+    before_json = aaa.split("<script", 1)[0]
+    for other in ("Utility Co", "Tracker", "Borrows", "toy_life"):
+        assert other not in before_json, other
+    # Reported (the filings), then signals (outside the filings), then the writeups.
+    order = [
+        aaa.index(marker)
+        for marker in ('<section id="reported"', '<section id="signals"', 'id="company-writeups"')
+    ]
+    assert order == sorted(order)
+    assert "<p" not in signals_section(aaa)
+    # The ticker in maps_to matches whatever its case; a source with no text shows its host.
+    bbb = table_rows(read(out / "companies" / "BBB.html"), "signals")
+    assert [row[0] for row in bbb[1:]] == ["2026-06-30"]
+    assert bbb[1][5:] == ["1.5 USD bn", "confirmed", "toy_life", "example.com"]
+
+
+def test_signals_index_counts_links_and_escapes(built: tuple[Path, BuildReport]) -> None:
+    out, report = built
+    assert report.signals == 5
+    page = read(out / "signals" / "index.html")
+    assert "<title>Signals · AI economics</title>" in page and "<h1>Signals</h1>" in page
+    assert '<p class="meta">5 signals · 2 confirmed · 2 reported · 1 speculated</p>' in page
+    assert '<section id="ledger" class="section">' in page and "<h2>Ledger</h2>" in page
+    rows = table_rows(page, "signals")
+    assert rows[0] == INDEX_SIGNALS_HEADER
+    assert [row[0] for row in rows[1:]] == [
+        "2026-09-01",
+        "2026-08-11",
+        "2026-07-15",
+        "2026-06-30",
+        "2026-05-01",
+    ]
+    # The stage column carries the stage's name, linked to its page.
+    assert [row[2] for row in rows[1:]] == ["Power", "GPU-hours", "Power", "Systems", "GPU-hours"]
+    assert '<a href="../stack/power.html">Power</a>' in page
+    assert '<a href="../stack/compute.html">GPU-hours</a>' in page
+    # Bears on: maps_to as written; a leading ticker the site knows is linked, whatever its case.
+    assert [row[7] for row in rows[1:]] == [
+        "stack: power/demand_pipeline_gw",
+        "AAA: toy_price",
+        "watch",
+        "bbb: toy_life",
+        "AAA: toy_share",
+    ]
+    assert '<a href="../companies/AAA.html">AAA</a>: toy_price' in page
+    assert '<a href="../companies/BBB.html">bbb</a>: toy_life' in page
+    assert "<td>watch</td>" in page and "<td>stack: power/demand_pipeline_gw</td>" in page
+    assert rows[1][5] == "2 GW" and rows[3][5] == MISSING
+    assert ESCAPED_CLAIM in page and "<requested>" not in page
+    assert '<a href="https://example.com/bbb-loan" rel="noopener">example.com</a>' in page
+    # Labels, numbers and links only between the heading and the end of the page body.
+    body = page.split('id="ledger"', 1)[1].split("</main>", 1)[0]
+    assert "<p" not in body
+    # The nav carries the section on every page, relative to that page, after the stack.
+    assert 'href="../signals/index.html">Signals</a>' in page
+    index = read(out / "index.html")
+    assert 'href="signals/index.html">Signals</a>' in index
+    assert index.index("Stack</a>") < index.index("Signals</a>") < index.index("Writeups</a>")
+    for rel in ("companies/AAA.html", "stack/power.html", "writeups/index.html"):
+        assert 'href="../signals/index.html">Signals</a>' in read(out / rel), rel
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "message"),
+    [
+        (",confirmed,AAA: toy_price,", ",likely,AAA: toy_price,", "confidence must be one of"),
+        # An unknown stage proves the ledger is checked against this build's stack.
+        ("2026-09-01,statement,power,", "2026-09-01,statement,orbit,", "unknown stage"),
+    ],
+)
+def test_malformed_ledger_warns_and_leaves_signals_out(
+    tmp_path: Path, old: str, new: str, message: str
+) -> None:
+    site, out, calls = make_site(tmp_path)
+    write_ledger(tmp_path, variant(LEDGER_CSV, old, new))
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
+    assert report.signals == 0 and report.stages == 9  # the rest of the site is built
+    assert len(report.warnings) == 1
+    assert report.warnings[0].startswith("ledger.csv: ") and message in report.warnings[0]
+    assert report.warnings[0].endswith("; signals left empty")
+    assert not (out / "signals" / "index.html").exists()
+    assert not any(p.startswith("signals/") for p in report.pages)
+    for rel in ("index.html", "companies/AAA.html", "stack/power.html", "stack/compute.html"):
+        text = read(out / rel)
+        assert 'id="signals"' not in text and "<h2>Signals</h2>" not in text, rel
+        assert "Signals</a>" not in text and "signals/index.html" not in text, rel
+
+
+def test_build_without_a_ledger_has_no_signals_and_no_warning(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
+    assert (out / "signals" / "index.html").exists()
+    # No ledger is "none yet", not a problem: no warning, and a rebuild drops the stale page.
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "no-signals",
+    )
+    assert report.signals == 0 and not report.warnings
+    assert not (out / "signals" / "index.html").exists()
+    assert not any(p.startswith("signals/") for p in report.pages)
+    for rel in ("index.html", "companies/AAA.html", "stack/power.html", "writeups/index.html"):
+        text = read(out / rel)
+        assert 'id="signals"' not in text and "<h2>Signals</h2>" not in text, rel
+        assert "Signals</a>" not in text and "signals/index.html" not in text, rel
+    # A ledger with a header and no rows is the same as none.
+    write_ledger(tmp_path, LEDGER_CSV.splitlines()[0] + "\n")
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+    )
+    assert report.signals == 0 and not report.warnings
+    assert not (out / "signals" / "index.html").exists()
+    assert "Signals</a>" not in read(out / "index.html")
+
+
+def test_signals_meta_counts_every_level_and_pluralises() -> None:
+    assert signals_meta([]) == "0 signals · 0 confirmed · 0 reported · 0 speculated"
+    one = [{"confidence": "reported"}]
+    assert signals_meta(one) == "1 signal · 0 confirmed · 1 reported · 0 speculated"
+    three = [{"confidence": "Confirmed"}, {"confidence": "confirmed"}, {"confidence": "speculated"}]
+    assert signals_meta(three) == "3 signals · 2 confirmed · 0 reported · 1 speculated"
+
+
+def test_stylesheet_rates_ledger_confidence_on_the_stack_scale_and_floors_the_claim() -> None:
+    css = read(SITE_STATIC_DIR / "style.css")
+    assert "var(--ink)" in css_block(css, ".confidence-confirmed")
+    assert "var(--warn)" in css_block(css, ".confidence-speculated")
+    assert "min-width" in css_block(css, ".signals .claim")
+
+
+def test_maps_to_ticker_is_read_the_same_way_everywhere() -> None:
+    # The index link, the company-page filter and "Bears on" must agree on a row, whatever the
+    # spacing and case of the ticker; a row linked on the index but missing from the company
+    # page would be a silent inconsistency.
+    from scripts.build_site import _bears_on, _maps_to_html, company_signals
+
+    rows = [{"maps_to": "aaa : toy_price"}, {"maps_to": "BBB:x"}, {"maps_to": "watch"}]
+    assert company_signals(rows, "AAA") == [rows[0]]
+    assert company_signals(rows, "bbb") == [rows[1]]
+    assert _bears_on("aaa : toy_price") == "toy_price"
+    assert _bears_on("watch") == "watch"
+    html = _maps_to_html("aaa : toy_price", "../", {"AAA"})
+    assert 'href="../companies/AAA.html"' in html and html.endswith(": toy_price")
+    assert _maps_to_html("stack: compute/price", "../", {"AAA"}) == "stack: compute/price"

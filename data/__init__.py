@@ -38,3 +38,6 @@ CALLS_MD = REPO_ROOT / "calls.md"
 # stage; bottleneck scores and status in stages.csv are Philbert's judgement (see data/stack.py).
 STACK_DIR = REPO_ROOT / "stack"
 STACK_PRIMERS_DIR = STACK_DIR / "primers"
+
+# Dated, sourced events from outside the filings, one ledger.csv, validated by data/signals.py.
+SIGNALS_DIR = REPO_ROOT / "signals"
