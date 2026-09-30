@@ -54,9 +54,10 @@ Track: all three (the skeleton serves fluency first).
       source states: CoWoS capacity, GPU list prices, tokens per user) are in the session notes.
 - [ ] Philbert: score each stage's `bottleneck_score` (1 to 5) in `stack/stages.csv` from the
       evidence on its page, and write the one-line `bottleneck_note`. These are calls.
-- [ ] Philbert: the campus likelihood scores. Three campuses carry a proposed score and the
-      evidence behind it in `stack/campus_evidence.csv` (Abilene 5, Hyperion 3, Colossus 3);
-      Rainier and the two Fairwater sites still need their evidence gathered.
+- [ ] Philbert: the campus likelihood scores. All six campuses carry a proposed score and the
+      evidence behind it (`stack/campus_evidence.csv`, 77 rows, shown on the data-centre page):
+      Abilene 5, Rainier 5, Fairwater Wisconsin 4, Fairwater Atlanta 4, Hyperion 3, Colossus 3.
+      Confirm or override in `likelihood_proposed` and say why in `likelihood_basis`.
 - [x] Nebius model in `companies/nebius.py` on the CoreWeave pattern (foreign private issuer:
       20-F and 6-K cadence; every quarterly figure from the 6-K results exhibits, quote-checked
       into `data/disclosed/NBIS.csv`; ARR-driven forecast; prepayments as a share of capex).
