@@ -17,12 +17,14 @@ import pytest
 
 from data import STACK_DIR
 from data.stack import (
-    CAMPUS_COLUMNS,
+    CAMPUS_EVIDENCE_COLUMNS,
+    CAMPUS_FRAME_COLUMNS,
     CONSUMPTION_TIER_COLUMNS,
     CONVERSION_COLUMNS,
     METRIC_COLUMNS,
     PLAYER_COLUMNS,
     STAGE_COLUMNS,
+    load_campus_evidence,
     load_campuses,
     load_consumption_tiers,
     load_conversions,
@@ -100,11 +102,19 @@ light,Example light tier,chat,5000-50000,subscription,
 # nowhere but here; C has an operating figure only, so its planned cell is blank and sorts last;
 # D has a fractional operating figure. Sponsors, builders and places are invented.
 CAMPUSES_CSV = """\
-campus,sponsor,developer,state,planned_mw,planned_basis,planned_as_of,planned_source_url,planned_source,planned_confidence,operating_mw,operating_as_of,operating_source_url,operating_source,operating_confidence,power_source,status,note
-Example Campus B,Beta Compute; Zed Labs,Example Builder,TX,1200,total power capacity,2026-03-18,https://example.com/campus-b,Example release (2026-03),high,400,2026-09,https://example.com/campus-b-ops,"Example directory, estimate <b>",medium,gas turbines on site,operating; expanding,Toy note & <caveat>
-Example Campus A,Alpha Cloud,,LA,5000,IT load at full build,2026-07,https://example.com/campus-a,Example agency (2026-07),low,,,,,,new gas plants,under construction,No phase operating
-Example Campus C,Gamma <Chips> & Co,,GA,,,,,,,600,2026-09-24,https://example.com/campus-c,Example directory,medium,,operating,No planned total published
-Example Campus D,Delta,,WI,2263,IT load projected (estimate),2026-09-24,https://example.com/campus-d,Example directory,medium,0.5,2026-09-24,https://example.com/campus-d,Example directory,high,,operating; expanding,
+campus,sponsor,developer,state,planned_mw,planned_basis,planned_as_of,planned_source_url,planned_source,planned_confidence,operating_mw,operating_as_of,operating_source_url,operating_source,operating_confidence,power_source,status,note,likelihood_proposed,likelihood_basis
+Example Campus B,Beta Compute; Zed Labs,Example Builder,TX,1200,total power capacity,2026-03-18,https://example.com/campus-b,Example release (2026-03),high,400,2026-09,https://example.com/campus-b-ops,"Example directory, estimate <b>",medium,gas turbines on site,operating; expanding,Toy note & <caveat>,4,"Power on site, permits in hand; a <toy> basis"
+Example Campus A,Alpha Cloud,,LA,5000,IT load at full build,2026-07,https://example.com/campus-a,Example agency (2026-07),low,,,,,,new gas plants,under construction,No phase operating,,
+Example Campus C,Gamma <Chips> & Co,,GA,,,,,,,600,2026-09-24,https://example.com/campus-c,Example directory,medium,,operating,No planned total published,,
+Example Campus D,Delta,,WI,2263,IT load projected (estimate),2026-09-24,https://example.com/campus-d,Example directory,medium,0.5,2026-09-24,https://example.com/campus-d,Example directory,high,,operating; expanding,,,
+"""  # noqa: E501
+
+CAMPUS_EVIDENCE_CSV = """\
+campus,criterion,claim,as_of,source_url,source,confidence
+Example Campus B,interconnection,Served by a 200 MW substation built in 2022,2026-01-15,https://example.com/sub,Example utility filing,high
+Example Campus B,power_secured,360 MW of on-site gas running since January 2026,2026-04-13,https://example.com/gas,Example report <b>,medium
+Example Campus A,power_secured,Regulator approved three gas plants for the site,2025-08-20,https://example.com/psc,Example commission order,high
+Example Campus Z,water,A claim about a campus that is not listed,2026-01-01,https://example.com/z,Example,low
 """  # noqa: E501
 
 PRIMER_MD = """\
@@ -124,6 +134,7 @@ STACK_FILES = {
     "conversions": CONVERSIONS_CSV,
     "consumption_tiers": TIERS_CSV,
     "campuses": CAMPUSES_CSV,
+    "campus_evidence": CAMPUS_EVIDENCE_CSV,
 }
 
 
@@ -198,7 +209,7 @@ def test_metrics_players_conversions_and_tiers_load(tmp_path: Path) -> None:
 
 def test_campuses_load_in_file_order_with_typed_figures(tmp_path: Path) -> None:
     campuses = load_campuses(write_stack(tmp_path))
-    assert tuple(campuses.columns) == CAMPUS_COLUMNS
+    assert tuple(campuses.columns) == CAMPUS_FRAME_COLUMNS
     assert campuses["campus"].tolist() == [f"Example Campus {c}" for c in "BACD"]  # file order
     assert campuses.index.tolist() == [0, 1, 2, 3]
     assert str(campuses["planned_mw"].dtype) == "float64"
@@ -231,7 +242,8 @@ def test_campuses_file_is_optional(tmp_path: Path) -> None:
     stack = write_stack(tmp_path)
     (stack / "campuses.csv").unlink()
     missing = load_campuses(stack)
-    assert missing.shape == (0, len(CAMPUS_COLUMNS)) and tuple(missing.columns) == CAMPUS_COLUMNS
+    assert missing.shape == (0, len(CAMPUS_FRAME_COLUMNS))
+    assert tuple(missing.columns) == CAMPUS_FRAME_COLUMNS
     assert str(missing["planned_mw"].dtype) == "float64" and str(missing["sponsor"].dtype) == "str"
     header_only = load_campuses(write_stack(tmp_path, campuses=CAMPUSES_CSV.splitlines()[0] + "\n"))
     pd.testing.assert_frame_equal(missing, header_only)
@@ -254,7 +266,7 @@ def test_header_only_tables_are_empty_frames_with_the_right_columns(tmp_path: Pa
     assert load_players(stack).shape == (0, len(PLAYER_COLUMNS))
     assert load_conversions(stack).shape == (0, len(CONVERSION_COLUMNS))
     assert load_consumption_tiers(stack).shape == (0, len(CONSUMPTION_TIER_COLUMNS))
-    assert load_campuses(stack).shape == (0, len(CAMPUS_COLUMNS))
+    assert load_campuses(stack).shape == (0, len(CAMPUS_FRAME_COLUMNS))
     assert len(load_stages(stack)) == 9  # the chain is unaffected
 
 
@@ -603,7 +615,7 @@ def test_malformed_campuses_file_shape_fails_naming_the_file(tmp_path: Path) -> 
         load_campuses(write_stack(tmp_path, campuses=missing))
     quoted = '"Example directory, estimate <b>"'
     unquoted = variant(CAMPUSES_CSV, quoted, quoted.strip('"'))
-    with pytest.raises(ValueError, match=r"campuses\.csv: row 2 has 19 fields, expected 18"):
+    with pytest.raises(ValueError, match=r"campuses\.csv: row 2 has 21 fields, expected 20"):
         load_campuses(write_stack(tmp_path, campuses=unquoted))
 
 
@@ -678,3 +690,45 @@ def test_committed_stack_loads() -> None:
     for figure in ("planned", "operating"):
         present = campuses[f"{figure}_mw"].notna()
         assert (campuses.loc[present, f"{figure}_source_url"].str.startswith("http")).all()
+
+
+def test_likelihood_columns_are_optional_and_range_checked(tmp_path: Path) -> None:
+    stack = write_stack(tmp_path)
+    campuses = load_campuses(stack).set_index("campus")
+    assert campuses.loc["Example Campus B", "likelihood_proposed"] == "4"
+    assert campuses.loc["Example Campus A", "likelihood_proposed"] == ""
+    # A file without the two columns loads with them blank.
+    header, *rows = CAMPUSES_CSV.splitlines()
+    cut = [",".join(header.split(",")[:-2])]
+    for row in rows:
+        cells = next(csv.reader([row]))
+        cut.append(",".join(_quote(c) for c in cells[:-2]))
+    old = write_stack(tmp_path / "old", campuses="\n".join(cut) + "\n")
+    assert set(load_campuses(old)["likelihood_proposed"]) == {""}
+    bad = write_stack(tmp_path / "bad", campuses=CAMPUSES_CSV.replace(",4,", ",7,"))
+    with pytest.raises(ValueError, match="likelihood_proposed '7' must be blank or 1 to 5"):
+        load_campuses(bad)
+
+
+def _quote(cell: str) -> str:
+    return f'"{cell}"' if "," in cell or '"' in cell else cell
+
+
+def test_campus_evidence_loads_and_validates(tmp_path: Path) -> None:
+    stack = write_stack(tmp_path)
+    evidence = load_campus_evidence(stack)
+    assert tuple(evidence.columns) == CAMPUS_EVIDENCE_COLUMNS and len(evidence) == 4
+    assert evidence.loc[0, "criterion"] == "interconnection"
+    (stack / "campus_evidence.csv").unlink()
+    assert load_campus_evidence(stack).empty
+    for broken, message in (
+        (CAMPUS_EVIDENCE_CSV.replace("interconnection", "vibes"), "criterion must be one of"),
+        (
+            CAMPUS_EVIDENCE_CSV.replace("https://example.com/sub", "example.com/sub"),
+            "does not start with http",
+        ),
+        (CAMPUS_EVIDENCE_CSV.replace(",high\n", ",certain\n"), "confidence must be one of"),
+        (CAMPUS_EVIDENCE_CSV.replace("2026-01-15", "Jan 2026"), "as_of 'Jan 2026'"),
+    ):
+        with pytest.raises(ValueError, match=message):
+            load_campus_evidence(write_stack(tmp_path / "x", campus_evidence=broken))

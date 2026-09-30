@@ -2143,6 +2143,7 @@ CAMPUSES_HEADER = [
     "Operating (MW)",
     "Power source",
     "Status",
+    "Likelihood (proposed, 1 to 5)",
     "Sources",
 ]
 
@@ -2164,9 +2165,9 @@ def test_datacenter_page_lists_campuses_by_planned_mw(built: tuple[Path, BuildRe
     a = ["Example Campus A", "Alpha Cloud", "LA", "5,000", MISSING, "new gas plants"]
     b = ["Example Campus B", "Beta Compute; Zed Labs", "TX", "1,200", "400", "gas turbines on site"]
     assert rows[1:] == [
-        [*a, "under construction", "planned"],
-        ["Example Campus D", "Delta", "WI", "2,263", "0.5", "", expanding, both],
-        [*b, expanding, both],
+        [*a, "under construction", MISSING, "planned"],
+        ["Example Campus D", "Delta", "WI", "2,263", "0.5", "", expanding, MISSING, both],
+        [*b, expanding, "4", both],
         [
             "Example Campus C",
             "Gamma <Chips> & Co",
@@ -2175,9 +2176,12 @@ def test_datacenter_page_lists_campuses_by_planned_mw(built: tuple[Path, BuildRe
             "600",
             "",
             "operating",
+            MISSING,
             "operating",
         ],
     ]
+    # The score carries its basis as the cell's title, escaped.
+    assert 'title="Power on site, permits in hand; a &lt;toy&gt; basis">4</td>' in page
     # Each number carries the confidence of its own figure; a blank carries none.
     assert '<td class="num confidence confidence-low">5,000</td>' in page
     assert '<td class="num confidence confidence-medium">2,263</td>' in page
@@ -2201,7 +2205,7 @@ def test_datacenter_page_lists_campuses_by_planned_mw(built: tuple[Path, BuildRe
     # One muted totals line under the table: counts and sums of the figures present.
     section = campuses_section(page)
     totals = "4 campuses · 8,463 MW planned · 1,000.5 MW operating"
-    assert section.endswith(f'</table></div><p class="muted campus-totals">{totals}</p>')
+    assert f'</table></div><p class="muted campus-totals">{totals}</p>' in section
     assert section.count("<p") == 1
     # Everything is escaped, and no real name from the committed file leaks into the fixture build.
     assert "Gamma &lt;Chips&gt; &amp; Co" in section and "<Chips>" not in page
@@ -3021,3 +3025,23 @@ def test_malformed_queues_file_warns_and_leaves_the_section_out(
     assert message in report.warnings[0]
     assert 'id="queues"' not in read(out / "stack" / "grid.html")
     assert (out / "stack" / "grid.html").is_file()  # the rest of the page is built
+
+
+def test_campus_evidence_table_follows_the_campuses(built: tuple[Path, BuildReport]) -> None:
+    out, report = built
+    assert not report.warnings
+    page = read(out / "stack" / "datacenter.html")
+    section = campuses_section(page)
+    assert "Evidence behind the scores" in section
+    rows = table_rows(section, "campus-evidence")
+    assert rows[0] == ["Campus", "Criterion", "Evidence", "As of", "Confidence", "Source"]
+    # Campus order follows the table (A, D, B, C); criteria in rubric order within a campus; the
+    # claim about the unlisted campus Z is left out.
+    assert [r[0] for r in rows[1:]] == ["Example Campus A", "Example Campus B", "Example Campus B"]
+    assert [r[1] for r in rows[1:]] == ["Power secured", "Power secured", "Interconnection"]
+    assert rows[2][2] == "360 MW of on-site gas running since January 2026"
+    assert "Example report &lt;b&gt;" in section and 'href="https://example.com/gas"' in section
+    assert section.index("Evidence behind the scores") > section.index("campus-totals")
+    for key in STAGE_KEYS:
+        if key != "datacenter":
+            assert "campus-evidence" not in read(out / "stack" / f"{key}.html"), key

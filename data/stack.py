@@ -144,6 +144,32 @@ CAMPUS_COLUMNS = (
 )
 
 CONFIDENCES = ("high", "medium", "low")
+# Optional columns of campuses.csv: the owner's likelihood score (1 to 5, from the rubric in
+# the data-centre primer) and the sentence behind it. Both may be blank; a proposed score is
+# one Claude suggested from the evidence, which the owner confirms or overrides in the note.
+CAMPUS_LIKELIHOOD_COLUMNS = ("likelihood_proposed", "likelihood_basis")
+LIKELIHOOD_RANGE = (1, 5)
+# What ``load_campuses`` returns: the file's required columns plus the optional two, filled
+# with blanks when the file lacks them, so the site can rely on every column being there.
+CAMPUS_FRAME_COLUMNS = (*CAMPUS_COLUMNS, *CAMPUS_LIKELIHOOD_COLUMNS)
+# campus_evidence.csv: one sourced claim per row behind a campus's likelihood score.
+CAMPUS_EVIDENCE_COLUMNS = (
+    "campus",
+    "criterion",
+    "claim",
+    "as_of",
+    "source_url",
+    "source",
+    "confidence",
+)
+CAMPUS_CRITERIA = (
+    "power_secured",
+    "interconnection",
+    "permits",
+    "water",
+    "construction",
+    "financing",
+)
 STATUSES = ("skeleton", "deep")
 BOTTLENECK_RANGE = (1, 5)
 
@@ -167,8 +193,11 @@ def split_stages(text: str) -> list[str]:
 # --------------------------------------------------------------------------------------------
 
 
-def _read(path: Path, columns: tuple[str, ...]) -> pd.DataFrame:
+def _read(path: Path, columns: tuple[str, ...], optional: tuple[str, ...] = ()) -> pd.DataFrame:
     """Read a CSV as text with blanks kept as ``""``; ``FileNotFoundError`` when it is absent.
+
+    ``columns`` must all be present; ``optional`` ones are kept when the file has them and
+    added blank when it does not, so callers see one shape either way.
 
     The frame is indexed by the physical line number of each row, so a later check can name
     the line the reader sees in Excel. The ``csv`` module is used instead of ``pd.read_csv``
@@ -201,7 +230,10 @@ def _read(path: Path, columns: tuple[str, ...]) -> pd.DataFrame:
             lines.append(reader.line_num)
     _raise(path, problems)
     frame = pd.DataFrame(rows, columns=header, index=lines, dtype=str)
-    return frame[list(columns)].copy()
+    for column in optional:
+        if column not in frame.columns:
+            frame[column] = ""
+    return frame[[*columns, *optional]].copy()
 
 
 def _rows(frame: pd.DataFrame, key: Callable[[pd.Series], str]) -> list[str]:
@@ -430,7 +462,7 @@ def _empty_campuses() -> pd.DataFrame:
     return pd.DataFrame(
         {
             column: pd.Series(dtype="float64" if column in mw_columns else "str")
-            for column in CAMPUS_COLUMNS
+            for column in CAMPUS_FRAME_COLUMNS
         }
     )
 
@@ -451,7 +483,7 @@ def load_campuses(directory: Path = STACK_DIR) -> pd.DataFrame:
     path = Path(directory) / "campuses.csv"
     if not path.is_file():
         return _empty_campuses()
-    frame = _read(path, CAMPUS_COLUMNS)
+    frame = _read(path, CAMPUS_COLUMNS, optional=CAMPUS_LIKELIHOOD_COLUMNS)
     labels = _rows(frame, lambda row: row["campus"] or "?")
     problems: list[str] = _check_blank(frame, "campus", labels)
     duplicates = frame.loc[frame["campus"].duplicated() & (frame["campus"] != ""), "campus"]
@@ -495,9 +527,57 @@ def load_campuses(directory: Path = STACK_DIR) -> pd.DataFrame:
                 problems.append(f"{label}: {figure}_mw {raw_mw!r} has no {figure}_confidence")
             if as_of and not _AS_OF_RE.fullmatch(as_of):
                 problems.append(f"{label}: {figure}_as_of {as_of!r} is not YYYY-MM or YYYY-MM-DD")
+    low, high = LIKELIHOOD_RANGE
+    for label, score in zip(labels, frame["likelihood_proposed"], strict=True):
+        if score and not (score.isdigit() and low <= int(score) <= high):
+            problems.append(
+                f"{label}: likelihood_proposed {score!r} must be blank or {low} to {high}"
+            )
     _raise(path, problems)
     for column, mw in numbers.items():
         frame[column] = mw
+    return frame.reset_index(drop=True)
+
+
+def _empty_campus_evidence() -> pd.DataFrame:
+    return pd.DataFrame({c: pd.Series(dtype="str") for c in CAMPUS_EVIDENCE_COLUMNS})
+
+
+def load_campus_evidence(directory: Path = STACK_DIR) -> pd.DataFrame:
+    """The sourced claims behind the campus likelihood scores, in file order; all text.
+
+    Optional like ``campuses.csv``: no file, an empty frame. Every problem is reported at once,
+    naming the row and the campus: a blank ``campus`` or ``claim``, a ``criterion`` outside
+    ``CAMPUS_CRITERIA``, a ``source_url`` that does not start with ``http``, a ``confidence``
+    outside ``CONFIDENCES``, an ``as_of`` that is not ``YYYY-MM`` or ``YYYY-MM-DD``. Whether the
+    campus exists in ``campuses.csv`` is the site's business: a claim about a campus that is
+    not listed is simply not shown.
+    """
+    path = Path(directory) / "campus_evidence.csv"
+    if not path.is_file():
+        return _empty_campus_evidence()
+    frame = _read(path, CAMPUS_EVIDENCE_COLUMNS)
+    labels = _rows(frame, lambda row: row["campus"] or "?")
+    problems = _check_blank(frame, "campus", labels) + _check_blank(frame, "claim", labels)
+    for label, criterion, url, confidence, as_of in zip(
+        labels,
+        frame["criterion"],
+        frame["source_url"],
+        frame["confidence"],
+        frame["as_of"],
+        strict=True,
+    ):
+        if criterion not in CAMPUS_CRITERIA:
+            problems.append(
+                f"{label}: criterion must be one of {CAMPUS_CRITERIA}, not {criterion!r}"
+            )
+        if not url.startswith("http"):
+            problems.append(f"{label}: source_url {url!r} does not start with http")
+        if confidence not in CONFIDENCES:
+            problems.append(f"{label}: confidence must be one of {CONFIDENCES}, not {confidence!r}")
+        if as_of and not _AS_OF_RE.fullmatch(as_of):
+            problems.append(f"{label}: as_of {as_of!r} is not YYYY-MM or YYYY-MM-DD")
+    _raise(path, problems)
     return frame.reset_index(drop=True)
 
 

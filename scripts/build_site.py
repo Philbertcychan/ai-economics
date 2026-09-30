@@ -79,7 +79,9 @@ from data.queues import group_type as queue_group
 from data.queues import read_summaries as read_queue_summaries
 from data.signals import CONFIDENCE, load_signals
 from data.stack import (
+    CAMPUS_CRITERIA,
     CAMPUS_FIGURES,
+    load_campus_evidence,
     load_campuses,
     load_consumption_tiers,
     load_conversions,
@@ -962,6 +964,7 @@ class Stack:
     conversions: list[dict[str, Any]]
     tiers: list[dict[str, Any]]
     campuses: list[dict[str, Any]]
+    campus_evidence: list[dict[str, Any]]
     primers: dict[str, str]  # stage key -> rendered HTML, for the stages that have one
 
     def name_of(self, key: str) -> str:
@@ -975,6 +978,7 @@ _STACK_TABLES: tuple[tuple[str, Callable[[Path], Any]], ...] = (
     ("conversions", load_conversions),
     ("tiers", load_consumption_tiers),
     ("campuses", load_campuses),  # optional file: absent gives an empty table, no warning
+    ("campus_evidence", load_campus_evidence),  # optional too
 )
 
 
@@ -1260,7 +1264,25 @@ _CAMPUSES_HEAD = [
     ("Operating (MW)", True),
     ("Power source", False),
     ("Status", False),
+    ("Likelihood (proposed, 1 to 5)", True),
     ("Sources", False),
+]
+# Criterion keys as the evidence table shows them.
+_CRITERION_LABELS = {
+    "power_secured": "Power secured",
+    "interconnection": "Interconnection",
+    "permits": "Permits",
+    "water": "Water",
+    "construction": "Construction",
+    "financing": "Financing",
+}
+_EVIDENCE_HEAD = [
+    ("Campus", False),
+    ("Criterion", False),
+    ("Evidence", False),
+    ("As of", False),
+    ("Confidence", False),
+    ("Source", False),
 ]
 
 
@@ -1293,6 +1315,49 @@ def _campus_sources(campus: dict[str, Any]) -> str:
     return " · ".join(links) or MISSING
 
 
+def _likelihood_cell(campus: dict[str, Any]) -> str:
+    """The proposed score, titled with the sentence behind it; an en dash when unscored."""
+    score = str(campus.get("likelihood_proposed") or "").strip()
+    if not score:
+        return f'<td class="num">{MISSING}</td>'
+    basis = str(campus.get("likelihood_basis") or "").strip()
+    title = f' title="{_e(basis)}"' if basis else ""
+    return f'<td class="num"{title}>{_e(score)}</td>'
+
+
+def _criterion_label(criterion: Any) -> str:
+    key = str(criterion or "")
+    return _CRITERION_LABELS.get(key, key)
+
+
+def _campus_evidence_table(campuses: list[dict[str, Any]], evidence: list[dict[str, Any]]) -> str:
+    """The sourced claims behind the scores, campus by campus in the table's order, criteria in
+    rubric order; claims about a campus that is not listed are left out.
+    """
+    order = {str(c["campus"]): i for i, c in enumerate(sorted(campuses, key=_campus_sort_key))}
+    rank = {key: i for i, key in enumerate(CAMPUS_CRITERIA)}
+    shown = [row for row in evidence if str(row.get("campus", "")) in order]
+    shown.sort(
+        key=lambda r: (
+            order[str(r["campus"])],
+            rank.get(str(r.get("criterion", "")), len(rank)),
+            str(r.get("as_of", "")),
+        )
+    )
+    rows = [
+        "<tr>"
+        f'<th scope="row">{_e(r["campus"])}</th>'
+        f'<td class="nowrap">{_e(_criterion_label(r.get("criterion")))}</td>'
+        f'<td class="claim">{_e(r["claim"])}</td>'
+        f'<td class="nowrap">{_e(r.get("as_of") or MISSING)}</td>'
+        f"{_confidence_cell(r.get('confidence'))}"
+        f'<td class="sources">{_source_link(r.get("source_url"), r.get("source") or "source")}</td>'
+        "</tr>"
+        for r in shown
+    ]
+    return _table("campus-evidence", _EVIDENCE_HEAD, rows, caption="Evidence behind the scores")
+
+
 def _campuses_table(campuses: list[dict[str, Any]]) -> str:
     rows = [
         "<tr>"
@@ -1303,6 +1368,7 @@ def _campuses_table(campuses: list[dict[str, Any]]) -> str:
         f"{_mw_cell(c['operating_mw'], c['operating_confidence'])}"
         f'<td class="power-source">{_e(c["power_source"])}</td>'
         f"<td>{_e(c['status'])}</td>"
+        f"{_likelihood_cell(c)}"
         f'<td class="sources">{_campus_sources(c)}</td>'
         "</tr>"
         for c in sorted(campuses, key=_campus_sort_key)
@@ -1322,13 +1388,16 @@ def campuses_meta(campuses: list[dict[str, Any]]) -> str:
     return " · ".join(parts)
 
 
-def _campuses_section(campuses: list[dict[str, Any]]) -> str:
-    """The campuses table with its totals line under it; nothing without campuses."""
+def _campuses_section(
+    campuses: list[dict[str, Any]], evidence: list[dict[str, Any]] | None = None
+) -> str:
+    """The campuses table, its totals line and the evidence table; nothing without campuses."""
     table = _campuses_table(campuses)
     if not table:
         return ""
     totals = f'<p class="muted campus-totals">{_e(campuses_meta(campuses))}</p>'
-    return _section("campuses", "Campuses", table + totals)
+    proof = _campus_evidence_table(campuses, evidence or [])
+    return _section("campuses", "Campuses", table + totals + proof)
 
 
 # --------------------------------------------------------------------------------------------
@@ -2287,7 +2356,11 @@ def build(
                 figures_section=_section("figures", "Figures", _figures_table(metrics)),
                 us_supply_section=(_us_supply_section(us_supply) if key == US_SUPPLY_STAGE else ""),
                 queues_section=(_queues_section(queues) if key == QUEUES_STAGE else ""),
-                campuses_section=(_campuses_section(stack.campuses) if key == CAMPUS_STAGE else ""),
+                campuses_section=(
+                    _campuses_section(stack.campuses, stack.campus_evidence)
+                    if key == CAMPUS_STAGE
+                    else ""
+                ),
                 conversions_section=_section(
                     "conversions", "Conversions", _conversions_table(stack, conversions, "../")
                 ),
