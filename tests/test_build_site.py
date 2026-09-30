@@ -269,14 +269,96 @@ def write_ledger(root: Path, text: str = LEDGER_CSV) -> Path:
     return signals
 
 
-def make_site(tmp_path: Path) -> tuple[Path, Path, Path]:
-    """Write the fixture site and, beside it, the fixture stack and ledger.
+# A toy processed EIA-860M folder, in the shape ``data/eia.py`` writes: the two summaries the
+# power page reads and the ``source.json`` naming the workbook. Real technology names (the site
+# groups them), invented megawatts, chosen so no gigawatt value lands on a rounding tie. The
+# planned rows put one technology of each group in the 2026-2030 window, leave 2029 empty, put a
+# gas unit in 2031 (outside the window) and one solar unit with no year at all; hydro and landfill
+# gas prove that the planned table folds them into Other and that "Landfill Gas" is not gas.
+EIA_SOURCE_JSON = {
+    "source": "EIA860M",
+    "url": "https://www.eia.gov/electricity/data/eia860m/xls/march_generator2026.xlsx",
+    "fetched_at": "2026-04-25T12:00:00Z",
+    "file": "march_generator2026.xlsx",
+    "period": "2026-03",
+    "sha256": "0" * 64,
+    "bytes": 1,
+    "skipped_sheets": [],
+    "rows": {"operating": 21, "planned": 11, "retired": 0},
+    "files": [
+        "operating.csv",
+        "planned.csv",
+        "retired.csv",
+        "summaries/capacity_by_fuel.csv",
+        "summaries/planned_by_year_and_fuel.csv",
+    ],
+}
+EIA_PLANNED_CSV = """\
+year,technology,units,nameplate_mw,net_summer_mw,under_construction_mw,under_construction_share
+2026,Solar Photovoltaic,2,3000.0,3000.0,3000.0,1.0
+2026,Batteries,1,1500.0,1500.0,500.0,0.333
+2026,Natural Gas Fired Combined Cycle,1,600.0,570.0,600.0,1.0
+2027,Natural Gas Fired Combustion Turbine,3,1260.0,1200.0,260.0,0.206
+2027,Onshore Wind Turbine,1,800.0,800.0,0.0,0.0
+2027,Conventional Hydroelectric,1,60.0,45.0,0.0,0.0
+2028,Nuclear,1,1100.0,1050.0,0.0,0.0
+2028,Landfill Gas,1,20.0,20.0,20.0,1.0
+2030,Offshore Wind Turbine,1,700.0,700.0,700.0,1.0
+2031,Natural Gas Fired Combined Cycle,1,900.0,850.0,0.0,0.0
+,Solar Photovoltaic,1,10.0,10.0,0.0,0.0
+"""
+EIA_CAPACITY_CSV = """\
+technology,units,nameplate_mw,net_summer_mw
+Natural Gas Fired Combined Cycle,3,40000.0,36000.0
+Conventional Steam Coal,1,20000.0,18500.0
+Solar Photovoltaic,5,15000.0,14800.0
+Natural Gas Fired Combustion Turbine,2,10000.0,9000.0
+Nuclear,1,9000.0,8600.0
+Onshore Wind Turbine,2,5000.0,5000.0
+Conventional Hydroelectric,2,4000.0,3900.0
+Batteries,2,3000.0,2940.0
+Hydroelectric Pumped Storage,1,2000.0,2100.0
+Petroleum Liquids,1,1000.0,900.0
+Not reported,1,60.0,40.0
+"""
+EIA_FILES = {
+    "source.json": json.dumps(EIA_SOURCE_JSON, indent=2) + "\n",
+    "summaries/planned_by_year_and_fuel.csv": EIA_PLANNED_CSV,
+    "summaries/capacity_by_fuel.csv": EIA_CAPACITY_CSV,
+}
 
-    Returns (site_dir, out_dir, calls_md); builds pass ``stack_dir=tmp_path / "stack"`` and
-    ``signals_dir=tmp_path / "signals"`` explicitly, so no test reads the repo's own tables.
+
+def write_eia(root: Path, **files: str) -> Path:
+    """Write the fixture EIA folder to ``root/eia860m`` and return it.
+
+    A keyword named after a file (``source_json=...``, ``planned=...``, ``capacity=...``)
+    replaces that file's text.
+    """
+    aliases = {
+        "source_json": "source.json",
+        "planned": "summaries/planned_by_year_and_fuel.csv",
+        "capacity": "summaries/capacity_by_fuel.csv",
+    }
+    unknown = set(files) - set(aliases)
+    assert not unknown, f"not an EIA file: {unknown}"
+    eia = root / "eia860m"
+    (eia / "summaries").mkdir(parents=True, exist_ok=True)
+    texts = EIA_FILES | {aliases[name]: text for name, text in files.items()}
+    for relative, text in texts.items():
+        (eia / relative).write_text(text, encoding="utf-8", newline="\n")
+    return eia
+
+
+def make_site(tmp_path: Path) -> tuple[Path, Path, Path]:
+    """Write the fixture site and, beside it, the fixture stack, ledger and EIA folder.
+
+    Returns (site_dir, out_dir, calls_md); builds pass ``stack_dir=tmp_path / "stack"``,
+    ``signals_dir=tmp_path / "signals"`` and ``eia_dir=tmp_path / "eia860m"`` explicitly, so
+    no test reads the repo's own tables.
     """
     write_stack(tmp_path)
     write_ledger(tmp_path)
+    write_eia(tmp_path)
     site = tmp_path / "site"
     (site / "data").mkdir(parents=True)
     (site / "content").mkdir()
@@ -302,6 +384,7 @@ def built(tmp_path: Path) -> tuple[Path, BuildReport]:
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
 
 
@@ -492,6 +575,7 @@ def test_index_rows_sort_by_layer_then_ticker_and_blank_out_missing_figures(
         calls_md=tmp_path / "missing-calls.md",
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
+        eia_dir=tmp_path / "no-eia",
     )
     rows = table_rows(read(out / "index.html"), "companies")[1:]
     assert [row[0].split()[0] for row in rows] == ["ANC", "ZNC", "CHP", "HYA", "HYB", "PWR"]
@@ -536,6 +620,7 @@ def test_empty_sections_and_their_nav_links_are_left_out(tmp_path: Path) -> None
         calls_md=no_calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert (report.writeups, report.calls) == (0, 0) and not report.warnings
     for page in ("index.html", "companies/AAA.html", "companies/BBB.html"):
@@ -560,6 +645,7 @@ def test_index_shows_only_newest_five_writeups(tmp_path: Path) -> None:
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert report.writeups == 8
     index = read(out / "index.html")
@@ -744,6 +830,7 @@ def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> No
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     page = read(out / "companies" / "BBB.html")
     model = page.split('<section id="model"', 1)[1].split("</section>", 1)[0]
@@ -769,6 +856,7 @@ def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> No
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     page = read(out / "companies" / "BBB.html")
     assert "<caption>Outputs</caption>" in page and 'data-charts="outputs"' not in page
@@ -804,6 +892,7 @@ def test_model_content_is_hidden_until_the_status_says_built(tmp_path: Path) -> 
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     page = read(out / "companies" / "BBB.html")
     assert 'id="model"' not in page and "toy_price" not in page.split("<script", 1)[0]
@@ -824,6 +913,7 @@ def test_status_labels_shown_to_readers(tmp_path: Path) -> None:
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     rows = table_rows(read(out / "index.html"), "companies")[1:]
     assert {row[0].split()[0]: row[-1] for row in rows} == {
@@ -897,6 +987,7 @@ def test_company_page_data_only(tmp_path: Path) -> None:
         calls_md=tmp_path / "missing-calls.md",
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
+        eia_dir=tmp_path / "no-eia",
     )
     index = read(out / "index.html")
     page = read(out / "companies" / "CCC.html")
@@ -949,6 +1040,7 @@ def test_empty_state_build_succeeds_with_warning(tmp_path: Path) -> None:
         calls_md=tmp_path / "missing-calls.md",
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
+        eia_dir=tmp_path / "no-eia",
     )
     assert "index.html" in report.pages and "writeups/index.html" in report.pages
     assert (report.companies, report.writeups, report.calls, report.stages) == (0, 0, 0, 0)
@@ -1010,6 +1102,7 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
 
     bare = tmp_path / "bare-site"
@@ -1025,6 +1118,7 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
         calls_md=tmp_path / "missing-calls.md",
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
+        eia_dir=tmp_path / "no-eia",
     )
     build(
         site_dir=tmp_path / "nothing",
@@ -1032,6 +1126,7 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
         calls_md=tmp_path / "x.md",
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
+        eia_dir=tmp_path / "no-eia",
     )
 
     # The full build has the stack index, nine stage pages and the signals index; the other two
@@ -1057,6 +1152,7 @@ def test_rebuild_is_byte_identical(tmp_path: Path) -> None:
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     first = {p.relative_to(out): p.read_bytes() for p in out.rglob("*") if p.is_file()}
     build(
@@ -1065,6 +1161,7 @@ def test_rebuild_is_byte_identical(tmp_path: Path) -> None:
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     second = {p.relative_to(out): p.read_bytes() for p in out.rglob("*") if p.is_file()}
     assert first == second
@@ -1074,13 +1171,15 @@ def test_main_cli(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     site, out, calls = make_site(tmp_path)
     argv = ["--site-dir", str(site), "--out", str(out), "--calls", str(calls)]
     argv += ["--stack", str(tmp_path / "stack"), "--signals", str(tmp_path / "signals")]
+    argv += ["--eia", str(tmp_path / "eia860m")]
     code = main(argv)
     assert code == 0
     printed = capsys.readouterr().out
     assert "built 17 pages" in printed and "2 companies" in printed and "9 stages" in printed
-    assert "5 signals" in printed
+    assert "5 signals" in printed and "warning" not in printed
     assert (out / "index.html").exists() and (out / "stack" / "power.html").exists()
     assert (out / "signals" / "index.html").exists()
+    assert 'id="us-supply"' in read(out / "stack" / "power.html")
 
 
 # --------------------------------------------------------------------------------------------
@@ -1118,6 +1217,7 @@ def test_build_refuses_an_out_dir_that_overlaps_the_sources(tmp_path: Path, targ
             calls_md=calls,
             stack_dir=tmp_path / "stack",
             signals_dir=tmp_path / "signals",
+            eia_dir=tmp_path / "eia860m",
         )
     assert site_files(site) == before
     assert (tmp_path / "signals" / "ledger.csv").is_file()
@@ -1133,6 +1233,7 @@ def test_build_allows_the_default_layout_of_a_build_dir_inside_the_site_dir(tmp_
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert "index.html" in report.pages and (site / "build" / "data" / "AAA.json").is_file()
     assert {p: b for p, b in site_files(site).items() if p.parts[0] != "build"} == before
@@ -1161,6 +1262,7 @@ def test_build_also_protects_the_repo_site_dir_when_site_dir_is_custom(
                 calls_md=calls,
                 stack_dir=tmp_path / "stack",
                 signals_dir=tmp_path / "signals",
+                eia_dir=tmp_path / "eia860m",
             )
     assert (repo_site / "data" / "AAA.json").is_file()
 
@@ -1181,6 +1283,7 @@ def test_main_cli_reports_a_refused_out_dir(
     site, _, calls = make_site(tmp_path)
     argv = ["--site-dir", str(site), "--out", str(site), "--calls", str(calls)]
     argv += ["--stack", str(tmp_path / "stack"), "--signals", str(tmp_path / "signals")]
+    argv += ["--eia", str(tmp_path / "eia860m")]
     with pytest.raises(SystemExit) as excinfo:
         main(argv)
     assert excinfo.value.code == 2
@@ -1203,6 +1306,7 @@ def test_writeup_slug_index_is_reserved_for_the_listing_page(tmp_path: Path) -> 
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert report.writeups == 3
     assert len(report.pages) == len(set(report.pages))
@@ -1843,11 +1947,22 @@ def test_stage_pages_omit_empty_sections_and_facts(built: tuple[Path, BuildRepor
     assert ("Buys from", '<a href="../stack/power.html">Power</a>') in facts(grid)
     for gone in ('id="primer"', 'id="figures"', 'id="players"'):
         assert gone not in grid, gone
-    # Nothing about datacenter but the chain: header, facts and nav, no heading, no "none" line.
-    page = read(out / "stack" / "datacenter.html")
+    # Nothing about memory but the chain: header, facts and nav, no heading, no "none" line.
+    page = read(out / "stack" / "memory.html")
     for gone in ('id="primer"', 'id="figures"', 'id="conversions"', 'id="players"', "<h2>"):
         assert gone not in page, gone
     assert '<p class="lede">' not in page  # blank summary
+    assert facts(page) == [
+        ("Unit", "GB"),
+        ("Sells", "HBM stacks"),
+        ("Lead time", "1.5 years"),
+        ("Status", '<span class="badge badge-skeleton">skeleton</span>'),
+    ]  # no "Buys from": memory buys from nothing in the fixture
+    # Datacenter has the campuses and nothing else about it.
+    page = read(out / "stack" / "datacenter.html")
+    for gone in ('id="primer"', 'id="figures"', 'id="conversions"', 'id="players"'):
+        assert gone not in page, gone
+    assert page.count("<h2>") == 1 and "<h2>Campuses</h2>" in page
     assert facts(page) == [
         ("Unit", "MW of IT load"),
         ("Sells", "rack-ready megawatts"),
@@ -1892,6 +2007,7 @@ def test_primer_section_is_omitted_without_a_primer_file(tmp_path: Path) -> None
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert not report.warnings
     page = read(out / "stack" / "power.html")
@@ -1907,6 +2023,7 @@ def test_build_without_a_stack_dir_warns_and_leaves_the_stack_out(tmp_path: Path
         calls_md=calls,
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert report.stages == 0 and not any(p.startswith("stack/") for p in report.pages)
     assert not (out / "stack" / "index.html").exists()
@@ -1936,6 +2053,7 @@ def test_malformed_stack_tables_warn_and_leave_that_table_empty(tmp_path: Path) 
         calls_md=calls,
         stack_dir=stack,
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert report.stages == 9 and len(report.warnings) == 1
     assert report.warnings[0].startswith("metrics.csv: row 2 (power / Broken): value 'lots'")
@@ -1953,6 +2071,7 @@ def test_malformed_stack_tables_warn_and_leave_that_table_empty(tmp_path: Path) 
         calls_md=calls,
         stack_dir=stack,
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert report.stages == 0 and not (out / "stack" / "index.html").exists()
     assert len(report.warnings) == 1
@@ -1987,6 +2106,490 @@ def test_stylesheet_lets_stage_names_wrap_and_lays_out_the_facts() -> None:
     assert "white-space: normal" in css_block(css, '.conversions th[scope="row"]')
     assert "grid-template-columns" in css_block(css, ".facts")
     assert "display: block" in css_block(css, ".figure")
+
+
+# --------------------------------------------------------------------------------------------
+# Campuses: the demand side of the data-centre stage, on that page only
+# --------------------------------------------------------------------------------------------
+
+CAMPUSES_HEADER = [
+    "Campus",
+    "Sponsor",
+    "State",
+    "Planned (MW)",
+    "Operating (MW)",
+    "Power source",
+    "Status",
+    "Sources",
+]
+
+
+def campuses_section(page: str) -> str:
+    return page.split('<section id="campuses"', 1)[1].split("</section>", 1)[0]
+
+
+def test_datacenter_page_lists_campuses_by_planned_mw(built: tuple[Path, BuildReport]) -> None:
+    out, report = built
+    assert not report.warnings
+    page = read(out / "stack" / "datacenter.html")
+    assert '<section id="campuses" class="section"><h2>Campuses</h2>' in page
+    rows = table_rows(page, "campuses")
+    assert rows[0] == CAMPUSES_HEADER
+    # Largest planned figure first; the campus with no planned figure last; blanks are en dashes.
+    expanding = "operating; expanding"
+    both = "planned · operating"
+    a = ["Example Campus A", "Alpha Cloud", "LA", "5,000", MISSING, "new gas plants"]
+    b = ["Example Campus B", "Beta Compute; Zed Labs", "TX", "1,200", "400", "gas turbines on site"]
+    assert rows[1:] == [
+        [*a, "under construction", "planned"],
+        ["Example Campus D", "Delta", "WI", "2,263", "0.5", "", expanding, both],
+        [*b, expanding, both],
+        [
+            "Example Campus C",
+            "Gamma <Chips> & Co",
+            "GA",
+            MISSING,
+            "600",
+            "",
+            "operating",
+            "operating",
+        ],
+    ]
+    # Each number carries the confidence of its own figure; a blank carries none.
+    assert '<td class="num confidence confidence-low">5,000</td>' in page
+    assert '<td class="num confidence confidence-medium">2,263</td>' in page
+    assert '<td class="num confidence confidence-high">0.5</td>' in page
+    assert '<td class="num confidence confidence-high">1,200</td>' in page
+    assert '<td class="num confidence confidence-medium">400</td>' in page
+    assert '<td class="num confidence confidence-medium">600</td>' in page
+    assert f'<td class="num">{MISSING}</td>' in page
+    # Sources: up to two links labelled planned and operating, the source text as the title.
+    b_planned = (
+        '<a href="https://example.com/campus-b" rel="noopener" title="Example release (2026-03)">'
+    )
+    b_operating = (
+        '<a href="https://example.com/campus-b-ops" rel="noopener" '
+        'title="Example directory, estimate &lt;b&gt;">'
+    )
+    assert f"{b_planned}planned</a> · {b_operating}operating</a>" in page
+    c_operating = '<a href="https://example.com/campus-c" rel="noopener" title="Example directory">'
+    assert f"{c_operating}operating</a>" in page
+    assert page.count('rel="noopener" title=') == 6  # A 1, D 2, B 2, C 1; none elsewhere
+    # One muted totals line under the table: counts and sums of the figures present.
+    section = campuses_section(page)
+    totals = "4 campuses · 8,463 MW planned · 1,000.5 MW operating"
+    assert section.endswith(f'</table></div><p class="muted campus-totals">{totals}</p>')
+    assert section.count("<p") == 1
+    # Everything is escaped, and no real name from the committed file leaks into the fixture build.
+    assert "Gamma &lt;Chips&gt; &amp; Co" in section and "<Chips>" not in page
+    assert "<b>" not in page
+    assert "Toy note" not in page  # the note column is not shown
+    assert "Stargate" not in page
+
+
+def test_campuses_render_only_on_the_datacenter_page(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    for key in STAGE_KEYS:
+        if key == "datacenter":
+            continue
+        text = read(out / "stack" / f"{key}.html")
+        assert 'id="campuses"' not in text and "Example Campus" not in text, key
+    for rel in ("index.html", "stack/index.html", "companies/AAA.html", "signals/index.html"):
+        text = read(out / rel)
+        assert 'id="campuses"' not in text and "Example Campus" not in text, rel
+
+
+def test_campuses_follow_the_figures_on_the_datacenter_page(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    metrics = read(tmp_path / "stack" / "metrics.csv")
+    metrics += (
+        "datacenter,Example IT load,10,GW,2026,US,https://example.com/dc,Example source,medium,\n"
+    )
+    (tmp_path / "stack" / "metrics.csv").write_text(metrics, encoding="utf-8", newline="\n")
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
+    )
+    assert not report.warnings
+    page = read(out / "stack" / "datacenter.html")
+    order = [
+        page.index(marker)
+        for marker in (
+            '<dl class="facts">',
+            '<section id="figures" class="section"><h2>Figures</h2>',
+            '<section id="campuses" class="section"><h2>Campuses</h2>',
+            'class="stage-nav"',
+        )
+    ]
+    assert order == sorted(order)
+
+
+def test_missing_campuses_file_means_no_section_and_no_warning(tmp_path: Path) -> None:
+    site, out, calls = make_site(tmp_path)
+    (tmp_path / "stack" / "campuses.csv").unlink()
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
+    )
+    assert report.stages == 9 and not report.warnings
+    page = read(out / "stack" / "datacenter.html")
+    assert 'id="campuses"' not in page and "Campuses" not in page and "<h2>" not in page
+
+
+@pytest.mark.parametrize(
+    ("old", "new", "message"),
+    [
+        (",TX,1200,", ",Texas,1200,", "state 'Texas' must be two capital letters"),
+        (
+            ",low,,,,,,new gas plants",
+            ",,,,,,,new gas plants",
+            "planned_mw '5000' has no planned_confidence",
+        ),
+    ],
+)
+def test_malformed_campuses_warn_and_leave_the_section_out(
+    tmp_path: Path, old: str, new: str, message: str
+) -> None:
+    from test_stack import CAMPUSES_CSV
+
+    site, out, calls = make_site(tmp_path)
+    write_stack(tmp_path, campuses=variant(CAMPUSES_CSV, old, new))
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
+    )
+    assert report.stages == 9 and len(report.warnings) == 1  # the rest of the stack is built
+    assert report.warnings[0].startswith("campuses.csv: ") and message in report.warnings[0]
+    assert report.warnings[0].endswith("campuses left empty")
+    page = read(out / "stack" / "datacenter.html")
+    assert 'id="campuses"' not in page and "Example Campus" not in page
+    assert (out / "stack" / "power.html").is_file() and 'id="figures"' in read(
+        out / "stack" / "power.html"
+    )
+
+
+def test_campuses_meta_counts_and_sums_what_is_present() -> None:
+    from scripts.build_site import campuses_meta
+
+    nan = float("nan")
+    assert campuses_meta([]) == "0 campuses · 0 MW planned · 0 MW operating"
+    one = [{"planned_mw": 1200.0, "operating_mw": nan}]
+    assert campuses_meta(one) == "1 campus · 1,200 MW planned · 0 MW operating"
+    several = [
+        {"planned_mw": 5000.0, "operating_mw": nan},
+        {"planned_mw": nan, "operating_mw": 600.0},
+        {"planned_mw": 0.1, "operating_mw": 0.2},
+    ]
+    assert campuses_meta(several) == "3 campuses · 5,000.1 MW planned · 600.2 MW operating"
+
+
+# --------------------------------------------------------------------------------------------
+# US supply: the EIA-860M summaries regrouped and shown in GW, on the power page only
+# --------------------------------------------------------------------------------------------
+
+PLANNED_HEADER = [
+    "Year",
+    "Gas",
+    "Solar",
+    "Batteries",
+    "Wind",
+    "Nuclear",
+    "Other",
+    "Total",
+    "Under construction (GW)",
+    "Under construction (share of total, %)",
+]
+FLEET_HEADER = ["Technology group", "Nameplate", "Net summer", "Share of nameplate (%)"]
+EIA_SOURCE_LINE = (
+    '<p class="muted us-supply-source">'
+    '<a href="https://www.eia.gov/electricity/data/eia860m/" rel="noopener">EIA-860M</a>'
+    " · 2026-03 · preliminary</p>"
+)
+
+
+def us_supply_section(page: str) -> str:
+    return page.split('<section id="us-supply"', 1)[1].split("</section>", 1)[0]
+
+
+def test_power_page_shows_us_supply_after_the_figures(built: tuple[Path, BuildReport]) -> None:
+    out, report = built
+    assert not report.warnings
+    page = read(out / "stack" / "power.html")
+    assert '<section id="us-supply" class="section"><h2>US supply</h2>' in page
+    order = [
+        page.index(marker)
+        for marker in (
+            '<section id="figures" class="section"><h2>Figures</h2>',
+            '<section id="us-supply" class="section"><h2>US supply</h2>',
+            '<section id="conversions" class="section"><h2>Conversions</h2>',
+        )
+    ]
+    assert order == sorted(order)
+    section = us_supply_section(page)
+    # One muted source line, then the two captioned tables and nothing else.
+    assert section.startswith(f' class="section"><h2>US supply</h2>{EIA_SOURCE_LINE}<div')
+    assert section.count("<p") == 1 and section.count("<table") == 2
+    assert "<caption>Planned additions, GW nameplate</caption>" in section
+    assert "<caption>Operating fleet, GW</caption>" in section
+    assert section.index("Planned additions") < section.index("Operating fleet")
+
+    # Planned additions: the period year and four more, in GW to one decimal, worked out by hand
+    # from EIA_PLANNED_CSV. 2026: 600 gas, 3,000 solar, 1,500 batteries = 5,100 MW, of which
+    # 600 + 3,000 + 500 = 4,100 under construction (80.4%). 2027: 1,260 gas, 800 wind and 60 MW
+    # of hydro folded into Other = 2,120 MW, 260 building (12.3%). 2028: 1,100 nuclear and 20 MW
+    # of landfill gas (Other, not Gas) = 1,120 MW, 20 building (1.8%). 2029: nothing planned, so
+    # zeros and no share. 2030: 700 MW of offshore wind, all of it building. The 2031 gas unit and
+    # the unit with no year are outside the window.
+    assert table_rows(page, "planned") == [
+        PLANNED_HEADER,
+        ["2026", "0.6", "3.0", "1.5", "0.0", "0.0", "0.0", "5.1", "4.1", "80.4"],
+        ["2027", "1.3", "0.0", "0.0", "0.8", "0.0", "0.1", "2.1", "0.3", "12.3"],
+        ["2028", "0.0", "0.0", "0.0", "0.0", "1.1", "0.0", "1.1", "0.0", "1.8"],
+        ["2029", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", MISSING],
+        ["2030", "0.0", "0.0", "0.0", "0.7", "0.0", "0.0", "0.7", "0.7", "100.0"],
+    ]
+    # Operating fleet: eight groups, largest nameplate first, shares of the 109,060 MW total.
+    # Gas is both gas technologies (50,000 MW), Hydro both hydro rows (6,000), Other the
+    # petroleum unit and the unreported one (1,060 / 940 MW).
+    assert table_rows(page, "fleet") == [
+        FLEET_HEADER,
+        ["Gas", "50.0", "45.0", "45.8"],
+        ["Coal", "20.0", "18.5", "18.3"],
+        ["Solar", "15.0", "14.8", "13.8"],
+        ["Nuclear", "9.0", "8.6", "8.3"],
+        ["Hydro", "6.0", "6.0", "5.5"],
+        ["Wind", "5.0", "5.0", "4.6"],
+        ["Batteries", "3.0", "2.9", "2.8"],
+        ["Other", "1.1", "0.9", "1.0"],
+    ]
+    # Every number is a right-aligned cell; no EIA technology name reaches the page.
+    assert section.count('<td class="num">') == 5 * 9 + 8 * 3
+    for name in ("Natural Gas", "Photovoltaic", "Landfill", "Not reported", "Petroleum"):
+        assert name not in page, name
+    # The rest of the power page is untouched.
+    assert 'id="figures"' in page and 'id="players"' in page and 'id="signals"' in page
+
+
+def test_us_supply_renders_only_on_the_power_page(built: tuple[Path, BuildReport]) -> None:
+    out, _ = built
+    for key in STAGE_KEYS:
+        if key == "power":
+            continue
+        text = read(out / "stack" / f"{key}.html")
+        assert 'id="us-supply"' not in text and "EIA-860M" not in text, key
+    for rel in ("index.html", "stack/index.html", "companies/AAA.html", "signals/index.html"):
+        text = read(out / rel)
+        assert 'id="us-supply"' not in text and "EIA-860M" not in text, rel
+
+
+def test_us_supply_follows_the_figures_and_precedes_the_campuses_slot(tmp_path: Path) -> None:
+    """The template order: figures, US supply, campuses, conversions. Power has no campuses and
+    datacenter no US supply, so the order is checked on the template itself and on the page."""
+    template = read(SITE_DIR / "templates" / "stack_stage.html")
+    slots = ["$figures_section", "$us_supply_section", "$campuses_section", "$conversions_section"]
+    assert [template.index(slot) for slot in slots] == sorted(template.index(s) for s in slots)
+    site, out, calls = make_site(tmp_path)
+    (tmp_path / "stack" / "primers" / "power.md").unlink()
+    build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
+    )
+    page = read(out / "stack" / "power.html")
+    assert (
+        page.index('<dl class="facts">') < page.index('id="figures"') < page.index('id="us-supply"')
+    )
+    assert page.index('id="us-supply"') < page.index('id="conversions"')
+
+
+@pytest.mark.parametrize(
+    "missing",
+    [
+        None,
+        "source.json",
+        "summaries/planned_by_year_and_fuel.csv",
+        "summaries/capacity_by_fuel.csv",
+    ],
+)
+def test_missing_eia_dir_or_file_means_no_section_and_no_warning(
+    tmp_path: Path, missing: str | None
+) -> None:
+    site, out, calls = make_site(tmp_path)
+    eia = tmp_path / "eia860m"
+    if missing is None:
+        eia = tmp_path / "no-eia"  # a fresh clone before the first pull
+    else:
+        (eia / missing).unlink()
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+        eia_dir=eia,
+    )
+    assert report.stages == 9 and not report.warnings
+    page = read(out / "stack" / "power.html")
+    assert 'id="us-supply"' not in page and "US supply" not in page and "EIA-860M" not in page
+    assert 'id="figures"' in page and 'id="conversions"' in page  # the rest still renders
+
+
+@pytest.mark.parametrize(
+    ("file", "text", "message"),
+    [
+        ("source_json", "{not json", "source.json: not a readable EIA860M record"),
+        (
+            "source_json",
+            json.dumps(EIA_SOURCE_JSON | {"period": "Q1 2026"}),
+            "source.json: period 'Q1 2026' is not YYYY-MM",
+        ),
+        (
+            "planned",
+            variant(EIA_PLANNED_CSV, "2026,Batteries,1,1500.0", "2026,Batteries,1,lots"),
+            "summaries/planned_by_year_and_fuel.csv: 'nameplate_mw' is not numeric",
+        ),
+        (
+            "capacity",
+            variant(
+                EIA_CAPACITY_CSV,
+                "technology,units,nameplate_mw,net_summer_mw",
+                "technology,units,mw",
+            ),
+            "summaries/capacity_by_fuel.csv: columns ['technology', 'units', 'mw'] are not",
+        ),
+        (
+            "capacity",
+            variant(EIA_CAPACITY_CSV, "Nuclear,1,9000.0", "Nuclear,1,-9000.0"),
+            "summaries/capacity_by_fuel.csv: 'nameplate_mw' is negative on rows [4]",
+        ),
+    ],
+)
+def test_malformed_eia_file_warns_and_leaves_us_supply_out(
+    tmp_path: Path, file: str, text: str, message: str
+) -> None:
+    site, out, calls = make_site(tmp_path)
+    write_eia(tmp_path, **{file: text})
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
+    )
+    assert report.stages == 9 and len(report.warnings) == 1  # the rest of the site is built
+    assert report.warnings[0].startswith(message), report.warnings[0]
+    assert report.warnings[0].endswith("; US supply left empty")
+    page = read(out / "stack" / "power.html")
+    assert 'id="us-supply"' not in page and "EIA-860M" not in page
+    assert 'id="figures"' in page and 'id="players"' in page
+
+
+def test_planned_and_fleet_regrouping_only_add_up_the_summary_rows() -> None:
+    """The pure regrouping: sums of rows per group and year, nothing else."""
+    from scripts.build_site import fleet_by_group, fmt_gw, planned_by_group
+
+    nan = float("nan")
+    rows = [
+        {
+            "year": 2026,
+            "technology": "Solar Photovoltaic",
+            "nameplate_mw": 30.0,
+            "under_construction_mw": 30.0,
+        },
+        {
+            "year": 2026,
+            "technology": "Solar Thermal with Energy Storage",
+            "nameplate_mw": 10.0,
+            "under_construction_mw": 0.0,
+        },
+        {
+            "year": 2026,
+            "technology": "Conventional Steam Coal",
+            "nameplate_mw": 5.0,
+            "under_construction_mw": 5.0,
+        },
+        {
+            "year": 2027,
+            "technology": "Nuclear",
+            "nameplate_mw": 1000.0,
+            "under_construction_mw": 0.0,
+        },
+        {
+            "year": nan,
+            "technology": "Batteries",
+            "nameplate_mw": 999.0,
+            "under_construction_mw": 999.0,
+        },
+        {
+            "year": 2030,
+            "technology": "Batteries",
+            "nameplate_mw": 1.0,
+            "under_construction_mw": 1.0,
+        },
+    ]
+    table = planned_by_group(rows, 2026, 2)
+    assert [t["year"] for t in table] == [2026, 2027]
+    first = table[0]
+    assert (first["Solar"], first["Other"], first["Gas"]) == (40.0, 5.0, 0.0)  # coal is Other here
+    assert first["total"] == 45.0 and first["under_construction"] == 35.0
+    assert first["under_construction_share"] == pytest.approx(35 / 45)
+    second = table[1]
+    assert second["Nuclear"] == 1000.0 and second["total"] == 1000.0
+    assert second["under_construction_share"] == 0.0
+    assert planned_by_group(rows, 2028, 1) == [
+        {
+            "year": 2028,
+            "Gas": 0.0,
+            "Solar": 0.0,
+            "Batteries": 0.0,
+            "Wind": 0.0,
+            "Nuclear": 0.0,
+            "Other": 0.0,
+            "total": 0.0,
+            "under_construction": 0.0,
+            "under_construction_share": None,
+        }
+    ]
+    assert planned_by_group([], 2026, 3) == planned_by_group(rows[4:5], 2026, 3)  # no year, no row
+
+    fleet = fleet_by_group(
+        [
+            {"technology": "Onshore Wind Turbine", "nameplate_mw": 30.0, "net_summer_mw": 29.0},
+            {"technology": "Offshore Wind Turbine", "nameplate_mw": 10.0, "net_summer_mw": 10.0},
+            {"technology": "Nuclear", "nameplate_mw": 40.0, "net_summer_mw": 38.0},
+            {"technology": "Geothermal", "nameplate_mw": 40.0, "net_summer_mw": 20.0},
+        ]
+    )
+    assert [(f["group"], f["nameplate"], f["net_summer"]) for f in fleet] == [
+        ("Nuclear", 40.0, 38.0),  # ties in nameplate sort by group name
+        ("Other", 40.0, 20.0),
+        ("Wind", 40.0, 39.0),
+    ]
+    assert [round(f["share"], 6) for f in fleet] == [round(1 / 3, 6)] * 3
+    assert fleet_by_group([]) == []
+    assert fmt_gw(26616.1) == "26.6" and fmt_gw(0) == "0.0" and fmt_gw(1234567.8) == "1,234.6"
+
+
+def test_stylesheet_styles_the_us_supply_source_line_and_planned_headers() -> None:
+    css = read(SITE_STATIC_DIR / "style.css")
+    assert "font-size" in css_block(css, ".us-supply-source")
+    assert "white-space: normal" in css_block(css, ".planned thead th")
 
 
 # --------------------------------------------------------------------------------------------
@@ -2175,6 +2778,7 @@ def test_malformed_ledger_warns_and_leaves_signals_out(
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert report.signals == 0 and report.stages == 9  # the rest of the site is built
     assert len(report.warnings) == 1
@@ -2196,6 +2800,7 @@ def test_build_without_a_ledger_has_no_signals_and_no_warning(tmp_path: Path) ->
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert (out / "signals" / "index.html").exists()
     # No ledger is "none yet", not a problem: no warning, and a rebuild drops the stale page.
@@ -2205,6 +2810,7 @@ def test_build_without_a_ledger_has_no_signals_and_no_warning(tmp_path: Path) ->
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "no-signals",
+        eia_dir=tmp_path / "no-eia",
     )
     assert report.signals == 0 and not report.warnings
     assert not (out / "signals" / "index.html").exists()
@@ -2221,6 +2827,7 @@ def test_build_without_a_ledger_has_no_signals_and_no_warning(tmp_path: Path) ->
         calls_md=calls,
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
     )
     assert report.signals == 0 and not report.warnings
     assert not (out / "signals" / "index.html").exists()

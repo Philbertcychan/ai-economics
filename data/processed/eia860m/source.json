@@ -1,11 +1,12 @@
 {
   "source": "EIA860M",
   "url": "https://www.eia.gov/electricity/data/eia860m/xls/august_generator2026.xlsx",
+  "fetched_at": "2026-09-27T17:51:51Z",
   "file": "august_generator2026.xlsx",
   "period": "2026-08",
   "sha256": "b4b70abb4c217e8e2658c3bde7608a3d530e86a81279ccc572ced82a200e9f1c",
   "bytes": 13955142,
-  "pulled_at": "2026-09-27T17:51:58Z",
+  "skipped_sheets": [],
   "rows": {
     "canceled_or_postponed": 1741,
     "operating": 28377,
@@ -14,5 +15,18 @@
     "planned_pr": 5,
     "retired": 7336,
     "retired_pr": 10
-  }
+  },
+  "files": [
+    "canceled_or_postponed.csv",
+    "operating.csv",
+    "operating_pr.csv",
+    "planned.csv",
+    "planned_pr.csv",
+    "retired.csv",
+    "retired_pr.csv",
+    "summaries/capacity_by_fuel.csv",
+    "summaries/planned_by_year_and_fuel.csv",
+    "summaries/retired_by_year_and_fuel.csv",
+    "summaries/state_summary.csv"
+  ]
 }

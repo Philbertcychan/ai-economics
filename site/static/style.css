@@ -717,6 +717,44 @@ tbody tr:hover {
   color: var(--warn);
 }
 
+/* ---- campuses -------------------------------------------------------------------------- */
+
+/* Campus names are phrases (a sponsor, a project, a town), so like stage names they wrap; the
+   power source is free text and needs a floor; the two source links stay on one line. */
+.campuses th[scope="row"] {
+  white-space: normal;
+  min-width: 11rem;
+}
+
+.campuses .power-source {
+  min-width: 12rem;
+}
+
+.campuses .sources {
+  white-space: nowrap;
+}
+
+/* The totals under the campuses table sit close to it, in the table's type size. */
+.campus-totals {
+  margin: -1rem 0 1.5rem;
+  font-size: 0.875rem;
+}
+
+/* ---- US supply (EIA-860M) -------------------------------------------------------------- */
+
+/* The source line (workbook, month, "preliminary") sits under the heading in the table's type
+   size; the two tables that follow carry their own captions. */
+.us-supply-source {
+  margin: 0 0 0.25rem;
+  font-size: 0.875rem;
+}
+
+/* The planned table's long last two headers wrap instead of pushing nine columns off a phone. */
+.planned thead th {
+  white-space: normal;
+  min-width: 5rem;
+}
+
 /* ---- signals --------------------------------------------------------------------------- */
 
 /* A claim is a sentence with its number in it; without a floor the eight short columns beside

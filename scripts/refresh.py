@@ -4,8 +4,9 @@ Purpose
 -------
 This is the one command that keeps the repository current::
 
-    uv run scripts/refresh.py                                   # fetch, export, site, diff
+    uv run scripts/refresh.py                                   # fetch, export, EIA, site, diff
     uv run scripts/refresh.py --tickers CRWV,NBIS --since 2025-06-01 --no-download
+    uv run scripts/refresh.py --skip-eia --skip-site            # companies only
     uv run scripts/refresh.py --dry-run                         # print the plan, touch nothing
 
 For every tracked company (``data.edgar.COMPANIES``, optionally narrowed with ``--tickers``) it
@@ -26,18 +27,26 @@ For every tracked company (``data.edgar.COMPANIES``, optionally narrowed with ``
    is reported as ``pending``; companies tracked for their reported data only are ``no-model``;
 6. writes ``site/data/<TICKER>.json`` (reported series plus model outputs) for the dashboard.
 
-After the loop it writes ``site/data/companies.json`` (whose per-company ``model_status`` is
-``built``, ``pending`` or ``no-model``; see ``SITE_MODEL_STATUS``), rebuilds ``site/build/``
+After the loop it (7) refreshes the EIA-860M generator inventory for the power stage (off with
+``--skip-eia``): it asks the index page for the newest workbook and, when that is the one
+``data/processed/eia860m/source.json`` already names, does nothing (``unchanged``); otherwise
+it downloads the workbook into ``data/raw/EIA860M/<date>/`` and rewrites the processed folder
+through ``data.eia.process_workbook``, the same function ``scripts/pull_eia860m.py`` uses
+(``updated``). Then it writes ``site/data/companies.json`` (whose per-company ``model_status``
+is ``built``, ``pending`` or ``no-model``; see ``SITE_MODEL_STATUS``), rebuilds ``site/build/``
 and records the whole run in ``data/last_refresh_diff.md``. The CI workflow commits all of it
-on the days when ``data/processed`` or ``models`` changed.
+on the days when ``data/processed`` or ``models`` changed, and the EIA folder lives inside
+``data/processed``, so a new month's tables are committed like a new filing.
 
 Design notes
 ------------
 * Robustness over purity. Every step of every company runs in its own ``try``: a failure is
   logged, recorded in ``CompanyResult.error`` and the run carries on with the next step and
   the next company. Where yesterday's processed CSVs exist they stand in for a failed fetch,
-  so a transient SEC outage never blanks the dashboard. The diff file is always written and
-  the exit code is 1 when anything failed, so CI notices without losing the partial results.
+  so a transient SEC outage never blanks the dashboard. The EIA step is isolated the same way:
+  its failure lands in ``EIAResult.error`` and the run's errors, and the site is still built
+  from yesterday's tables. The diff file is always written and the exit code is 1 when anything
+  failed, so CI notices without losing the partial results.
 * Idempotent. With unchanged upstream data a second run rewrites identical bytes everywhere
   except the diff file (which carries the run timestamp) and the ``as_of`` field of
   ``companies.json`` (which the site footer shows as "Last refresh"). The CI workflow
@@ -66,11 +75,15 @@ import pandas as pd
 
 from data import (
     CALLS_MD,
+    EIA_PROCESSED_DIR,
+    EIA_RAW_DIR,
     LAST_REFRESH_DIFF,
     MODELS_DIR,
     PROCESSED_DIR,
+    SIGNALS_DIR,
     SITE_BUILD_DIR,
     SITE_DIR,
+    STACK_DIR,
 )
 from data.edgar import (
     COMPANIES,
@@ -82,6 +95,13 @@ from data.edgar import (
     calendar_series,
     facts_to_frame,
     load_processed_facts,
+)
+from data.eia import (
+    EIA860MClient,
+    process_workbook,
+    processed_is_current,
+    read_source,
+    workbook_name,
 )
 from scripts.build_site import BuildReport
 from scripts.build_site import build as build_site_pages
@@ -119,6 +139,10 @@ SITE_MODEL_STATUS: dict[str, str] = {
 MODELS_MANIFEST = "manifest.json"
 OUTPUTS_ITEM_COLUMN = "item"  # first column of processed/<TICKER>/outputs.csv
 MAX_LISTED_FILINGS = 20  # a first run would otherwise list decades of 10-Qs in the diff
+# Outcome of the EIA-860M step: the newest workbook was already processed, was pulled and
+# tidied, could not be (the error is in the run's errors), or the step was turned off.
+EIA_STATUSES: tuple[str, ...] = ("unchanged", "updated", "error", "skipped")
+EIA_LABEL = "EIA-860M"  # how the step names itself in the diff and the errors
 
 
 # --------------------------------------------------------------------------------------------
@@ -134,6 +158,7 @@ class RefreshConfig:
     since: str = DEFAULT_SINCE  # uncached documents of filings from this date on are downloaded
     download: bool = True
     build_site: bool = True
+    eia: bool = True  # refresh the EIA-860M inventory (off with --skip-eia)
     dry_run: bool = False
 
 
@@ -147,6 +172,12 @@ class RefreshPaths:
     site_build_dir: Path = SITE_BUILD_DIR
     diff_path: Path = LAST_REFRESH_DIFF
     calls_md: Path = CALLS_MD
+    eia_dir: Path = EIA_PROCESSED_DIR  # the processed EIA-860M folder the site reads
+    # The hand-kept tables the site renders; tests point them at fixtures so a refresh test
+    # never reads the repository's own stack or ledger.
+    stack_dir: Path = STACK_DIR
+    signals_dir: Path = SIGNALS_DIR
+    eia_raw_dir: Path = EIA_RAW_DIR  # where a real EIA client stores the workbook it pulls
 
     @property
     def site_data_dir(self) -> Path:
@@ -175,6 +206,19 @@ class CompanyResult:
 
 
 @dataclass
+class EIAResult:
+    """Outcome of the EIA-860M step. ``status`` is one of ``EIA_STATUSES``; ``period`` is the
+    month of the tables now on disk (``"2026-08"``), from the new workbook after an update and
+    from the previous ``source.json`` otherwise; ``error`` names the step that failed."""
+
+    status: str
+    period: str | None = None
+    file: str | None = None  # the newest workbook's name, once the index page answered
+    url: str | None = None
+    error: str | None = None
+
+
+@dataclass
 class RefreshResult:
     """Outcome of a whole run; ``errors`` is empty exactly when the exit code is 0."""
 
@@ -183,6 +227,7 @@ class RefreshResult:
     companies: list[CompanyResult]
     site: BuildReport | None
     errors: list[str]
+    eia: EIAResult | None = None  # None only for a dry run
 
 
 # --------------------------------------------------------------------------------------------
@@ -665,6 +710,48 @@ def refresh_company(
 
 
 # --------------------------------------------------------------------------------------------
+# EIA-860M (step 7)
+# --------------------------------------------------------------------------------------------
+
+
+def refresh_eia(client: Any, paths: RefreshPaths) -> EIAResult:
+    """Bring ``paths.eia_dir`` up to the newest EIA-860M workbook. Never raises.
+
+    ``client`` is an ``EIA860MClient`` or anything with its ``latest_file_url``, ``download``
+    and ``write_manifest``; tests inject a fake. The index page is read every run (one small
+    request), the 14 MB workbook only when its name is not the one ``source.json`` already
+    records or a listed table is missing: EIA publishes a new month roughly every four weeks,
+    so most days end here as ``unchanged``. An update goes through ``process_workbook``, which
+    is what ``scripts/pull_eia860m.py`` runs, so the two never disagree about the folder.
+    """
+    previous = read_source(paths.eia_dir)
+    result = EIAResult(status="error", period=previous.get("period") if previous else None)
+    try:
+        result.url = client.latest_file_url()
+        result.file = workbook_name(result.url)
+    except Exception as exc:  # any failure is recorded, never raised
+        result.error = f"index: {type(exc).__name__}: {exc}"
+        log.error("%s: %s", EIA_LABEL, result.error, exc_info=log.isEnabledFor(logging.DEBUG))
+        return result
+    if processed_is_current(paths.eia_dir, result.url):
+        result.status = "unchanged"
+        log.info("%s: %s already processed (%s)", EIA_LABEL, result.file, result.period)
+        return result
+    try:
+        workbook = client.download(result.url)
+        client.write_manifest()
+        processed = process_workbook(workbook, paths.eia_dir)
+    except Exception as exc:
+        result.error = f"update {result.file}: {type(exc).__name__}: {exc}"
+        log.error("%s: %s", EIA_LABEL, result.error, exc_info=log.isEnabledFor(logging.DEBUG))
+        return result
+    result.status = "updated"
+    result.period = processed.period
+    log.info("%s: updated to %s (%s)", EIA_LABEL, result.period, result.file)
+    return result
+
+
+# --------------------------------------------------------------------------------------------
 # The run
 # --------------------------------------------------------------------------------------------
 
@@ -707,9 +794,11 @@ def _plan(
         f"  tickers:            {tickers}",
         f"  since:              {config.since} (uncached documents of filings from this date on)",
         f"  download documents: {'yes' if config.download else 'no'}",
+        f"  EIA-860M:           {'yes' if config.eia else 'no'}",
         f"  build site:         {'yes' if config.build_site else 'no'}",
         f"  processed dir:      {paths.processed_dir}",
         f"  models dir:         {paths.models_dir}",
+        f"  EIA dir:            {paths.eia_dir}",
         f"  site data dir:      {paths.site_data_dir}",
         f"  site build dir:     {paths.site_build_dir}",
         f"  diff:               {paths.diff_path}",
@@ -721,16 +810,19 @@ def run(
     config: RefreshConfig,
     *,
     client: EdgarClient | None = None,
+    eia_client: Any = None,
     registry: Mapping[str, type] | None = None,
     companies: Mapping[str, CompanyInfo] | None = None,
     paths: RefreshPaths | None = None,
     now: Callable[[], datetime] | None = None,
 ) -> RefreshResult:
-    """Refresh every selected company, then the site and the diff file.
+    """Refresh every selected company, then the EIA inventory, the site and the diff file.
 
     Args:
         config: what to refresh; see ``RefreshConfig``.
         client: EDGAR client (a real one is created when omitted); tests inject a fake.
+        eia_client: EIA-860M client (a real one, writing under ``paths.eia_raw_dir``, is created
+            when omitted and the step is on); tests inject a fake.
         registry: ticker -> model class; defaults to ``companies.REGISTRY``.
         companies: ticker -> ``CompanyInfo``; defaults to ``data.edgar.COMPANIES``.
         paths: where to read and write; defaults to the repository layout.
@@ -767,6 +859,15 @@ def run(
         )
     errors = [f"{result.ticker}: {result.error}" for result in results if result.error]
 
+    # 7. The power stage's supply table, before the site build that shows it.
+    if config.eia:
+        eia = refresh_eia(eia_client or EIA860MClient(paths.eia_raw_dir), paths)
+        if eia.error:
+            errors.append(f"{EIA_LABEL}: {eia.error}")
+    else:
+        previous = read_source(paths.eia_dir)
+        eia = EIAResult(status="skipped", period=previous.get("period") if previous else None)
+
     try:
         index_path = paths.site_data_dir / "companies.json"
         previous = _read_json(index_path) if index_path.exists() else None
@@ -780,14 +881,19 @@ def run(
     if config.build_site:
         try:
             site = build_site_pages(
-                site_dir=paths.site_dir, out_dir=paths.site_build_dir, calls_md=paths.calls_md
+                site_dir=paths.site_dir,
+                out_dir=paths.site_build_dir,
+                calls_md=paths.calls_md,
+                eia_dir=paths.eia_dir,
+                stack_dir=paths.stack_dir,
+                signals_dir=paths.signals_dir,
             )
             log.info("site: %d pages built into %s", len(site.pages), paths.site_build_dir)
         except Exception as exc:
             log.error("site build failed: %s", exc, exc_info=log.isEnabledFor(logging.DEBUG))
             errors.append(f"site: {type(exc).__name__}: {exc}")
 
-    result = RefreshResult(started_at, utc_iso(clock()), results, site, errors)
+    result = RefreshResult(started_at, utc_iso(clock()), results, site, errors, eia=eia)
     write_diff(result, paths.diff_path)
     return result
 
@@ -799,6 +905,17 @@ def run(
 
 def _plural(count: int, noun: str, plural: str | None = None) -> str:
     return f"{count} {noun if count == 1 else plural or noun + 's'}"
+
+
+def eia_line(eia: EIAResult | None) -> str:
+    """``EIA-860M: unchanged · 2026-08``: the one line the diff and the console give the step.
+
+    The period is the month of the tables on disk after the step, or ``no tables`` when there
+    are none yet (a first run that failed, or a skipped step on a fresh clone).
+    """
+    if eia is None:
+        return ""
+    return f"{EIA_LABEL}: {eia.status} · {eia.period or 'no tables'}"
 
 
 def render_diff(result: RefreshResult) -> str:
@@ -816,6 +933,8 @@ def render_diff(result: RefreshResult) -> str:
         f"{_plural(downloaded, 'document')} downloaded, models: {models}, "
         f"{_plural(len(result.errors), 'error')}. Finished {result.finished_at}.",
     ]
+    if result.eia is not None:
+        lines += ["", eia_line(result.eia) + "."]
     for company in companies:
         lines += ["", f"## {company.ticker}", ""]
         if company.new_filings:
@@ -912,6 +1031,12 @@ def main(argv: list[str] | None = None) -> int:
         "--skip-site", dest="build_site", action="store_false", help="do not rebuild site/build"
     )
     parser.add_argument(
+        "--skip-eia",
+        dest="eia",
+        action="store_false",
+        help="do not check EIA for a newer generator inventory (data/processed/eia860m)",
+    )
+    parser.add_argument(
         "--dry-run", action="store_true", help="print the plan; fetch nothing, write nothing"
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="debug logging to stderr")
@@ -931,6 +1056,7 @@ def main(argv: list[str] | None = None) -> int:
         since=args.since,
         download=args.download,
         build_site=args.build_site,
+        eia=args.eia,
         dry_run=args.dry_run,
     )
     result = run(config)
@@ -938,10 +1064,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     new_total = sum(len(c.new_filings) for c in result.companies)
+    eia = f"{eia_line(result.eia)}; " if result.eia is not None else ""
     print(
         f"refreshed {_plural(len(result.companies), 'company', 'companies')}: "
         f"{_plural(new_total, 'new filing')}, {_plural(len(result.errors), 'error')}; "
-        f"see {LAST_REFRESH_DIFF}"
+        f"{eia}see {LAST_REFRESH_DIFF}"
     )
     for error in result.errors:
         print(f"  error: {error}")

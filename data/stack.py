@@ -17,6 +17,9 @@ Files
 ``metrics.csv``            one row per figure about a stage (capacity, price, lead time)
 ``players.csv``            one row per company per stage, with its role
 ``conversions.csv``        factors that turn one stage's unit into another's (MW per wafer...)
+``campuses.csv``           the demand side of the data-centre stage: one row per announced AI
+                           campus with its planned and operating MW, each sourced (optional
+                           file; a missing one means no campuses yet)
 ``primers/<stage>.md``     a markdown primer per stage, rendered on the stage's page
 
 Columns
@@ -34,6 +37,14 @@ players:           ``stage``, ``company``, ``ticker``, ``role``, ``listed`` (``t
                    ``note``, ``source_url``
 conversions:       ``from_stage``, ``to_stage``, ``factor`` (number), ``unit``, ``as_of``,
                    ``source_url``, ``source``, ``confidence``, ``note``
+campuses:          ``campus`` (key, unique), ``sponsor``, ``developer``, ``state`` (two capital
+                   letters), then two figures, ``planned`` and ``operating``, each as
+                   ``<figure>_mw`` (number or blank), ``<figure>_as_of`` (``YYYY-MM`` or
+                   ``YYYY-MM-DD`` or blank), ``<figure>_source_url``, ``<figure>_source``,
+                   ``<figure>_confidence``, plus ``planned_basis`` (what the planned number
+                   counts: IT load, total power...), ``power_source``, ``status``, ``note``.
+                   A figure that is present needs its ``source_url`` and its ``confidence``; a
+                   blank figure needs neither.
 
 ``confidence`` is ``high``, ``medium`` or ``low``. Every ``stage`` reference must name a row of
 ``stages.csv``. A ``source_url`` is blank or starts with ``http``. Blank text stays blank (never
@@ -41,7 +52,8 @@ NaN) so the site can test for it.
 
 Whose judgement
 ---------------
-Metrics, players and conversions are research: each row carries its source and a confidence.
+Metrics, players, conversions and campuses are research: each row carries its source and a
+confidence.
 ``bottleneck_score``, ``bottleneck_note`` and ``status`` are not research; they are the owner's
 (Philbert's) judgement about where the chain binds and how far each stage has been worked, and
 only he edits them. The loaders check their form, never their substance.
@@ -107,6 +119,30 @@ CONVERSION_COLUMNS = (
     "note",
 )
 
+# The two figures a campus row carries, each with its own mw, as_of, source_url, source and
+# confidence columns; ``planned`` also has a ``basis`` saying what the number counts.
+CAMPUS_FIGURES = ("planned", "operating")
+CAMPUS_COLUMNS = (
+    "campus",
+    "sponsor",
+    "developer",
+    "state",
+    "planned_mw",
+    "planned_basis",
+    "planned_as_of",
+    "planned_source_url",
+    "planned_source",
+    "planned_confidence",
+    "operating_mw",
+    "operating_as_of",
+    "operating_source_url",
+    "operating_source",
+    "operating_confidence",
+    "power_source",
+    "status",
+    "note",
+)
+
 CONFIDENCES = ("high", "medium", "low")
 STATUSES = ("skeleton", "deep")
 BOTTLENECK_RANGE = (1, 5)
@@ -114,6 +150,10 @@ BOTTLENECK_RANGE = (1, 5)
 # A stage key names a page (``stack/<stage>.html``) and a primer (``primers/<stage>.md``), so it
 # is restricted to characters that cannot escape those folders or need URL-encoding.
 _STAGE_KEY_RE = re.compile(r"[a-z0-9][a-z0-9_-]*")
+_STATE_RE = re.compile(r"[A-Z]{2}")
+# A month or a day: the precision a source gives, no more (a press release dates a plan to the
+# day, a directory page to the month it was last updated).
+_AS_OF_RE = re.compile(r"\d{4}-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01]))?")
 
 
 def split_stages(text: str) -> list[str]:
@@ -381,6 +421,83 @@ def load_conversions(directory: Path = STACK_DIR) -> pd.DataFrame:
     problems += _check_url(frame, labels)
     _raise(path, problems)
     frame["factor"] = factor
+    return frame.reset_index(drop=True)
+
+
+def _empty_campuses() -> pd.DataFrame:
+    """The frame ``load_campuses`` returns when there is no file: same columns, same dtypes."""
+    mw_columns = {f"{figure}_mw" for figure in CAMPUS_FIGURES}
+    return pd.DataFrame(
+        {
+            column: pd.Series(dtype="float64" if column in mw_columns else "str")
+            for column in CAMPUS_COLUMNS
+        }
+    )
+
+
+def load_campuses(directory: Path = STACK_DIR) -> pd.DataFrame:
+    """Announced AI data-centre campuses in file order; the two ``*_mw`` columns are float
+    (NaN when blank), everything else text with blanks kept as ``""``.
+
+    The file is optional: a missing ``campuses.csv`` gives an empty frame with the right
+    columns, because campuses are the demand side of one stage and the chain stands without
+    them. When the file exists every problem is reported at once, naming the row and the
+    campus: a blank or duplicate ``campus``, a ``state`` that is not two capital letters, a
+    ``*_mw`` that is not a number or is negative, a present figure without its ``source_url``
+    (``http...``) or its ``confidence`` (one of ``CONFIDENCES``), a ``source_url`` or
+    ``confidence`` that is malformed even beside a blank figure, an ``*_as_of`` that is not
+    ``YYYY-MM`` or ``YYYY-MM-DD``.
+    """
+    path = Path(directory) / "campuses.csv"
+    if not path.is_file():
+        return _empty_campuses()
+    frame = _read(path, CAMPUS_COLUMNS)
+    labels = _rows(frame, lambda row: row["campus"] or "?")
+    problems: list[str] = _check_blank(frame, "campus", labels)
+    duplicates = frame.loc[frame["campus"].duplicated() & (frame["campus"] != ""), "campus"]
+    if not duplicates.empty:
+        problems.append(f"duplicate campus names {sorted(set(duplicates))}")
+    problems += [
+        f"{label}: state {value!r} must be two capital letters"
+        for label, value in zip(labels, frame["state"], strict=True)
+        if not _STATE_RE.fullmatch(value)
+    ]
+
+    numbers: dict[str, pd.Series] = {}
+    for figure in CAMPUS_FIGURES:
+        mw, mw_problems = _check_numeric(frame, f"{figure}_mw", labels, required=False)
+        numbers[f"{figure}_mw"] = mw
+        problems += mw_problems
+        problems += [
+            f"{label}: {figure}_mw {number:g} is negative"
+            for label, number in zip(labels, mw, strict=True)
+            if not pd.isna(number) and number < 0
+        ]
+        rows = zip(
+            labels,
+            frame[f"{figure}_mw"],
+            frame[f"{figure}_source_url"],
+            frame[f"{figure}_confidence"],
+            frame[f"{figure}_as_of"],
+            strict=True,
+        )
+        for label, raw_mw, url, confidence, as_of in rows:
+            present = raw_mw != ""
+            if url and not url.startswith("http"):
+                problems.append(f"{label}: {figure}_source_url {url!r} does not start with http")
+            elif present and not url:
+                problems.append(f"{label}: {figure}_mw {raw_mw!r} has no {figure}_source_url")
+            if confidence and confidence not in CONFIDENCES:
+                problems.append(
+                    f"{label}: {figure}_confidence must be one of {CONFIDENCES}, not {confidence!r}"
+                )
+            elif present and not confidence:
+                problems.append(f"{label}: {figure}_mw {raw_mw!r} has no {figure}_confidence")
+            if as_of and not _AS_OF_RE.fullmatch(as_of):
+                problems.append(f"{label}: {figure}_as_of {as_of!r} is not YYYY-MM or YYYY-MM-DD")
+    _raise(path, problems)
+    for column, mw in numbers.items():
+        frame[column] = mw
     return frame.reset_index(drop=True)
 
 

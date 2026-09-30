@@ -8,7 +8,9 @@ that GitHub Pages can serve: an index with one comparison table of the companies
 table and the writeups list once either has entries); one page per company with a key-figures
 strip, server-rendered tables and Chart.js charts layered on top; one page per published
 writeup; the stack (``stack/*.csv``, loaded by ``data/stack.py``) as one table of the chain
-plus a page per stage with its primer, figures, conversions and players; and the signals ledger
+plus a page per stage with its primer, figures, conversions and players (on the data-centre
+stage the announced campuses, on the power stage the US supply tables from the EIA-860M
+summaries ``data/eia.py`` writes); and the signals ledger
 (``signals/ledger.csv``, loaded by ``data/signals.py``) as one table of every signal, with the
 rows for a stage or a company repeated on that page. There is no framework and no bundler:
 templates are ``string.Template`` files in ``site/templates/`` and the browser assets are copied
@@ -28,12 +30,13 @@ Design notes
   unchanged inputs produces byte-identical files.
 * The generated subtrees of the output dir are deleted before each build, so an output dir that
   overlaps the sources (``--out site``, ``--out .``) is refused rather than built.
-* This module is presentation only. Its one piece of arithmetic is display ratios of figures
-  refresh.py already published (change on a year earlier, capex / revenue); nothing here models
-  or forecasts.
+* This module is presentation only. Its arithmetic is display ratios of figures refresh.py
+  already published (change on a year earlier, capex / revenue) and sums of summary rows the
+  EIA pipeline already computed (megawatts by technology group); nothing here models or
+  forecasts.
 
 CLI: ``uv run scripts/build_site.py [--out DIR] [--site-dir DIR] [--calls FILE] [--stack DIR]
-[--signals DIR]``
+[--signals DIR] [--eia DIR]``
 """
 
 from __future__ import annotations
@@ -60,6 +63,7 @@ import markdown
 
 from data import (
     CALLS_MD,
+    EIA_PROCESSED_DIR,
     SIGNALS_DIR,
     SITE_BUILD_DIR,
     SITE_DIR,
@@ -67,8 +71,12 @@ from data import (
     SITE_TEMPLATES_DIR,
     STACK_DIR,
 )
+from data.eia import INDEX_URL as EIA_INDEX_URL
+from data.eia import group_technology, read_summaries
 from data.signals import CONFIDENCE, load_signals
 from data.stack import (
+    CAMPUS_FIGURES,
+    load_campuses,
     load_consumption_tiers,
     load_conversions,
     load_metrics,
@@ -949,6 +957,7 @@ class Stack:
     players: list[dict[str, Any]]
     conversions: list[dict[str, Any]]
     tiers: list[dict[str, Any]]
+    campuses: list[dict[str, Any]]
     primers: dict[str, str]  # stage key -> rendered HTML, for the stages that have one
 
     def name_of(self, key: str) -> str:
@@ -961,6 +970,7 @@ _STACK_TABLES: tuple[tuple[str, Callable[[Path], Any]], ...] = (
     ("players", load_players),
     ("conversions", load_conversions),
     ("tiers", load_consumption_tiers),
+    ("campuses", load_campuses),  # optional file: absent gives an empty table, no warning
 )
 
 
@@ -1034,7 +1044,9 @@ def _confidence_cell(confidence: Any) -> str:
     return f'<td class="confidence confidence-{_e(level)}">{_e(level)}</td>'
 
 
-def _table(table_class: str, head: list[tuple[str, bool]], rows: list[str]) -> str:
+def _table(
+    table_class: str, head: list[tuple[str, bool]], rows: list[str], *, caption: str = ""
+) -> str:
     """A ``.table-scroll`` table, or nothing without rows; ``head`` is (label, numeric)."""
     if not rows:
         return ""
@@ -1044,8 +1056,9 @@ def _table(table_class: str, head: list[tuple[str, bool]], rows: list[str]) -> s
         else f'<th scope="col">{_e(label)}</th>'
         for label, numeric in head
     )
+    caption_html = f"<caption>{_e(caption)}</caption>" if caption else ""
     return (
-        f'<div class="table-scroll"><table class="{_e(table_class)}">'
+        f'<div class="table-scroll"><table class="{_e(table_class)}">{caption_html}'
         f"<thead><tr>{header}</tr></thead><tbody>{''.join(rows)}</tbody></table></div>"
     )
 
@@ -1230,6 +1243,269 @@ def _players_table(players: list[dict[str, Any]], root: str, known: set[str]) ->
         for p in players
     ]
     return _table("players", _PLAYERS_HEAD, rows)
+
+
+# Announced campuses are the demand side of one stage, so they render on that stage's page only.
+CAMPUS_STAGE = "datacenter"
+
+_CAMPUSES_HEAD = [
+    ("Campus", False),
+    ("Sponsor", False),
+    ("State", False),
+    ("Planned (MW)", True),
+    ("Operating (MW)", True),
+    ("Power source", False),
+    ("Status", False),
+    ("Sources", False),
+]
+
+
+def _campus_sort_key(campus: dict[str, Any]) -> tuple[bool, float, str]:
+    """Largest planned MW first, campuses without a planned figure last, then by name."""
+    planned = _as_float(campus["planned_mw"])
+    return planned is None, -(planned or 0.0), str(campus["campus"])
+
+
+def _mw_cell(value: Any, confidence: Any) -> str:
+    """A campus figure: right-aligned, coloured by its own confidence; an en dash when blank."""
+    number = _as_float(value)
+    if number is None:
+        return f'<td class="num">{MISSING}</td>'
+    level = str(confidence or "").lower()
+    classes = f"num confidence confidence-{_e(level)}" if level else "num"
+    return f'<td class="{classes}">{_e(fmt_number(number))}</td>'
+
+
+def _campus_sources(campus: dict[str, Any]) -> str:
+    """Up to two links, ``planned`` and ``operating``, each titled with its source text."""
+    links = []
+    for figure in CAMPUS_FIGURES:
+        url = campus[f"{figure}_source_url"]
+        if not url:
+            continue
+        source = str(campus[f"{figure}_source"] or "").strip()
+        title = f' title="{_e(source)}"' if source else ""
+        links.append(f'<a href="{_e(url)}" rel="noopener"{title}>{figure}</a>')
+    return " · ".join(links) or MISSING
+
+
+def _campuses_table(campuses: list[dict[str, Any]]) -> str:
+    rows = [
+        "<tr>"
+        f'<th scope="row">{_e(c["campus"])}</th>'
+        f"<td>{_e(c['sponsor'])}</td>"
+        f'<td class="nowrap">{_e(c["state"])}</td>'
+        f"{_mw_cell(c['planned_mw'], c['planned_confidence'])}"
+        f"{_mw_cell(c['operating_mw'], c['operating_confidence'])}"
+        f'<td class="power-source">{_e(c["power_source"])}</td>'
+        f"<td>{_e(c['status'])}</td>"
+        f'<td class="sources">{_campus_sources(c)}</td>'
+        "</tr>"
+        for c in sorted(campuses, key=_campus_sort_key)
+    ]
+    return _table("campuses", _CAMPUSES_HEAD, rows)
+
+
+def campuses_meta(campuses: list[dict[str, Any]]) -> str:
+    """``5 campuses · 12,713 MW planned · 3,282 MW operating``: the figures present, summed."""
+    total = len(campuses)
+    sums = {
+        figure: sum(n for c in campuses if (n := _as_float(c[f"{figure}_mw"])) is not None)
+        for figure in CAMPUS_FIGURES
+    }
+    parts = [f"{total} campus{'' if total == 1 else 'es'}"]
+    parts += [f"{fmt_number(sums[figure])} MW {figure}" for figure in CAMPUS_FIGURES]
+    return " · ".join(parts)
+
+
+def _campuses_section(campuses: list[dict[str, Any]]) -> str:
+    """The campuses table with its totals line under it; nothing without campuses."""
+    table = _campuses_table(campuses)
+    if not table:
+        return ""
+    totals = f'<p class="muted campus-totals">{_e(campuses_meta(campuses))}</p>'
+    return _section("campuses", "Campuses", table + totals)
+
+
+# --------------------------------------------------------------------------------------------
+# US supply: the EIA-860M summaries on the power stage page. The pipeline (data/eia.py) tidied
+# the workbook and summed megawatts by year and technology; the site only regroups those rows
+# into the eight technology groups and formats them in gigawatts. No number here is computed
+# from anything but the summary CSVs, so a figure on the page can be traced to a row in
+# data/processed/eia860m/summaries/ and from there to the workbook EIA served.
+# --------------------------------------------------------------------------------------------
+
+# The supply side of one stage, so it renders on that stage's page only.
+US_SUPPLY_STAGE = "power"
+# The planned table runs from the file's period year to four years later: EIA's planned sheet
+# is dense over the next few years and sparse beyond them.
+PLANNED_YEARS = 5
+# Columns of the planned table. Coal and hydro additions are a rounding error in the US
+# pipeline, so they fold into Other; the fleet table keeps every group.
+PLANNED_GROUPS: tuple[str, ...] = ("Gas", "Solar", "Batteries", "Wind", "Nuclear")
+PLANNED_OTHER = "Other"
+MW_PER_GW = 1000.0
+
+
+@dataclass(frozen=True)
+class USSupply:
+    """The two EIA-860M summaries the power page shows, as plain rows.
+
+    ``planned`` rows are ``planned_by_year_and_fuel`` (``year``, ``technology``,
+    ``nameplate_mw``, ``under_construction_mw`` ...); ``capacity`` rows are ``capacity_by_fuel``
+    (``technology``, ``nameplate_mw``, ``net_summer_mw`` ...). ``period`` is the workbook's
+    month, ``"2026-08"``.
+    """
+
+    period: str
+    planned: list[dict[str, Any]]
+    capacity: list[dict[str, Any]]
+
+    @property
+    def first_year(self) -> int:
+        return int(self.period[:4])
+
+
+def load_us_supply(eia_dir: Path, warnings: list[str]) -> USSupply | None:
+    """Read the processed EIA folder; ``None`` when it or one of its files is missing.
+
+    A fresh clone has no processed EIA folder yet, and that is not a problem to report: the
+    section is left out like any other empty section. A malformed file is named in ``warnings``
+    and the section left out, on the stack's rule: the loader refuses the file so a bad row
+    cannot reach the page, and the builder never fails on an input.
+    """
+    try:
+        summaries = read_summaries(eia_dir)
+    except FileNotFoundError:
+        return None
+    except (ValueError, OSError) as exc:
+        warnings.append(f"{exc}; US supply left empty")
+        return None
+    return USSupply(
+        period=summaries.period,
+        planned=summaries.planned.to_dict("records"),
+        capacity=summaries.capacity.to_dict("records"),
+    )
+
+
+def fmt_gw(mw: float) -> str:
+    """Megawatts as gigawatts to one decimal: ``26616.1 -> '26.6'``, ``0 -> '0.0'``."""
+    return f"{mw / MW_PER_GW:,.1f}"
+
+
+def _fmt_percent(share: float | None) -> str:
+    """A fraction as a percentage to one decimal; the en dash when there is no denominator."""
+    return MISSING if share is None else f"{share * 100:.1f}"
+
+
+def planned_by_group(
+    rows: list[dict[str, Any]], first_year: int, years: int
+) -> list[dict[str, Any]]:
+    """One dict per year from ``first_year``: nameplate MW per planned-table column, the total
+    and the under-construction MW, summed from the summary rows of that year.
+
+    Every row's technology lands in one of ``PLANNED_GROUPS`` or in ``PLANNED_OTHER``, so the
+    group columns add up to ``total``. A row with a blank year belongs to no year. A year with
+    no rows is a row of zeros, since the pipeline reported nothing planned for it.
+    """
+    table = []
+    for year in range(first_year, first_year + years):
+        sums = dict.fromkeys((*PLANNED_GROUPS, PLANNED_OTHER), 0.0)
+        under_construction = 0.0
+        for row in rows:
+            if _as_float(row.get("year")) != year:
+                continue
+            group = group_technology(row.get("technology"))
+            column = group if group in PLANNED_GROUPS else PLANNED_OTHER
+            sums[column] += _as_float(row.get("nameplate_mw")) or 0.0
+            under_construction += _as_float(row.get("under_construction_mw")) or 0.0
+        total = sum(sums.values())
+        table.append(
+            {
+                "year": year,
+                **sums,
+                "total": total,
+                "under_construction": under_construction,
+                "under_construction_share": under_construction / total if total > 0 else None,
+            }
+        )
+    return table
+
+
+def fleet_by_group(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Nameplate and net summer MW per technology group and the group's share of total
+    nameplate, largest nameplate first (ties by group name); groups with no rows are left out."""
+    sums: dict[str, dict[str, float]] = {}
+    for row in rows:
+        group = sums.setdefault(group_technology(row.get("technology")), {"n": 0.0, "s": 0.0})
+        group["n"] += _as_float(row.get("nameplate_mw")) or 0.0
+        group["s"] += _as_float(row.get("net_summer_mw")) or 0.0
+    total = sum(g["n"] for g in sums.values())
+    table = [
+        {
+            "group": name,
+            "nameplate": g["n"],
+            "net_summer": g["s"],
+            "share": g["n"] / total if total > 0 else None,
+        }
+        for name, g in sums.items()
+    ]
+    return sorted(table, key=lambda t: (-t["nameplate"], t["group"]))
+
+
+_PLANNED_HEAD = [
+    ("Year", False),
+    *((group, True) for group in (*PLANNED_GROUPS, PLANNED_OTHER)),
+    ("Total", True),
+    ("Under construction (GW)", True),
+    ("Under construction (share of total, %)", True),
+]
+
+
+def _planned_table(supply: USSupply) -> str:
+    rows = []
+    for year in planned_by_group(supply.planned, supply.first_year, PLANNED_YEARS):
+        cells = "".join(
+            f'<td class="num">{_e(fmt_gw(year[column]))}</td>'
+            for column in (*PLANNED_GROUPS, PLANNED_OTHER, "total", "under_construction")
+        )
+        rows.append(
+            f'<tr><th scope="row">{_e(year["year"])}</th>{cells}'
+            f'<td class="num">{_e(_fmt_percent(year["under_construction_share"]))}</td></tr>'
+        )
+    return _table("planned", _PLANNED_HEAD, rows, caption="Planned additions, GW nameplate")
+
+
+_FLEET_HEAD = [
+    ("Technology group", False),
+    ("Nameplate", True),
+    ("Net summer", True),
+    ("Share of nameplate (%)", True),
+]
+
+
+def _fleet_table(supply: USSupply) -> str:
+    rows = [
+        f'<tr><th scope="row">{_e(group["group"])}</th>'
+        f'<td class="num">{_e(fmt_gw(group["nameplate"]))}</td>'
+        f'<td class="num">{_e(fmt_gw(group["net_summer"]))}</td>'
+        f'<td class="num">{_e(_fmt_percent(group["share"]))}</td></tr>'
+        for group in fleet_by_group(supply.capacity)
+    ]
+    return _table("fleet", _FLEET_HEAD, rows, caption="Operating fleet, GW")
+
+
+def _us_supply_section(supply: USSupply | None) -> str:
+    """Source line, planned additions, operating fleet; nothing without the summaries."""
+    if supply is None:
+        return ""
+    source = (
+        f'<p class="muted us-supply-source"><a href="{_e(EIA_INDEX_URL)}" rel="noopener">'
+        f"EIA-860M</a> · {_e(supply.period)} · preliminary</p>"
+    )
+    return _section(
+        "us-supply", "US supply", source + _planned_table(supply) + _fleet_table(supply)
+    )
 
 
 def _stage_nav(stack: Stack, index: int, root: str) -> str:
@@ -1654,15 +1930,16 @@ def build(
     static_dir: Path | None = None,
     stack_dir: Path = STACK_DIR,
     signals_dir: Path = SIGNALS_DIR,
+    eia_dir: Path = EIA_PROCESSED_DIR,
 ) -> BuildReport:
     """Render the whole site into ``out_dir`` and return what was built.
 
     ``site_dir`` holds ``data/`` and ``content/``; templates and static assets come from it too
     when present, otherwise from the repo's ``site/templates`` and ``site/static``. ``stack_dir``
-    holds the chain's CSVs and primers, ``signals_dir`` the ledger. Missing inputs produce an
-    empty-state site plus warnings, never an exception. The one refusal is an ``out_dir`` that
-    overlaps the sources (``ValueError`` from ``_check_out_dir``), raised before anything is
-    deleted or written.
+    holds the chain's CSVs and primers, ``signals_dir`` the ledger, ``eia_dir`` the processed
+    EIA-860M summaries the power page shows. Missing inputs produce an empty-state site plus
+    warnings, never an exception. The one refusal is an ``out_dir`` that overlaps the sources
+    (``ValueError`` from ``_check_out_dir``), raised before anything is deleted or written.
     """
     templates_src = templates_dir or _pick_dir(site_dir / "templates", SITE_TEMPLATES_DIR)
     static_src = static_dir or _pick_dir(site_dir / "static", SITE_STATIC_DIR)
@@ -1672,7 +1949,7 @@ def build(
     _check_out_dir(
         out_dir,
         [root / sub for root in (site_dir, SITE_DIR) for sub in SOURCE_SUBDIRS]
-        + [templates_src, static_src, stack_dir, signals_dir],
+        + [templates_src, static_src, stack_dir, signals_dir, eia_dir],
     )
     templates = _load_templates(templates_src)
     data_dir = site_dir / "data"
@@ -1708,6 +1985,7 @@ def build(
     stack = load_stack(stack_dir, warnings)
     # The ledger's stage column is checked against this build's stack, not the repo's.
     signals = load_ledger(signals_dir, stack_dir, warnings)
+    us_supply = load_us_supply(eia_dir, warnings)
 
     if calls_md.exists():
         calls = parse_calls(calls_md.read_text(encoding="utf-8"))
@@ -1856,6 +2134,8 @@ def build(
                     "primer", "Primer", f'<div class="prose">{primer}</div>' if primer else ""
                 ),
                 figures_section=_section("figures", "Figures", _figures_table(metrics)),
+                us_supply_section=(_us_supply_section(us_supply) if key == US_SUPPLY_STAGE else ""),
+                campuses_section=(_campuses_section(stack.campuses) if key == CAMPUS_STAGE else ""),
                 conversions_section=_section(
                     "conversions", "Conversions", _conversions_table(stack, conversions, "../")
                 ),
@@ -1923,6 +2203,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--signals", type=Path, default=SIGNALS_DIR, help="dir with the ledger.csv of signals"
     )
+    parser.add_argument(
+        "--eia",
+        type=Path,
+        default=EIA_PROCESSED_DIR,
+        metavar="DIR",
+        help="processed EIA-860M dir (source.json and summaries/) for the power page",
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
@@ -1933,6 +2220,7 @@ def main(argv: list[str] | None = None) -> int:
             calls_md=args.calls,
             stack_dir=args.stack,
             signals_dir=args.signals,
+            eia_dir=args.eia,
         )
     except ValueError as exc:  # an --out that overlaps the sources; nothing was touched
         parser.error(str(exc))

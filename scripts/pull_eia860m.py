@@ -11,20 +11,26 @@ The US generator inventory for the power stage, in one command::
 
 It (1) reads the EIA-860M index page for the newest ``<month>_generator<year>.xlsx``, (2) stores
 the workbook under ``data/raw/EIA860M/<UTC date>/`` with a manifest (sha256 per file), (3) tidies
-every sheet with ``data.eia.tidy_all`` and writes one CSV per sheet into
+every sheet with ``data.eia.process_workbook`` and writes one CSV per sheet into
 ``data/processed/eia860m/`` (``operating.csv``, ``planned.csv``, ``retired.csv`` and one per
 extra sheet, such as ``canceled_or_postponed.csv``), (4) writes the four summaries into
-``summaries/`` and (5) records where it all came from in ``source.json`` (URL, file name, sha256,
-period, pull time, rows per sheet). CSVs no longer produced by the current workbook are removed,
-because the processed folder is rebuilt by code and must not keep stale tables.
+``summaries/`` and (5) records where it all came from in ``source.json`` (URL and fetch time from
+the raw manifest, file name, sha256, period, rows per sheet, the files written, sheets skipped).
+CSVs that an earlier run listed in ``source.json`` and this run did not write are removed, because
+the processed folder is rebuilt by code and must not keep stale tables; nothing else in the folder
+is touched.
 
 Design notes
 ------------
-* Orchestration only. Header detection, validation and the summaries live in ``data/eia.py``;
-  this script moves files and prints a short report.
+* Orchestration only. Header detection, validation, the summaries, the period check and the
+  writing of the processed folder live in ``data/eia.py`` (``process_workbook``), shared with
+  the daily refresh; this script moves files and prints a short report.
 * Byte-stable output: UTF-8, LF line endings, ``index=False``, rows sorted by the tidy functions,
-  so a Windows laptop and the Linux runner commit the same CSVs. ``source.json`` carries the pull
-  time and therefore differs between runs; the CSVs do not unless the workbook changed.
+  so a Windows laptop and the Linux runner commit the same CSVs. ``source.json`` carries no run
+  time: its provenance comes from the raw folder's manifest, so the same workbook gives the same
+  folder, run after run, and the daily refresh commits only when EIA published something new.
+* Everything is computed before anything is written, and ``source.json`` last, so a failure
+  part-way leaves the previous ``source.json`` describing what is on disk.
 * Exit code 0 on success, 1 when the pull or the tidy failed (the error is printed), 2 for bad
   arguments.
 """
@@ -32,109 +38,46 @@ Design notes
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import sys
-from collections.abc import Callable, Mapping
+from collections.abc import Mapping
 from pathlib import Path
 
 import pandas as pd
 
 from data import EIA_PROCESSED_DIR, EIA_RAW_DIR
-from data.edgar import sha256_file, utc_now_iso
-from data.eia import (
-    CORE_SHEETS,
-    SOURCE,
-    EIA860MClient,
-    capacity_by_fuel,
-    period_from_name,
-    planned_by_year_and_fuel,
-    retired_by_year_and_fuel,
-    state_summary,
-    tidy_all,
-)
+from data.eia import EIA860MClient, planned_in_window, planned_outputs, process_workbook
 
 log = logging.getLogger(__name__)
 
-SUMMARIES_DIR = "summaries"
-SOURCE_JSON = "source.json"
-# summary file name -> how it is computed from the tidied sheets
-SUMMARIES: dict[str, Callable[[Mapping[str, pd.DataFrame]], pd.DataFrame]] = {
-    "capacity_by_fuel": lambda frames: capacity_by_fuel(frames["operating"]),
-    "planned_by_year_and_fuel": lambda frames: planned_by_year_and_fuel(frames["planned"]),
-    "retired_by_year_and_fuel": lambda frames: retired_by_year_and_fuel(frames["retired"]),
-    "state_summary": lambda frames: state_summary(frames["operating"], frames["planned"]),
-}
 TOP_N = 3  # technologies listed in the console report
 PLANNED_WINDOW_YEARS = 3  # the report's planned window: the file's year and the two after it
 
 
-def _write_csv(table: pd.DataFrame, path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    table.to_csv(path, index=False, encoding="utf-8", lineterminator="\n")
-
-
-def _write_json(path: Path, payload: object) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-
-
-def planned_outputs(out_dir: Path, sheet_keys: list[str] | None = None) -> list[Path]:
-    """The files a run writes into ``out_dir``; the core sheets only when the keys are unknown."""
-    keys = list(sheet_keys) if sheet_keys is not None else list(CORE_SHEETS)
-    paths = [out_dir / f"{key}.csv" for key in keys]
-    paths += [out_dir / SUMMARIES_DIR / f"{name}.csv" for name in SUMMARIES]
-    return paths + [out_dir / SOURCE_JSON]
-
-
-def write_processed(
-    frames: Mapping[str, pd.DataFrame], out_dir: Path, source: dict[str, object]
-) -> list[Path]:
-    """Write one CSV per sheet, the summaries and ``source.json``; drop CSVs not written now."""
-    written: list[Path] = []
-    for key, frame in sorted(frames.items()):
-        path = out_dir / f"{key}.csv"
-        _write_csv(frame, path)
-        written.append(path)
-    for name, compute in SUMMARIES.items():
-        path = out_dir / SUMMARIES_DIR / f"{name}.csv"
-        _write_csv(compute(frames), path)
-        written.append(path)
-    source_path = out_dir / SOURCE_JSON
-    _write_json(
-        source_path, {**source, "rows": {k: int(len(v)) for k, v in sorted(frames.items())}}
-    )
-    written.append(source_path)
-
-    keep = {p.resolve() for p in written}
-    for folder in (out_dir, out_dir / SUMMARIES_DIR):
-        for stale in folder.glob("*.csv") if folder.is_dir() else ():
-            if stale.resolve() not in keep:
-                stale.unlink()
-                log.info("removed stale %s", stale)
-    return written
-
-
-def report(frames: Mapping[str, pd.DataFrame], period: str | None) -> str:
+def report(
+    frames: Mapping[str, pd.DataFrame], summaries: Mapping[str, pd.DataFrame], period: str | None
+) -> str:
     """A few lines for the console: period, rows per sheet, the leading technologies."""
     lines = [
         f"EIA-860M {period or 'unknown period'}: "
         + ", ".join(f"{key} {len(frame)} rows" for key, frame in sorted(frames.items()))
     ]
-    capacity = capacity_by_fuel(frames["operating"]).head(TOP_N)
+    capacity = summaries["capacity_by_fuel"].head(TOP_N)
     lines.append(
         "  operating nameplate MW by technology: "
         + "; ".join(f"{r.technology} {r.nameplate_mw:,.0f}" for r in capacity.itertuples())
     )
-    planned = planned_by_year_and_fuel(frames["planned"])
     if period is not None:
         first = int(period[:4])
         last = first + PLANNED_WINDOW_YEARS - 1
-        window = planned[planned["year"].between(first, last)]
-        by_fuel = window.groupby("technology")["nameplate_mw"].sum().sort_values(ascending=False)
+        window = planned_in_window(
+            summaries["planned_by_year_and_fuel"], first, PLANNED_WINDOW_YEARS
+        )
         lines.append(
             f"  planned {first}-{last} nameplate MW by technology: "
-            + "; ".join(f"{tech} {mw:,.0f}" for tech, mw in by_fuel.head(TOP_N).items())
+            + "; ".join(
+                f"{r.technology} {r.nameplate_mw:,.0f}" for r in window.head(TOP_N).itertuples()
+            )
         )
     return "\n".join(lines)
 
@@ -173,20 +116,9 @@ def run(
             print(f"error: {workbook} is not a file", file=sys.stderr)
             return 1
 
-    frames = tidy_all(workbook)
-    period = period_from_name(workbook.name)
-    source = {
-        "source": SOURCE,
-        "url": url,
-        "file": workbook.name,
-        "period": period,
-        "sha256": sha256_file(workbook),
-        "bytes": workbook.stat().st_size,
-        "pulled_at": utc_now_iso(),
-    }
-    written = write_processed(frames, out_dir, source)
-    print(report(frames, period))
-    print(f"wrote {len(written)} files under {out_dir}")
+    processed = process_workbook(workbook, out_dir)
+    print(report(processed.tidied.frames, processed.summaries, processed.period))
+    print(f"wrote {len(processed.written)} files under {out_dir}")
     return 0
 
 

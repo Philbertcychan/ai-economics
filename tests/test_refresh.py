@@ -1,10 +1,11 @@
 """Tests for scripts/refresh.py: the daily refresh pipeline, fully offline.
 
-A fake EDGAR client serves small hand-made responses from memory and fake model classes return
-constant frames (placeholder numbers with no financial meaning). Every run writes into
-``tmp_path``: nothing here touches the network or the repository's own data/, models/ or
-site/data directories. The one integration test that builds the site reads the real templates
-from ``site/templates`` and writes into a temporary output directory.
+A fake EDGAR client serves small hand-made responses from memory, a fake EIA client serves the
+fixture workbook of ``tests/test_eia.py``, and fake model classes return constant frames
+(placeholder numbers with no financial meaning). Every run writes into ``tmp_path``: nothing
+here touches the network or the repository's own data/, models/ or site/data directories. The
+one integration test that builds the site reads the real templates from ``site/templates`` and
+writes into a temporary output directory.
 """
 
 from __future__ import annotations
@@ -17,21 +18,27 @@ from typing import Any
 
 import pandas as pd
 import pytest
+from test_eia import AUGUST_URL, write_workbook
 
 from companies.base import FILINGS_CSV_COLUMNS, BaseCompanyModel
-from data import REPO_ROOT, SITE_DATA_DIR
+from data import REPO_ROOT, SIGNALS_DIR, SITE_DATA_DIR, STACK_DIR
 from data.edgar import FACT_COLUMNS, CompanyInfo, Filing, facts_to_frame
+from data.eia import EIAError, process_workbook, read_source, workbook_name
 from scripts import refresh
 from scripts.build_site import BuildReport
 from scripts.export_xlsx import export_workbook
 from scripts.refresh import (
+    EIA_STATUSES,
     FILINGS_COLUMNS,
     CompanyResult,
+    EIAResult,
     RefreshConfig,
     RefreshPaths,
     RefreshResult,
     changed_line_items,
+    eia_line,
     read_filings_csv,
+    refresh_eia,
     render_diff,
     reported_payload,
     run,
@@ -241,6 +248,57 @@ class ExplodingClient:
         raise AssertionError(f"dry run must not call client.{name}")
 
 
+# The month the fake EIA index page offers, and the file that month is stored as.
+EIA_FILE = workbook_name(AUGUST_URL)  # august_generator2026.xlsx
+EIA_AS_OF = "August 2026"
+EIA_PERIOD = "2026-08"
+MARCH_URL = AUGUST_URL.replace("august", "march")
+
+
+class FakeEIAClient:
+    """Duck-typed stand-in for ``data.eia.EIA860MClient``: one workbook on the index, written
+    from the ``test_eia`` fixture rows when downloaded.
+
+    ``fail`` maps a method name to an exception to raise, so a test can break one step.
+    """
+
+    def __init__(
+        self,
+        raw_dir: Path,
+        *,
+        url: str = AUGUST_URL,
+        as_of: str = EIA_AS_OF,
+        fail: dict[str, Exception] | None = None,
+    ) -> None:
+        self.raw_dir = raw_dir
+        self.url = url
+        self.as_of = as_of
+        self.fail = fail or {}
+        self.calls: Counter[str] = Counter()
+
+    def _record(self, method: str) -> None:
+        self.calls[method] += 1
+        exc = self.fail.get(method)
+        if exc is not None:
+            raise exc
+
+    def latest_file_url(self) -> str:
+        self._record("latest_file_url")
+        return self.url
+
+    def download(self, url: str) -> Path:
+        self._record("download")
+        dated = self.raw_dir / FIXED_NOW.date().isoformat()
+        return write_workbook(dated / workbook_name(url), as_of=self.as_of)
+
+    def write_manifest(self) -> Path:
+        self._record("write_manifest")
+        path = self.raw_dir / FIXED_NOW.date().isoformat() / "manifest.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}", encoding="utf-8")
+        return path
+
+
 # --------------------------------------------------------------------------------------------
 # Fake models: constant frames, no logic
 # --------------------------------------------------------------------------------------------
@@ -344,6 +402,10 @@ def make_paths(tmp_path: Path) -> RefreshPaths:
         site_build_dir=site / "build",
         diff_path=tmp_path / "last_refresh_diff.md",
         calls_md=tmp_path / "calls.md",
+        eia_dir=tmp_path / "processed" / "eia860m",
+        eia_raw_dir=tmp_path / "eia-raw",
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
     )
 
 
@@ -352,20 +414,34 @@ def do_run(
     *,
     config: RefreshConfig | None = None,
     client: Any = None,
+    eia_client: Any = None,
     registry: dict[str, type] | None = None,
 ) -> tuple[RefreshResult, RefreshPaths, Any]:
-    """Run the pipeline into ``tmp_path`` with the fakes; site build off unless asked."""
+    """Run the pipeline into ``tmp_path`` with the fakes; site build off unless asked.
+
+    A fake EIA client is always injected: a run without one would build a real client and
+    read EIA's index page.
+    """
     paths = make_paths(tmp_path)
     client = client or FakeEdgarClient(tmp_path / "raw")
     result = run(
         config or RefreshConfig(build_site=False),
         client=client,
+        eia_client=eia_client or FakeEIAClient(paths.eia_raw_dir),
         registry=REGISTRY if registry is None else registry,
         companies=COMPANIES,
         paths=paths,
         now=fixed_now,
     )
     return result, paths, client
+
+
+def seed_eia(paths: RefreshPaths, url: str = AUGUST_URL, as_of: str = EIA_AS_OF) -> Path:
+    """Process the fixture workbook of ``url``'s month into ``paths.eia_dir``, the way an
+    earlier run or the ``pull_eia860m`` command would have; returns the workbook."""
+    workbook = write_workbook(paths.eia_raw_dir / "seed" / workbook_name(url), as_of=as_of)
+    process_workbook(workbook, paths.eia_dir)
+    return workbook
 
 
 def by_ticker(result: RefreshResult) -> dict[str, CompanyResult]:
@@ -576,6 +652,9 @@ def test_diff_file_contents(tmp_path: Path) -> None:
     assert "- Downloaded: 2 documents" in text
     assert text.rstrip().endswith("## Errors\n\nNone.")
     assert result.site is None and "## Site" not in text
+    # One line for the EIA step, between the summary and the first company.
+    assert text.index("EIA-860M: updated · 2026-08.") < text.index("## AAA")
+    assert text.count("EIA-860M") == 1
 
 
 # --------------------------------------------------------------------------------------------
@@ -765,6 +844,161 @@ def test_site_build_failure_is_recorded_and_diff_still_written(
 
 
 # --------------------------------------------------------------------------------------------
+# EIA-860M (step 7): unchanged, updated, error, skipped
+# --------------------------------------------------------------------------------------------
+
+
+def test_eia_unchanged_when_the_newest_workbook_is_already_processed(tmp_path: Path) -> None:
+    paths = make_paths(tmp_path)
+    seed_eia(paths)
+    before = snapshot(paths.eia_dir)
+    eia_client = FakeEIAClient(paths.eia_raw_dir)
+    result, _, _ = do_run(tmp_path, eia_client=eia_client)
+
+    assert result.errors == []
+    assert result.eia == EIAResult(
+        status="unchanged", period=EIA_PERIOD, file=EIA_FILE, url=AUGUST_URL, error=None
+    )
+    # The index page was read; the workbook was not fetched and nothing was rewritten.
+    assert eia_client.calls == Counter({"latest_file_url": 1})
+    assert snapshot(paths.eia_dir) == before
+    assert not paths.eia_raw_dir.joinpath(FIXED_NOW.date().isoformat()).exists()
+    text = paths.diff_path.read_text(encoding="utf-8")
+    assert f"\n\n{eia_line(result.eia)}.\n\n## AAA" in text
+    assert eia_line(result.eia) == "EIA-860M: unchanged · 2026-08"
+    assert text.rstrip().endswith("## Errors\n\nNone.")
+
+
+def test_eia_updated_when_the_index_offers_a_newer_workbook(tmp_path: Path) -> None:
+    paths = make_paths(tmp_path)
+    # Yesterday's tables are March's; the index now links August.
+    seed_eia(paths, MARCH_URL, "March 2026")
+    assert read_source(paths.eia_dir)["period"] == "2026-03"
+    eia_client = FakeEIAClient(paths.eia_raw_dir)
+    result, _, _ = do_run(tmp_path, eia_client=eia_client)
+
+    assert result.errors == []
+    assert result.eia == EIAResult(
+        status="updated", period=EIA_PERIOD, file=EIA_FILE, url=AUGUST_URL, error=None
+    )
+    assert eia_client.calls == Counter({"latest_file_url": 1, "download": 1, "write_manifest": 1})
+    # The processed folder is August's now, written by the same function the CLI uses.
+    source = read_source(paths.eia_dir)
+    assert source["file"] == EIA_FILE and source["period"] == EIA_PERIOD
+    for relative in source["files"]:
+        assert (paths.eia_dir / relative).is_file(), relative
+    assert "summaries/planned_by_year_and_fuel.csv" in source["files"]
+    operating = pd.read_csv(paths.eia_dir / "operating.csv", keep_default_na=False)
+    assert len(operating) == 7 and "Alpha Gas" in set(operating["plant_name"])
+    # The raw copy landed in the fake's dated folder, beside its manifest.
+    dated = paths.eia_raw_dir / FIXED_NOW.date().isoformat()
+    assert (dated / EIA_FILE).is_file() and (dated / "manifest.json").is_file()
+    assert "EIA-860M: updated · 2026-08." in paths.diff_path.read_text(encoding="utf-8")
+
+    # The next run finds August already processed and downloads nothing.
+    again = FakeEIAClient(paths.eia_raw_dir)
+    before = snapshot(paths.eia_dir)
+    result, _, _ = do_run(tmp_path, eia_client=again)
+    assert result.eia.status == "unchanged" and result.eia.period == EIA_PERIOD
+    assert again.calls == Counter({"latest_file_url": 1})
+    assert snapshot(paths.eia_dir) == before
+
+
+def test_eia_first_run_into_an_empty_folder_is_an_update(tmp_path: Path) -> None:
+    result, paths, _ = do_run(tmp_path)
+    assert result.eia.status == "updated" and result.eia.period == EIA_PERIOD
+    assert read_source(paths.eia_dir)["file"] == EIA_FILE
+    # A half-emptied folder is rebuilt rather than trusted: source.json still names August.
+    (paths.eia_dir / "summaries" / "state_summary.csv").unlink()
+    eia_client = FakeEIAClient(paths.eia_raw_dir)
+    result, _, _ = do_run(tmp_path, eia_client=eia_client)
+    assert result.eia.status == "updated" and eia_client.calls["download"] == 1
+    assert (paths.eia_dir / "summaries" / "state_summary.csv").is_file()
+
+
+@pytest.mark.parametrize(
+    ("fail", "message"),
+    [
+        (
+            {"latest_file_url": EIAError("HTTP 503 for the index page", status=503)},
+            "index: EIAError: HTTP 503 for the index page",
+        ),
+        (
+            {"download": EIAError("HTTP 500 for the workbook", status=500)},
+            f"update {EIA_FILE}: EIAError: HTTP 500 for the workbook",
+        ),
+        ({"write_manifest": OSError("disk full")}, f"update {EIA_FILE}: OSError: disk full"),
+    ],
+)
+def test_eia_failure_is_recorded_and_stops_nothing_else(
+    tmp_path: Path, fail: dict[str, Exception], message: str
+) -> None:
+    paths = make_paths(tmp_path)
+    seed_eia(paths, MARCH_URL, "March 2026")  # yesterday's tables, kept when today fails
+    before = snapshot(paths.eia_dir)
+    eia_client = FakeEIAClient(paths.eia_raw_dir, fail=fail)
+    result, _, _ = do_run(tmp_path, config=RefreshConfig(build_site=True), eia_client=eia_client)
+
+    assert result.eia.status == "error" and result.eia.error == message
+    assert result.eia.period == "2026-03", "the month of the tables still on disk"
+    assert result.errors == [f"EIA-860M: {message}"]
+    assert all(company.error is None for company in result.companies)
+    assert by_ticker(result)["AAA"].model_status == "changed"
+    assert isinstance(result.site, BuildReport) and result.site.companies == 3, "site still built"
+    assert snapshot(paths.eia_dir) == before, "yesterday's tables are untouched"
+
+    text = paths.diff_path.read_text(encoding="utf-8")
+    assert "\n\nEIA-860M: error · 2026-03.\n" in text
+    assert text.rstrip().endswith(f"## Errors\n\n- EIA-860M: {message}")
+    assert "1 error." in text
+
+
+def test_eia_workbook_that_fails_validation_is_an_error_and_keeps_the_old_tables(
+    tmp_path: Path,
+) -> None:
+    paths = make_paths(tmp_path)
+    seed_eia(paths, MARCH_URL, "March 2026")
+    before = snapshot(paths.eia_dir)
+    # The fake writes August's file with March in its titles: tidy_workbook refuses it.
+    eia_client = FakeEIAClient(paths.eia_raw_dir, as_of="March 2026")
+    result, _, _ = do_run(tmp_path, eia_client=eia_client)
+    assert result.eia.status == "error" and result.eia.period == "2026-03"
+    assert result.eia.error.startswith(f"update {EIA_FILE}: ValueError: ")
+    assert "file name says 2026-08 but the sheet titles say 2026-03" in result.eia.error
+    assert result.errors == [f"EIA-860M: {result.eia.error}"]
+    assert snapshot(paths.eia_dir) == before
+    # No tables at all yet: the line says so instead of inventing a period.
+    empty = make_paths(tmp_path / "fresh")
+    outcome = refresh_eia(FakeEIAClient(empty.eia_raw_dir, as_of="March 2026"), empty)
+    assert outcome.status == "error" and outcome.period is None
+    assert eia_line(outcome) == "EIA-860M: error · no tables"
+    assert not empty.eia_dir.exists()
+
+
+def test_eia_skipped_calls_no_client_and_says_so(tmp_path: Path) -> None:
+    paths = make_paths(tmp_path)
+    seed_eia(paths)
+    before = snapshot(paths.eia_dir)
+    config = RefreshConfig(build_site=False, eia=False)
+    result, _, _ = do_run(tmp_path, config=config, eia_client=ExplodingClient())
+    assert result.errors == []
+    assert result.eia == EIAResult(status="skipped", period=EIA_PERIOD)
+    assert snapshot(paths.eia_dir) == before
+    assert "\n\nEIA-860M: skipped · 2026-08.\n" in paths.diff_path.read_text(encoding="utf-8")
+    # Skipped on a fresh clone: no period to report.
+    fresh, _, _ = do_run(tmp_path / "fresh", config=config, eia_client=ExplodingClient())
+    assert fresh.eia == EIAResult(status="skipped", period=None)
+    assert eia_line(fresh.eia) == "EIA-860M: skipped · no tables"
+
+
+def test_eia_statuses_and_the_line_for_a_run_without_the_step() -> None:
+    assert EIA_STATUSES == ("unchanged", "updated", "error", "skipped")
+    assert eia_line(None) == ""
+    result = RefreshResult(FIXED_NOW_ISO, FIXED_NOW_ISO, companies=[], site=None, errors=[])
+    assert result.eia is None and "EIA-860M" not in render_diff(result)
+
+
+# --------------------------------------------------------------------------------------------
 # Dry run, selection, site integration
 # --------------------------------------------------------------------------------------------
 
@@ -777,12 +1011,14 @@ def test_dry_run_prints_plan_and_touches_nothing(
     result = run(
         config,
         client=ExplodingClient(),
+        eia_client=ExplodingClient(),
         registry=REGISTRY,
         companies=COMPANIES,
         paths=paths,
         now=fixed_now,
     )
     assert result.companies == [] and result.errors == [] and result.site is None
+    assert result.eia is None
     assert result.started_at == result.finished_at == FIXED_NOW_ISO
     assert snapshot(tmp_path) == {}, "a dry run writes nothing"
 
@@ -791,8 +1027,10 @@ def test_dry_run_prints_plan_and_touches_nothing(
     assert "AAA (model), CCC (data only)" in out
     assert "2025-06-01" in out
     assert "download documents: no" in out and "build site:         yes" in out
+    assert "EIA-860M:           yes" in out
     for path in (paths.processed_dir, paths.models_dir, paths.site_data_dir, paths.diff_path):
         assert str(path) in out
+    assert str(paths.eia_dir) in out
 
 
 def test_tickers_filter_and_unknown_ticker(tmp_path: Path) -> None:
@@ -980,12 +1218,25 @@ def test_main_flags_and_exit_codes(monkeypatch: pytest.MonkeyPatch) -> None:
     assert seen["config"] == RefreshConfig(
         tickers=("CRWV", "NBIS"), since="2025-06-01", download=False, build_site=False
     )
+    assert seen["config"].eia is True, "the EIA step is on unless --skip-eia says otherwise"
     assert refresh.main([]) == 0
     assert seen["config"] == RefreshConfig()
+    assert refresh.main(["--skip-eia"]) == 0
+    assert seen["config"] == RefreshConfig(eia=False)
 
     failed = RefreshResult(FIXED_NOW_ISO, FIXED_NOW_ISO, [], None, errors=["NBIS: facts: boom"])
     monkeypatch.setattr(refresh, "run", lambda config, **_: failed)
     assert refresh.main(["-v"]) == 1
+
+
+def test_main_prints_the_eia_line(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    eia = EIAResult(status="unchanged", period=EIA_PERIOD)
+    done = RefreshResult(FIXED_NOW_ISO, FIXED_NOW_ISO, [], None, errors=[], eia=eia)
+    monkeypatch.setattr(refresh, "run", lambda config, **_: done)
+    assert refresh.main([]) == 0
+    assert "0 errors; EIA-860M: unchanged · 2026-08; see" in capsys.readouterr().out
 
 
 def test_main_dry_run_uses_no_client(
@@ -993,6 +1244,7 @@ def test_main_dry_run_uses_no_client(
 ) -> None:
     monkeypatch.setattr(refresh, "_load_registry", lambda: REGISTRY)
     monkeypatch.setattr(refresh, "EdgarClient", ExplodingClient)
+    monkeypatch.setattr(refresh, "EIA860MClient", ExplodingClient)
     assert refresh.main(["--dry-run", "--tickers", "CRWV"]) == 0
     assert "Dry run" in capsys.readouterr().out
 
@@ -1104,6 +1356,20 @@ def test_refresh_workflow_structure() -> None:
             if action in line:
                 version = line.split("@", 1)[1].strip()
                 assert version.startswith("v") and version[1:].isdigit(), f"pin a major: {line}"
+
+
+def test_refresh_workflow_commits_the_eia_step_without_changes_of_its_own() -> None:
+    """The EIA step writes inside the folders the workflow already commits: its tables under
+    data/processed (which also triggers the commit) and its raw manifest under data/raw."""
+    from data import EIA_PROCESSED_DIR, EIA_RAW_DIR
+
+    assert EIA_PROCESSED_DIR.relative_to(REPO_ROOT).as_posix().startswith("data/processed/")
+    assert EIA_RAW_DIR.relative_to(REPO_ROOT).as_posix().startswith("data/raw/")
+    assert RefreshPaths().eia_dir == EIA_PROCESSED_DIR
+    assert RefreshPaths().eia_raw_dir == EIA_RAW_DIR
+    assert RefreshPaths().stack_dir == STACK_DIR and RefreshPaths().signals_dir == SIGNALS_DIR
+    text = _workflow_text("refresh.yml")
+    assert "eia" not in text.lower(), "no EIA-specific step or path is needed in the workflow"
 
 
 def test_partial_run_keeps_the_other_companies_in_the_index(tmp_path: Path) -> None:

@@ -2,24 +2,28 @@
 
 ``write_stack`` writes a small fixture stack into ``tmp_path`` (nine stages with the real chain's
 keys but toy text and round toy values, a few metrics, players and conversions, two consumption
-tiers, one primer). ``tests/test_build_site.py`` imports it to build the stack pages, so the
-fixture is defined once. No real figure about a real company appears here.
+tiers, four campuses, one primer). ``tests/test_build_site.py`` imports it to build the stack
+pages, so the fixture is defined once. No real figure about a real company appears here.
 """
 
 from __future__ import annotations
 
+import csv
 import math
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from data import STACK_DIR
 from data.stack import (
+    CAMPUS_COLUMNS,
     CONSUMPTION_TIER_COLUMNS,
     CONVERSION_COLUMNS,
     METRIC_COLUMNS,
     PLAYER_COLUMNS,
     STAGE_COLUMNS,
+    load_campuses,
     load_consumption_tiers,
     load_conversions,
     load_metrics,
@@ -91,6 +95,18 @@ heavy,Example heavy tier,"agents, long runs",>1000000,usage,Toy
 light,Example light tier,chat,5000-50000,subscription,
 """
 
+# Four toy campuses out of size order: B has both figures (planned high, operating medium, a
+# source text with a tag to escape); A has a planned figure only (low) and a sponsor to escape
+# nowhere but here; C has an operating figure only, so its planned cell is blank and sorts last;
+# D has a fractional operating figure. Sponsors, builders and places are invented.
+CAMPUSES_CSV = """\
+campus,sponsor,developer,state,planned_mw,planned_basis,planned_as_of,planned_source_url,planned_source,planned_confidence,operating_mw,operating_as_of,operating_source_url,operating_source,operating_confidence,power_source,status,note
+Example Campus B,Beta Compute; Zed Labs,Example Builder,TX,1200,total power capacity,2026-03-18,https://example.com/campus-b,Example release (2026-03),high,400,2026-09,https://example.com/campus-b-ops,"Example directory, estimate <b>",medium,gas turbines on site,operating; expanding,Toy note & <caveat>
+Example Campus A,Alpha Cloud,,LA,5000,IT load at full build,2026-07,https://example.com/campus-a,Example agency (2026-07),low,,,,,,new gas plants,under construction,No phase operating
+Example Campus C,Gamma <Chips> & Co,,GA,,,,,,,600,2026-09-24,https://example.com/campus-c,Example directory,medium,,operating,No planned total published
+Example Campus D,Delta,,WI,2263,IT load projected (estimate),2026-09-24,https://example.com/campus-d,Example directory,medium,0.5,2026-09-24,https://example.com/campus-d,Example directory,high,,operating; expanding,
+"""  # noqa: E501
+
 PRIMER_MD = """\
 ## Why power comes first
 
@@ -107,6 +123,7 @@ STACK_FILES = {
     "players": PLAYERS_CSV,
     "conversions": CONVERSIONS_CSV,
     "consumption_tiers": TIERS_CSV,
+    "campuses": CAMPUSES_CSV,
 }
 
 
@@ -179,6 +196,48 @@ def test_metrics_players_conversions_and_tiers_load(tmp_path: Path) -> None:
     assert tiers["tokens_per_user_day"].tolist() == [">1000000", "5000-50000"]  # text, as written
 
 
+def test_campuses_load_in_file_order_with_typed_figures(tmp_path: Path) -> None:
+    campuses = load_campuses(write_stack(tmp_path))
+    assert tuple(campuses.columns) == CAMPUS_COLUMNS
+    assert campuses["campus"].tolist() == [f"Example Campus {c}" for c in "BACD"]  # file order
+    assert campuses.index.tolist() == [0, 1, 2, 3]
+    assert str(campuses["planned_mw"].dtype) == "float64"
+    assert str(campuses["operating_mw"].dtype) == "float64"
+    assert campuses["planned_mw"].tolist()[:2] == [1200.0, 5000.0]
+    assert math.isnan(campuses["planned_mw"].tolist()[2])  # C has no planned figure
+    assert math.isnan(campuses["operating_mw"].tolist()[1])  # A has no operating figure
+    assert campuses["operating_mw"].tolist()[3] == 0.5
+    by_name = campuses.set_index("campus")
+    a = by_name.loc["Example Campus A"]
+    # blanks beside a blank figure stay "" (never NaN), and text is kept as written
+    assert (a["operating_source_url"], a["operating_confidence"], a["operating_as_of"]) == (
+        "",
+        "",
+        "",
+    )
+    assert (
+        a["developer"] == ""
+        and a["planned_as_of"] == "2026-07"
+        and a["planned_confidence"] == "low"
+    )
+    b = by_name.loc["Example Campus B"]
+    assert b["sponsor"] == "Beta Compute; Zed Labs" and b["planned_as_of"] == "2026-03-18"
+    assert b["operating_source"] == "Example directory, estimate <b>"  # quoted comma, raw tag
+    assert campuses["state"].tolist() == ["TX", "LA", "GA", "WI"]
+
+
+def test_campuses_file_is_optional(tmp_path: Path) -> None:
+    """No campuses.csv is "none yet": an empty frame with the columns and dtypes of a full one."""
+    stack = write_stack(tmp_path)
+    (stack / "campuses.csv").unlink()
+    missing = load_campuses(stack)
+    assert missing.shape == (0, len(CAMPUS_COLUMNS)) and tuple(missing.columns) == CAMPUS_COLUMNS
+    assert str(missing["planned_mw"].dtype) == "float64" and str(missing["sponsor"].dtype) == "str"
+    header_only = load_campuses(write_stack(tmp_path, campuses=CAMPUSES_CSV.splitlines()[0] + "\n"))
+    pd.testing.assert_frame_equal(missing, header_only)
+    assert load_campuses(tmp_path / "nowhere").empty  # no stack dir at all
+
+
 def test_header_only_tables_are_empty_frames_with_the_right_columns(tmp_path: Path) -> None:
     """Researchers fill metrics, players and conversions later; a header alone is not an error."""
     stack = write_stack(
@@ -187,6 +246,7 @@ def test_header_only_tables_are_empty_frames_with_the_right_columns(tmp_path: Pa
         players=PLAYERS_CSV.splitlines()[0] + "\n",
         conversions=CONVERSIONS_CSV.splitlines()[0] + "\n",
         consumption_tiers=TIERS_CSV.splitlines()[0] + "\n",
+        campuses=CAMPUSES_CSV.splitlines()[0] + "\n",
     )
     metrics = load_metrics(stack)
     assert metrics.shape == (0, len(METRIC_COLUMNS)) and tuple(metrics.columns) == METRIC_COLUMNS
@@ -194,6 +254,7 @@ def test_header_only_tables_are_empty_frames_with_the_right_columns(tmp_path: Pa
     assert load_players(stack).shape == (0, len(PLAYER_COLUMNS))
     assert load_conversions(stack).shape == (0, len(CONVERSION_COLUMNS))
     assert load_consumption_tiers(stack).shape == (0, len(CONSUMPTION_TIER_COLUMNS))
+    assert load_campuses(stack).shape == (0, len(CAMPUS_COLUMNS))
     assert len(load_stages(stack)) == 9  # the chain is unaffected
 
 
@@ -434,6 +495,131 @@ def test_malformed_tiers_fail_naming_the_row(tmp_path: Path, text: str, match: s
         load_consumption_tiers(write_stack(tmp_path, consumption_tiers=text))
 
 
+def campus_row(name: str, **changes: str) -> tuple[str, str]:
+    """The ``CAMPUSES_CSV`` line of campus ``name`` (its letter) and a copy with columns changed."""
+    header, *lines = CAMPUSES_CSV.splitlines()
+    header = header.split(",")
+    line = next(r for r in lines if r.startswith(f"Example Campus {name},"))
+    cells = next(csv.reader([line]))
+    for column, value in changes.items():
+        cells[header.index(column)] = value
+    return line, ",".join(f'"{cell}"' if "," in cell else cell for cell in cells)
+
+
+def edited(text: str, name: str, **changes: str) -> str:
+    """``text`` (a campuses CSV) with one campus's columns replaced."""
+    return variant(text, *campus_row(name, **changes))
+
+
+# (campus letter, columns to change, expected message). Rows: B is row 2, A row 3, C row 4.
+CAMPUS_FAILURES = [
+    ("A", {"campus": ""}, r"row 3 \(\?\): campus is blank"),
+    ("C", {"campus": "Example Campus A"}, r"duplicate campus names \['Example Campus A'\]"),
+    ("B", {"state": "Tx"}, r"row 2 \(Example Campus B\): state 'Tx' must be two capital letters"),
+    ("B", {"state": "Texas"}, r"state 'Texas' must be two capital letters"),
+    ("B", {"state": ""}, r"state '' must be two capital letters"),
+    ("B", {"planned_mw": "lots"}, r"row 2 \(Example Campus B\): planned_mw 'lots' is not a number"),
+    ("B", {"planned_mw": "-5"}, r"row 2 \(Example Campus B\): planned_mw -5 is negative"),
+    ("C", {"operating_mw": "six hundred"}, r"operating_mw 'six hundred' is not a number"),
+    (
+        "A",
+        {"planned_source_url": ""},
+        r"row 3 \(Example Campus A\): planned_mw '5000' has no planned_source_url",
+    ),
+    (
+        "A",
+        {"planned_confidence": ""},
+        r"row 3 \(Example Campus A\): planned_mw '5000' has no planned_confidence",
+    ),
+    (
+        "C",
+        {"operating_source_url": ""},
+        r"row 4 \(Example Campus C\): operating_mw '600' has no operating_source_url",
+    ),
+    (
+        "C",
+        {"operating_confidence": ""},
+        r"row 4 \(Example Campus C\): operating_mw '600' has no operating_confidence",
+    ),
+    (
+        "A",
+        {"planned_confidence": "sure"},
+        r"planned_confidence must be one of \('high', 'medium', 'low'\), not 'sure'",
+    ),
+    (
+        "C",
+        {"operating_confidence": "Medium"},
+        r"operating_confidence must be one of .*, not 'Medium'",
+    ),
+    (
+        "A",
+        {"planned_source_url": "example.com/a"},
+        r"row 3 \(Example Campus A\): planned_source_url 'example.com/a' does not start with http",
+    ),
+    (
+        "C",
+        {"operating_source_url": "ftp://example.com/c"},
+        r"operating_source_url 'ftp://example.com/c' does not start with http",
+    ),
+    # a blank figure needs no source or confidence, but what is there must still be well formed
+    (
+        "A",
+        {"operating_source_url": "www.example.com"},
+        r"row 3 \(Example Campus A\): operating_source_url 'www.example.com' does not start",
+    ),
+    (
+        "A",
+        {"operating_confidence": "maybe"},
+        r"row 3 \(Example Campus A\): operating_confidence must be one of .*, not 'maybe'",
+    ),
+    (
+        "A",
+        {"planned_as_of": "2026"},
+        r"row 3 \(Example Campus A\): planned_as_of '2026' is not YYYY-MM or YYYY-MM-DD",
+    ),
+    ("A", {"planned_as_of": "2026-13"}, r"planned_as_of '2026-13' is not YYYY-MM or YYYY-MM-DD"),
+    ("A", {"planned_as_of": "2026-7"}, r"planned_as_of '2026-7' is not"),
+    ("A", {"planned_as_of": "July 2026"}, r"planned_as_of 'July 2026' is not"),
+    ("C", {"operating_as_of": "2026-09-32"}, r"operating_as_of '2026-09-32' is not YYYY-MM"),
+    ("C", {"operating_as_of": "20260924"}, r"operating_as_of '20260924' is not"),
+]
+
+
+@pytest.mark.parametrize(("name", "changes", "match"), CAMPUS_FAILURES)
+def test_malformed_campuses_fail_naming_the_row(
+    tmp_path: Path, name: str, changes: dict[str, str], match: str
+) -> None:
+    text = edited(CAMPUSES_CSV, name, **changes)
+    assert text != CAMPUSES_CSV
+    with pytest.raises(ValueError, match=match):
+        load_campuses(write_stack(tmp_path, campuses=text))
+
+
+def test_malformed_campuses_file_shape_fails_naming_the_file(tmp_path: Path) -> None:
+    missing = CAMPUSES_CSV.replace(",planned_confidence,", ",planned_conf,")
+    with pytest.raises(
+        ValueError, match=r"campuses\.csv: missing columns \['planned_confidence'\]"
+    ):
+        load_campuses(write_stack(tmp_path, campuses=missing))
+    quoted = '"Example directory, estimate <b>"'
+    unquoted = variant(CAMPUSES_CSV, quoted, quoted.strip('"'))
+    with pytest.raises(ValueError, match=r"campuses\.csv: row 2 has 19 fields, expected 18"):
+        load_campuses(write_stack(tmp_path, campuses=unquoted))
+
+
+def test_campus_problems_are_reported_together(tmp_path: Path) -> None:
+    text = edited(CAMPUSES_CSV, "B", state="Tx")
+    text = edited(text, "A", planned_confidence="")
+    text = edited(text, "C", operating_mw="-1")
+    with pytest.raises(ValueError) as excinfo:
+        load_campuses(write_stack(tmp_path, campuses=text))
+    message = str(excinfo.value)
+    assert message.startswith("campuses.csv: ")
+    assert "row 2 (Example Campus B): state 'Tx' must be two capital letters" in message
+    assert "row 3 (Example Campus A): planned_mw '5000' has no planned_confidence" in message
+    assert "row 4 (Example Campus C): operating_mw -1 is negative" in message
+
+
 def test_every_problem_in_a_file_is_reported_at_once(tmp_path: Path) -> None:
     text = variant(STAGES_CSV, "1,power,", "one,power,")
     text = variant(text, GRID_TAIL, ",coal,3,,,skeleton,Example grid summary.")
@@ -486,3 +672,9 @@ def test_committed_stack_loads() -> None:
     assert stages["stage"].tolist() == STAGE_KEYS
     for loader in (load_metrics, load_players, load_conversions, load_consumption_tiers):
         loader(STACK_DIR)
+    campuses = load_campuses(STACK_DIR)
+    assert len(campuses) >= 1 and campuses["campus"].is_unique
+    # every figure that is present carries a source: the loader enforces it, this restates it
+    for figure in ("planned", "operating"):
+        present = campuses[f"{figure}_mw"].notna()
+        assert (campuses.loc[present, f"{figure}_source_url"].str.startswith("http")).all()
