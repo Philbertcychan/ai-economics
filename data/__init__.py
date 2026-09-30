@@ -22,6 +22,10 @@ LAST_REFRESH_DIFF = DATA_DIR / "last_refresh_diff.md"
 EIA_RAW_DIR = RAW_DIR / "EIA860M"
 # Tidy generator tables and summaries rebuilt from the newest EIA-860M workbook; committed.
 EIA_PROCESSED_DIR = PROCESSED_DIR / "eia860m"
+# Dated pulls of LBNL's yearly "Queued Up" interconnection-queue workbook (data/queues.py).
+QUEUES_RAW_DIR = RAW_DIR / "LBNL_QUEUES"
+# The tidy request table and summaries rebuilt from that workbook; committed.
+QUEUES_PROCESSED_DIR = PROCESSED_DIR / "queues"
 
 MODELS_DIR = REPO_ROOT / "models"  # generated .xlsx per company; committed build artifact
 

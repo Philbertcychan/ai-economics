@@ -385,6 +385,7 @@ def built(tmp_path: Path) -> tuple[Path, BuildReport]:
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
 
 
@@ -576,6 +577,7 @@ def test_index_rows_sort_by_layer_then_ticker_and_blank_out_missing_figures(
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
         eia_dir=tmp_path / "no-eia",
+        queues_dir=tmp_path / "no-queues",
     )
     rows = table_rows(read(out / "index.html"), "companies")[1:]
     assert [row[0].split()[0] for row in rows] == ["ANC", "ZNC", "CHP", "HYA", "HYB", "PWR"]
@@ -621,6 +623,7 @@ def test_empty_sections_and_their_nav_links_are_left_out(tmp_path: Path) -> None
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert (report.writeups, report.calls) == (0, 0) and not report.warnings
     for page in ("index.html", "companies/AAA.html", "companies/BBB.html"):
@@ -646,6 +649,7 @@ def test_index_shows_only_newest_five_writeups(tmp_path: Path) -> None:
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.writeups == 8
     index = read(out / "index.html")
@@ -831,6 +835,7 @@ def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> No
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     page = read(out / "companies" / "BBB.html")
     model = page.split('<section id="model"', 1)[1].split("</section>", 1)[0]
@@ -857,6 +862,7 @@ def test_single_period_outputs_are_one_table_and_no_charts(tmp_path: Path) -> No
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     page = read(out / "companies" / "BBB.html")
     assert "<caption>Outputs</caption>" in page and 'data-charts="outputs"' not in page
@@ -893,6 +899,7 @@ def test_model_content_is_hidden_until_the_status_says_built(tmp_path: Path) -> 
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     page = read(out / "companies" / "BBB.html")
     assert 'id="model"' not in page and "toy_price" not in page.split("<script", 1)[0]
@@ -914,6 +921,7 @@ def test_status_labels_shown_to_readers(tmp_path: Path) -> None:
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     rows = table_rows(read(out / "index.html"), "companies")[1:]
     assert {row[0].split()[0]: row[-1] for row in rows} == {
@@ -988,6 +996,7 @@ def test_company_page_data_only(tmp_path: Path) -> None:
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
         eia_dir=tmp_path / "no-eia",
+        queues_dir=tmp_path / "no-queues",
     )
     index = read(out / "index.html")
     page = read(out / "companies" / "CCC.html")
@@ -1041,6 +1050,7 @@ def test_empty_state_build_succeeds_with_warning(tmp_path: Path) -> None:
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
         eia_dir=tmp_path / "no-eia",
+        queues_dir=tmp_path / "no-queues",
     )
     assert "index.html" in report.pages and "writeups/index.html" in report.pages
     assert (report.companies, report.writeups, report.calls, report.stages) == (0, 0, 0, 0)
@@ -1103,6 +1113,7 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
 
     bare = tmp_path / "bare-site"
@@ -1119,6 +1130,7 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
         eia_dir=tmp_path / "no-eia",
+        queues_dir=tmp_path / "no-queues",
     )
     build(
         site_dir=tmp_path / "nothing",
@@ -1127,6 +1139,7 @@ def test_no_generated_page_carries_explanatory_prose(tmp_path: Path) -> None:
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "no-signals",
         eia_dir=tmp_path / "no-eia",
+        queues_dir=tmp_path / "no-queues",
     )
 
     # The full build has the stack index, nine stage pages and the signals index; the other two
@@ -1153,6 +1166,7 @@ def test_rebuild_is_byte_identical(tmp_path: Path) -> None:
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     first = {p.relative_to(out): p.read_bytes() for p in out.rglob("*") if p.is_file()}
     build(
@@ -1162,6 +1176,7 @@ def test_rebuild_is_byte_identical(tmp_path: Path) -> None:
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     second = {p.relative_to(out): p.read_bytes() for p in out.rglob("*") if p.is_file()}
     assert first == second
@@ -1171,7 +1186,7 @@ def test_main_cli(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     site, out, calls = make_site(tmp_path)
     argv = ["--site-dir", str(site), "--out", str(out), "--calls", str(calls)]
     argv += ["--stack", str(tmp_path / "stack"), "--signals", str(tmp_path / "signals")]
-    argv += ["--eia", str(tmp_path / "eia860m")]
+    argv += ["--eia", str(tmp_path / "eia860m"), "--queues", str(tmp_path / "no-queues")]
     code = main(argv)
     assert code == 0
     printed = capsys.readouterr().out
@@ -1218,6 +1233,7 @@ def test_build_refuses_an_out_dir_that_overlaps_the_sources(tmp_path: Path, targ
             stack_dir=tmp_path / "stack",
             signals_dir=tmp_path / "signals",
             eia_dir=tmp_path / "eia860m",
+            queues_dir=tmp_path / "no-queues",
         )
     assert site_files(site) == before
     assert (tmp_path / "signals" / "ledger.csv").is_file()
@@ -1234,6 +1250,7 @@ def test_build_allows_the_default_layout_of_a_build_dir_inside_the_site_dir(tmp_
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert "index.html" in report.pages and (site / "build" / "data" / "AAA.json").is_file()
     assert {p: b for p, b in site_files(site).items() if p.parts[0] != "build"} == before
@@ -1263,6 +1280,7 @@ def test_build_also_protects_the_repo_site_dir_when_site_dir_is_custom(
                 stack_dir=tmp_path / "stack",
                 signals_dir=tmp_path / "signals",
                 eia_dir=tmp_path / "eia860m",
+                queues_dir=tmp_path / "no-queues",
             )
     assert (repo_site / "data" / "AAA.json").is_file()
 
@@ -1283,7 +1301,7 @@ def test_main_cli_reports_a_refused_out_dir(
     site, _, calls = make_site(tmp_path)
     argv = ["--site-dir", str(site), "--out", str(site), "--calls", str(calls)]
     argv += ["--stack", str(tmp_path / "stack"), "--signals", str(tmp_path / "signals")]
-    argv += ["--eia", str(tmp_path / "eia860m")]
+    argv += ["--eia", str(tmp_path / "eia860m"), "--queues", str(tmp_path / "no-queues")]
     with pytest.raises(SystemExit) as excinfo:
         main(argv)
     assert excinfo.value.code == 2
@@ -1307,6 +1325,7 @@ def test_writeup_slug_index_is_reserved_for_the_listing_page(tmp_path: Path) -> 
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.writeups == 3
     assert len(report.pages) == len(set(report.pages))
@@ -2008,6 +2027,7 @@ def test_primer_section_is_omitted_without_a_primer_file(tmp_path: Path) -> None
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert not report.warnings
     page = read(out / "stack" / "power.html")
@@ -2024,6 +2044,7 @@ def test_build_without_a_stack_dir_warns_and_leaves_the_stack_out(tmp_path: Path
         stack_dir=tmp_path / "no-stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.stages == 0 and not any(p.startswith("stack/") for p in report.pages)
     assert not (out / "stack" / "index.html").exists()
@@ -2054,6 +2075,7 @@ def test_malformed_stack_tables_warn_and_leave_that_table_empty(tmp_path: Path) 
         stack_dir=stack,
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.stages == 9 and len(report.warnings) == 1
     assert report.warnings[0].startswith("metrics.csv: row 2 (power / Broken): value 'lots'")
@@ -2072,6 +2094,7 @@ def test_malformed_stack_tables_warn_and_leave_that_table_empty(tmp_path: Path) 
         stack_dir=stack,
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.stages == 0 and not (out / "stack" / "index.html").exists()
     assert len(report.warnings) == 1
@@ -2213,6 +2236,7 @@ def test_campuses_follow_the_figures_on_the_datacenter_page(tmp_path: Path) -> N
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert not report.warnings
     page = read(out / "stack" / "datacenter.html")
@@ -2238,6 +2262,7 @@ def test_missing_campuses_file_means_no_section_and_no_warning(tmp_path: Path) -
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.stages == 9 and not report.warnings
     page = read(out / "stack" / "datacenter.html")
@@ -2269,6 +2294,7 @@ def test_malformed_campuses_warn_and_leave_the_section_out(
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.stages == 9 and len(report.warnings) == 1  # the rest of the stack is built
     assert report.warnings[0].startswith("campuses.csv: ") and message in report.warnings[0]
@@ -2409,6 +2435,7 @@ def test_us_supply_follows_the_figures_and_precedes_the_campuses_slot(tmp_path: 
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     page = read(out / "stack" / "power.html")
     assert (
@@ -2491,6 +2518,7 @@ def test_malformed_eia_file_warns_and_leaves_us_supply_out(
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.stages == 9 and len(report.warnings) == 1  # the rest of the site is built
     assert report.warnings[0].startswith(message), report.warnings[0]
@@ -2779,6 +2807,7 @@ def test_malformed_ledger_warns_and_leaves_signals_out(
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.signals == 0 and report.stages == 9  # the rest of the site is built
     assert len(report.warnings) == 1
@@ -2801,6 +2830,7 @@ def test_build_without_a_ledger_has_no_signals_and_no_warning(tmp_path: Path) ->
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert (out / "signals" / "index.html").exists()
     # No ledger is "none yet", not a problem: no warning, and a rebuild drops the stale page.
@@ -2811,6 +2841,7 @@ def test_build_without_a_ledger_has_no_signals_and_no_warning(tmp_path: Path) ->
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "no-signals",
         eia_dir=tmp_path / "no-eia",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.signals == 0 and not report.warnings
     assert not (out / "signals" / "index.html").exists()
@@ -2828,6 +2859,7 @@ def test_build_without_a_ledger_has_no_signals_and_no_warning(tmp_path: Path) ->
         stack_dir=tmp_path / "stack",
         signals_dir=tmp_path / "signals",
         eia_dir=tmp_path / "eia860m",
+        queues_dir=tmp_path / "no-queues",
     )
     assert report.signals == 0 and not report.warnings
     assert not (out / "signals" / "index.html").exists()
@@ -2863,3 +2895,129 @@ def test_maps_to_ticker_is_read_the_same_way_everywhere() -> None:
     html = _maps_to_html("aaa : toy_price", "../", {"AAA"})
     assert 'href="../companies/AAA.html"' in html and html.endswith(": toy_price")
     assert _maps_to_html("stack: compute/price", "../", {"AAA"}) == "stack: compute/price"
+
+
+# --------------------------------------------------------------------------------------------
+# US interconnection queues (LBNL) on the grid page
+# --------------------------------------------------------------------------------------------
+
+QUEUES_SOURCE_JSON = {
+    "source": "LBNL_QUEUES",
+    "license": "CC BY 4.0",
+    "attribution": "LBNL and GridTracker",
+    "file": "LBNL_Ix_Queue_Data_File_thru2025.xlsx",
+    "through": 2025,
+    "sha256": "0" * 64,
+    "bytes": 1,
+    "rows": {"requests": 3},
+    "files": [],
+}
+# A hybrid column (Solar+Battery) must land under Solar; Hydro under Other.
+QUEUES_ACTIVE_CSV = (
+    "region,Gas,Solar+Battery,Hydro,total\n"
+    "ERCOT,44.2,112.1,0.0,156.3\n"
+    "PJM,12.7,13.7,0.1,26.5\n"
+    "Total,56.9,125.8,0.1,182.8\n"
+)
+QUEUES_IA_CSV = "region,Gas,Solar+Battery,total\nERCOT,8.3,33.9,42.2\nTotal,8.3,33.9,42.2\n"
+QUEUES_MONTHS_CSV = (
+    "year,n,overall,CAISO,ERCOT,ISO-NE,MISO,NYISO,PJM,SPP,Southeast,West\n"
+    "2019,145,46.3,81.3,37.6,,46.5,58.1,43.8,50.7,32.5,36.1\n"
+    "2024,257,61.4,95.0,43.5,,60.3,,70.3,88.8,62.9,55.6\n"
+    "2025,163,65.3,109.6,48.7,,,,83.1,66.4,54.4,38.6\n"
+)
+QUEUES_BY_YEAR_CSV = (
+    "prop_year,Gas,Solar+Battery,total\n"
+    "earlier,1.0,2.0,3.0\n"
+    "2028,56.2,199.2,255.4\n"
+    "later,22.3,48.8,71.1\n"
+    "Total,79.5,250.0,329.5\n"
+)
+QUEUES_FILES = {
+    "source.json": json.dumps(QUEUES_SOURCE_JSON, indent=2) + "\n",
+    "summaries/active_by_region_and_type.csv": QUEUES_ACTIVE_CSV,
+    "summaries/ia_executed_not_operational.csv": QUEUES_IA_CSV,
+    "summaries/median_months_to_operation.csv": QUEUES_MONTHS_CSV,
+    "summaries/active_by_proposed_year_and_type.csv": QUEUES_BY_YEAR_CSV,
+}
+
+
+def write_queues(root: Path, **files: str) -> Path:
+    """Write the fixture processed-queues folder to ``root/queues``; keywords replace a file."""
+    aliases = {
+        "source_json": "source.json",
+        "active": "summaries/active_by_region_and_type.csv",
+        "months": "summaries/median_months_to_operation.csv",
+    }
+    queues = root / "queues"
+    (queues / "summaries").mkdir(parents=True, exist_ok=True)
+    texts = QUEUES_FILES | {aliases[name]: text for name, text in files.items()}
+    for relative, text in texts.items():
+        (queues / relative).write_text(text, encoding="utf-8", newline="\n")
+    return queues
+
+
+def _build_with_queues(tmp_path: Path, queues_dir: Path) -> tuple[Path, BuildReport]:
+    site, out, calls = make_site(tmp_path)
+    report = build(
+        site_dir=site,
+        out_dir=out,
+        calls_md=calls,
+        stack_dir=tmp_path / "stack",
+        signals_dir=tmp_path / "signals",
+        eia_dir=tmp_path / "eia860m",
+        queues_dir=queues_dir,
+    )
+    return out, report
+
+
+def test_queues_section_regroups_types_on_the_grid_page_only(tmp_path: Path) -> None:
+    queues = write_queues(tmp_path)
+    out, report = _build_with_queues(tmp_path, queues)
+    assert report.warnings == []
+    page = read(out / "stack" / "grid.html")
+    assert 'id="queues"' in page and "US interconnection queues" in page
+    assert 'href="https://emp.lbl.gov/queues"' in page and "data through 2025" in page
+    rows = table_rows(page, "region")
+    # Header, then the regions: Solar+Battery folds into Solar, Hydro into Other, total kept.
+    assert rows[0] == ["Region", "Gas", "Solar", "Wind", "Battery", "Other", "Total"]
+    assert rows[1] == ["ERCOT", "44.2", "112.1", "0.0", "0.0", "0.0", "156.3"]
+    assert rows[2] == ["PJM", "12.7", "13.7", "0.0", "0.0", "0.1", "26.5"]
+    assert rows[3][0] == "Total" and rows[3][-1] == "182.8"
+    months = table_rows(page, "months")
+    assert months[0][:3] == ["Year", "Overall", "CAISO"]
+    assert [r[0] for r in months[1:]] == ["2024", "2025"]  # 2019 is before the table's first year
+    assert months[2][1] == "65" and months[2][3] == "49" and months[2][4] == "–"
+    by_year = table_rows(page, "prop_year")
+    assert [r[0] for r in by_year[1:]] == ["earlier", "2028", "later", "Total"]
+    template = read(SITE_DIR / "templates" / "stack_stage.html")
+    slots = ["$us_supply_section", "$queues_section", "$campuses_section", "$conversions_section"]
+    assert [template.index(slot) for slot in slots] == sorted(template.index(s) for s in slots)
+    for key in STAGE_KEYS:
+        if key != "grid":
+            assert 'id="queues"' not in read(out / "stack" / f"{key}.html"), key
+
+
+def test_missing_queues_folder_means_no_section_and_no_warning(tmp_path: Path) -> None:
+    out, report = _build_with_queues(tmp_path, tmp_path / "no-queues")
+    assert report.warnings == []
+    assert 'id="queues"' not in read(out / "stack" / "grid.html")
+
+
+@pytest.mark.parametrize(
+    ("bad", "message"),
+    [
+        ({"active": "region,Gas\nERCOT,1.0\n"}, "total"),
+        ({"months": "year,n,overall\n2025,1,many\n"}, "numeric"),
+        ({"source_json": '{"source": "SOMETHING_ELSE"}\n'}, "source.json"),
+    ],
+)
+def test_malformed_queues_file_warns_and_leaves_the_section_out(
+    tmp_path: Path, bad: dict[str, str], message: str
+) -> None:
+    queues = write_queues(tmp_path, **bad)
+    out, report = _build_with_queues(tmp_path, queues)
+    assert len(report.warnings) == 1 and report.warnings[0].endswith("; queues left empty")
+    assert message in report.warnings[0]
+    assert 'id="queues"' not in read(out / "stack" / "grid.html")
+    assert (out / "stack" / "grid.html").is_file()  # the rest of the page is built

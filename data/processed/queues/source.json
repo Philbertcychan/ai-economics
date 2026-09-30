@@ -1,0 +1,28 @@
+{
+  "source": "LBNL_QUEUES",
+  "license": "CC BY 4.0",
+  "attribution": "LBNL and GridTracker",
+  "url": "https://emp.lbl.gov/sites/default/files/2026-05/LBNL_Ix_Queue_Data_File_thru2025.xlsx",
+  "fetched_at": "2026-09-30T18:04:01Z",
+  "file": "LBNL_Ix_Queue_Data_File_thru2025.xlsx",
+  "through": 2025,
+  "sha256": "794582d3281c6a305e9615fcfec3fae9dc85be2165216d33760b677e976a08b6",
+  "bytes": 15571236,
+  "rows": {
+    "requests": 38201,
+    "active": 8513,
+    "withdrawn": 24221,
+    "suspended": 668,
+    "operational": 4789,
+    "unknown": 10
+  },
+  "files": [
+    "requests.csv",
+    "summaries/active_by_region_and_type.csv",
+    "summaries/active_by_proposed_year_and_type.csv",
+    "summaries/ia_executed_not_operational.csv",
+    "summaries/completion_rates.csv",
+    "summaries/median_months_to_operation.csv",
+    "summaries/active_by_state_and_type.csv"
+  ]
+}

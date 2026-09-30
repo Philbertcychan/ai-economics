@@ -54,6 +54,9 @@ Track: all three (the skeleton serves fluency first).
       source states: CoWoS capacity, GPU list prices, tokens per user) are in the session notes.
 - [ ] Philbert: score each stage's `bottleneck_score` (1 to 5) in `stack/stages.csv` from the
       evidence on its page, and write the one-line `bottleneck_note`. These are calls.
+- [ ] Philbert: the campus likelihood scores. Three campuses carry a proposed score and the
+      evidence behind it in `stack/campus_evidence.csv` (Abilene 5, Hyperion 3, Colossus 3);
+      Rainier and the two Fairwater sites still need their evidence gathered.
 - [x] Nebius model in `companies/nebius.py` on the CoreWeave pattern (foreign private issuer:
       20-F and 6-K cadence; every quarterly figure from the 6-K results exhibits, quote-checked
       into `data/disclosed/NBIS.csv`; ARR-driven forecast; prepayments as a share of capex).
@@ -74,8 +77,11 @@ Track: bottlenecks, with fluency as the by-product. US first.
       with summaries by fuel, year and state (2026-09-27). Still to do: run it from
       `scripts/refresh.py` on a monthly cadence and show the planned-additions table on the
       power stage page.
-- [ ] Interconnection queues: ERCOT, PJM, MISO, SPP, CAISO public queue files; years-to-connect
-      by ISO; large-load requests where published.
+- [x] Interconnection queues: LBNL's project-level Queued Up file (38,201 requests, CC BY 4.0) as
+      `data/queues.py` and `scripts/pull_queues.py`; active capacity by region and type, capacity
+      with an executed agreement, median months to connect by ISO, and capacity by proposed online
+      year on the grid page (2026-09-30). Still to do: large-load (data-centre) queues, which LBNL
+      does not cover; ERCOT and PJM publish theirs.
 - [ ] Demand side: announced data-centre campuses in the US with MW, sponsor, power source and
       status, each with a source; start from the nine campuses the data-centre research recorded
       on 2026-09-26 (Stargate Abilene, Hyperion, Colossus, Fairwater, Rainier and others; in the

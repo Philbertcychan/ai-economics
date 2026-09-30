@@ -64,6 +64,7 @@ import markdown
 from data import (
     CALLS_MD,
     EIA_PROCESSED_DIR,
+    QUEUES_PROCESSED_DIR,
     SIGNALS_DIR,
     SITE_BUILD_DIR,
     SITE_DIR,
@@ -73,6 +74,9 @@ from data import (
 )
 from data.eia import INDEX_URL as EIA_INDEX_URL
 from data.eia import group_technology, read_summaries
+from data.queues import TYPE_GROUPS as QUEUE_GROUPS
+from data.queues import group_type as queue_group
+from data.queues import read_summaries as read_queue_summaries
 from data.signals import CONFIDENCE, load_signals
 from data.stack import (
     CAMPUS_FIGURES,
@@ -1508,6 +1512,151 @@ def _us_supply_section(supply: USSupply | None) -> str:
     )
 
 
+# --------------------------------------------------------------------------------------------
+# US interconnection queues (LBNL Queued Up) on the grid stage page
+# --------------------------------------------------------------------------------------------
+
+QUEUES_STAGE = "grid"
+QUEUES_URL = "https://emp.lbl.gov/queues"
+# The months table starts here: earlier years are in the file but say little about today's wait.
+QUEUE_MONTHS_FIRST_YEAR = 2020
+QUEUE_REGIONS: tuple[str, ...] = (
+    "CAISO",
+    "ERCOT",
+    "ISO-NE",
+    "MISO",
+    "NYISO",
+    "PJM",
+    "SPP",
+    "Southeast",
+    "West",
+)
+QUEUE_TOTAL = "Total"
+
+
+@dataclass(frozen=True)
+class Queues:
+    """The four LBNL summaries the grid page shows, as plain rows.
+
+    ``active`` and ``ia_executed`` rows are region x ``type_clean`` GW tables with a ``total``
+    column and a ``Total`` row; ``months`` rows are ``year``, ``n``, ``overall`` and one column
+    per region; ``by_year`` rows are proposed-online-year x ``type_clean``. ``through`` is the
+    data year.
+    """
+
+    through: int
+    active: list[dict[str, Any]]
+    ia_executed: list[dict[str, Any]]
+    months: list[dict[str, Any]]
+    by_year: list[dict[str, Any]]
+
+
+def load_queues(queues_dir: Path, warnings: list[str]) -> Queues | None:
+    """Read the processed queue folder; ``None`` when it or one of its files is missing.
+
+    Same rule as the EIA folder: a fresh clone has no processed queues, which is not a problem to
+    report; a malformed file is named in ``warnings`` and the section left out.
+    """
+    try:
+        summaries = read_queue_summaries(queues_dir)
+    except FileNotFoundError:
+        return None
+    except (ValueError, OSError) as exc:
+        warnings.append(f"{exc}; queues left empty")
+        return None
+    return Queues(
+        through=summaries.through,
+        active=summaries.active.to_dict("records"),
+        ia_executed=summaries.ia_executed.to_dict("records"),
+        months=summaries.months.to_dict("records"),
+        by_year=summaries.by_proposed_year.to_dict("records"),
+    )
+
+
+def queue_rows_by_group(rows: list[dict[str, Any]], label: str) -> list[dict[str, Any]]:
+    """Collapse a ``type_clean`` GW table to the five type groups, one dict per row.
+
+    The pipeline computed the GW per standardised type; the site only adds the columns that
+    fall in the same group (a hybrid counts under its first type: ``Solar+Battery`` is Solar)
+    and keeps the ``total`` the pipeline wrote. Rows keep their order, ``Total`` last.
+    """
+    out = []
+    for row in rows:
+        sums = dict.fromkeys(QUEUE_GROUPS, 0.0)
+        for column, value in row.items():
+            if column in (label, "total"):
+                continue
+            sums[queue_group(column)] += _as_float(value) or 0.0
+        out.append(
+            {"label": str(row.get(label, "")), **sums, "total": _as_float(row.get("total")) or 0.0}
+        )
+    return out
+
+
+def _queue_gw_table(rows: list[dict[str, Any]], label: str, key: str, caption: str) -> str:
+    head = [(label, False), *((group, True) for group in QUEUE_GROUPS), ("Total", True)]
+    body = []
+    for row in queue_rows_by_group(rows, key):
+        cells = "".join(
+            f'<td class="num">{_e(f"{row[column]:,.1f}")}</td>'
+            for column in (*QUEUE_GROUPS, "total")
+        )
+        body.append(f'<tr><th scope="row">{_e(row["label"])}</th>{cells}</tr>')
+    return _table(key, head, body, caption=caption)
+
+
+def _queue_months_table(queues: Queues) -> str:
+    head = [("Year", False), ("Overall", True), *((region, True) for region in QUEUE_REGIONS)]
+    body = []
+    for row in queues.months:
+        year = str(row.get("year", ""))
+        if not year.isdigit() or int(year) < QUEUE_MONTHS_FIRST_YEAR:
+            continue
+        cells = "".join(
+            f'<td class="num">{_e(_fmt_months(row.get(column)))}</td>'
+            for column in ("overall", *QUEUE_REGIONS)
+        )
+        body.append(f'<tr><th scope="row">{_e(year)}</th>{cells}</tr>')
+    return _table(
+        "months", head, body, caption="Time to connect: median months from request to operation"
+    )
+
+
+def _fmt_months(value: Any) -> str:
+    number = _as_float(value)
+    return MISSING if number is None else f"{number:,.0f}"
+
+
+def _queues_section(queues: Queues | None) -> str:
+    """Source line and four tables; nothing without the summaries."""
+    if queues is None:
+        return ""
+    source = (
+        f'<p class="muted queues-source"><a href="{_e(QUEUES_URL)}" rel="noopener">LBNL Queued Up'
+        f"</a> · data through {_e(queues.through)} · CC BY 4.0, LBNL and GridTracker · capacity as "
+        "filed, without the imputed hybrid storage in LBNL's report</p>"
+    )
+    return _section(
+        "queues",
+        "US interconnection queues",
+        source
+        + _queue_gw_table(queues.active, "Region", "region", "Active capacity, GW")
+        + _queue_gw_table(
+            queues.ia_executed,
+            "Region",
+            "region",
+            "Closest to built: interconnection agreement executed, not yet operating, GW",
+        )
+        + _queue_months_table(queues)
+        + _queue_gw_table(
+            queues.by_year,
+            "Proposed online year",
+            "prop_year",
+            "Active capacity by proposed online year, GW",
+        ),
+    )
+
+
 def _stage_nav(stack: Stack, index: int, root: str) -> str:
     """Previous stage, the chain, next stage: whichever neighbours exist."""
     parts = []
@@ -1931,6 +2080,7 @@ def build(
     stack_dir: Path = STACK_DIR,
     signals_dir: Path = SIGNALS_DIR,
     eia_dir: Path = EIA_PROCESSED_DIR,
+    queues_dir: Path = QUEUES_PROCESSED_DIR,
 ) -> BuildReport:
     """Render the whole site into ``out_dir`` and return what was built.
 
@@ -1949,7 +2099,7 @@ def build(
     _check_out_dir(
         out_dir,
         [root / sub for root in (site_dir, SITE_DIR) for sub in SOURCE_SUBDIRS]
-        + [templates_src, static_src, stack_dir, signals_dir, eia_dir],
+        + [templates_src, static_src, stack_dir, signals_dir, eia_dir, queues_dir],
     )
     templates = _load_templates(templates_src)
     data_dir = site_dir / "data"
@@ -1986,6 +2136,7 @@ def build(
     # The ledger's stage column is checked against this build's stack, not the repo's.
     signals = load_ledger(signals_dir, stack_dir, warnings)
     us_supply = load_us_supply(eia_dir, warnings)
+    queues = load_queues(queues_dir, warnings)
 
     if calls_md.exists():
         calls = parse_calls(calls_md.read_text(encoding="utf-8"))
@@ -2135,6 +2286,7 @@ def build(
                 ),
                 figures_section=_section("figures", "Figures", _figures_table(metrics)),
                 us_supply_section=(_us_supply_section(us_supply) if key == US_SUPPLY_STAGE else ""),
+                queues_section=(_queues_section(queues) if key == QUEUES_STAGE else ""),
                 campuses_section=(_campuses_section(stack.campuses) if key == CAMPUS_STAGE else ""),
                 conversions_section=_section(
                     "conversions", "Conversions", _conversions_table(stack, conversions, "../")
@@ -2210,6 +2362,13 @@ def main(argv: list[str] | None = None) -> int:
         metavar="DIR",
         help="processed EIA-860M dir (source.json and summaries/) for the power page",
     )
+    parser.add_argument(
+        "--queues",
+        type=Path,
+        default=QUEUES_PROCESSED_DIR,
+        metavar="DIR",
+        help="processed LBNL queues dir (source.json and summaries/) for the grid page",
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
@@ -2221,6 +2380,7 @@ def main(argv: list[str] | None = None) -> int:
             stack_dir=args.stack,
             signals_dir=args.signals,
             eia_dir=args.eia,
+            queues_dir=args.queues,
         )
     except ValueError as exc:  # an --out that overlaps the sources; nothing was touched
         parser.error(str(exc))

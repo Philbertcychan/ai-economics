@@ -30,6 +30,7 @@ One command runs the whole chain: `uv run scripts/refresh.py`. GitHub runs it ev
 | `data/processed/` | tidy CSVs built from raw: `filings.csv`, `reported.csv` | always rebuilt by code, so it can be deleted and regenerated |
 | `data/edgar.py` | the SEC client and the functions that tidy reported facts | knows about the SEC; knows nothing about models |
 | `data/eia.py` | the EIA-860M client (US generators: operating, planned, retired), the functions that tidy and summarise the monthly workbook and write `data/processed/eia860m/` (shared by `pull_eia860m.py` and the refresh), and the reader the power page uses | knows about EIA; knows nothing about the stack or the models |
+| `data/queues.py` | the LBNL Queued Up client (US interconnection queues, one row per request) and the functions that tidy and summarise the yearly workbook | knows about LBNL's file; knows nothing about the stack or the models |
 | `data/disclosed.py`, `data/stack.py`, `data/signals.py` | loaders for the hand-kept tables: KPIs stated in prose, the stack, the ledger | validate on load; a malformed row is an error, never a warning |
 | `engine/` | the economics of one GPU | pure arithmetic: numbers in, numbers out, no files, no internet |
 | `assumptions/` | one CSV per company of every non-reported number, with source and status | the only place assumptions live; edited by hand, in Excel if you like |
@@ -120,6 +121,7 @@ uv run scripts/refresh.py --dry-run    # show what would happen, do nothing
 uv run scripts/export_xlsx.py CRWV     # write models/CRWV.xlsx
 uv run scripts/build_site.py           # rebuild the website into site/build/
 uv run scripts/pull_eia860m.py         # pull the newest EIA-860M workbook into data/processed/eia860m/
+uv run scripts/pull_queues.py          # pull LBNL's yearly queue workbook into data/processed/queues/
 uv run pytest                          # run every test
 ```
 

@@ -207,6 +207,10 @@ As of 2026-09-22:
 - The first power-supply dataset is in: `scripts/pull_eia860m.py` pulls EIA's monthly generator
   inventory and tidies operating, planned and retired generators with summaries by fuel, year
   and state under `data/processed/eia860m/`.
+- The grid side is in too: `scripts/pull_queues.py` tidies LBNL's project-level interconnection
+  queue file (38,201 requests) into `data/processed/queues/`, and the grid page shows active
+  capacity by region and type, what already holds an interconnection agreement, and the median
+  months from request to operation by ISO.
 
 The spine of the project from here is the value chain itself, bottom-up: nine stages from
 power generation to applications in `stack/`, each with its unit, sourced figures, players,

@@ -1,0 +1,13 @@
+{
+  "source": "LBNL_QUEUES",
+  "pulled_at": "2026-09-30T18:04:01Z",
+  "files": [
+    {
+      "path": "LBNL_Ix_Queue_Data_File_thru2025.xlsx",
+      "bytes": 15571236,
+      "sha256": "794582d3281c6a305e9615fcfec3fae9dc85be2165216d33760b677e976a08b6",
+      "source_url": "https://emp.lbl.gov/sites/default/files/2026-05/LBNL_Ix_Queue_Data_File_thru2025.xlsx",
+      "fetched_at": "2026-09-30T18:04:01Z"
+    }
+  ]
+}
