@@ -34,6 +34,9 @@ Active power is disclosed once (about 170 MW at December 2025). The June 2026 fi
 forecast rolls forward from is an assumption inferred from ARR, named for its quarter
 (``active_power_mw_2026q2``) so that a later quarter of actuals cannot silently reuse it.
 
+Capacity goes live on a plan: the register may schedule single quarters (``mw_added_2026q3``)
+and the flat pace covers the rest. The plan row on the Drivers sheet is pasted from the register.
+
 Two things the model does not do, and says so: prepaid revenue is recognised as a flat share
 of the balance, and capex goes live in the quarter it is spent.
 """
@@ -76,6 +79,11 @@ ASSUMPTIONS_NEEDED = (
 
 # ---- Drivers: (label, unit). Order is the order on the sheet. -------------------------------
 DRIVER_ROWS: dict[str, tuple[str, str]] = {
+    "mw_added_plan": (
+        "Active power going live, plan (register: mw_added_<quarter> where given, "
+        "else mw_added_per_quarter)",
+        "MW",
+    ),
     "active_power_mw_end": (
         "Active power, end of quarter (disclosed Dec 2025; June 2026 inferred from ARR)",
         "MW",
@@ -118,7 +126,7 @@ DRIVER_ROWS: dict[str, tuple[str, str]] = {
 # Every driver template starts at the first estimate column: the actual columns are the
 # company's own figures, pasted. Rows with no template are plugs that are zero in estimates.
 DRIVER_FORMULAS: dict[str, str] = {
-    "active_power_mw_end": "={active_power_mw_end@prev}+{in.mw_added_per_quarter}",
+    "active_power_mw_end": "={active_power_mw_end@prev}+{mw_added_plan}",
     "active_power_mw_added": "={active_power_mw_end}-{active_power_mw_end@prev}",
     "active_power_mw_avg": "=({active_power_mw_end@prev}+{active_power_mw_end})/2",
     "arr_end_usd_m": (
@@ -401,6 +409,7 @@ class Nebius(BaseCompanyModel):
             if period == last:
                 power = float(a[opening_power])
             d = {
+                "mw_added_plan": math.nan,
                 "active_power_mw_end": power,
                 "active_power_mw_added": math.nan,
                 "active_power_mw_avg": math.nan,
@@ -441,7 +450,7 @@ class Nebius(BaseCompanyModel):
         period = last
         for _ in range(FORECAST_QUARTERS):
             period = next_quarter(period)
-            added = float(a["mw_added_per_quarter"])
+            added = mw_added(a, period)
             closing = prev["active_power_mw_end"] + added
             arr = prev["arr_end_usd_m"] + added * float(a["arr_per_new_mw_year_usd_m"])
             ai_cloud = (prev["arr_end_usd_m"] + arr) / 8 * float(a["revenue_to_midpoint_arr"])
@@ -463,6 +472,7 @@ class Nebius(BaseCompanyModel):
             funding = max(0.0, float(a["minimum_cash_usd_bn"]) * 1000 - before_funding)
             cumulative_funding += funding
             d = {
+                "mw_added_plan": added,
                 "active_power_mw_end": closing,
                 "active_power_mw_added": added,
                 "active_power_mw_avg": (prev["active_power_mw_end"] + closing) / 2,
@@ -521,11 +531,7 @@ class Nebius(BaseCompanyModel):
                 * (1 - float(a["prepayment_share_of_capex"]))
                 / ebitda_per_mw,
                 "disclosed_payback_years": float(a["disclosed_payback_months"]) / 12,
-                "prepayments_share_of_capex": (
-                    d["prepayments_received_usd_m"] / d["capex_usd_m"]
-                    if not math.isnan(d["prepayments_received_usd_m"])
-                    else d["deferred_revenue_change_usd_m"] / d["capex_usd_m"]
-                ),
+                "prepayments_share_of_capex": _share_of_capex(d),
                 "free_cash_flow_usd_m": d["cfo_usd_m"] - d["capex_usd_m"],
                 "net_debt_usd_m": d["debt_end_usd_m"] - d["cash_end_usd_m"],
                 "net_debt_to_ebitda": (d["debt_end_usd_m"] - d["cash_end_usd_m"]) / (ebitda * 4),
@@ -574,6 +580,32 @@ class Nebius(BaseCompanyModel):
             )
             / 1000,
         }
+
+
+def _share_of_capex(d: dict[str, float]) -> float:
+    """Prepayments over capex; in actuals the change in deferred revenue stands in for them.
+
+    Blank when nothing was spent in the quarter: a share of zero capex has no meaning.
+    """
+    if not d["capex_usd_m"]:
+        return math.nan
+    received = d["prepayments_received_usd_m"]
+    if math.isnan(received):
+        received = d["deferred_revenue_change_usd_m"]
+    return received / d["capex_usd_m"]
+
+
+def mw_added(a: pd.Series, period: str) -> float:
+    """MW going live in a forecast quarter: the register's figure for that quarter if it has one.
+
+    A row named ``mw_added_2026q4`` overrides the flat ``mw_added_per_quarter`` for that quarter
+    only. Capacity does not arrive evenly: the company's own 2026 guidance (revenue of 3.0 to
+    3.4 USD bn with ARR of 7 to 9 USD bn at year end) only holds if most of the second half's
+    capacity goes live in the fourth quarter, so the near quarters are scheduled and the far
+    ones use the pace.
+    """
+    name = f"mw_added_{period.lower()}"
+    return float(a[name]) if name in a.index else float(a["mw_added_per_quarter"])
 
 
 def _previous(period: str) -> str:

@@ -59,8 +59,9 @@ Track: all three (the skeleton serves fluency first).
       into `data/disclosed/NBIS.csv`; ARR-driven forecast; prepayments as a share of capex).
 - [ ] Philbert: review `assumptions/NBIS.csv` (17 proposed rows); the two that matter most are
       `active_power_mw_2026q2` (inferred, not disclosed) and `arr_per_new_mw_year_usd_m`.
-- [ ] Nebius: a back-loaded 2026 ramp (or a go-live lag) so the model can hold both the ARR
-      and the revenue guidance at once; per-GPU lines once kW per GPU or GPU counts are disclosed.
+- [x] Nebius: a back-loaded 2026 ramp so the model holds the ARR and the revenue guidance at
+      once (two scheduled quarters in the register, 2026-09-29).
+- [ ] Nebius: per-GPU lines once kW per GPU or GPU counts are disclosed.
 - [ ] A spend-to-live lag for capex in the CoreWeave forecast.
 - [ ] Prepaid revenue recognised by contract vintage in the CoreWeave forecast.
 

@@ -22,6 +22,7 @@ from companies.nebius import (
     OUTPUT_FORMULA_FROM_FORECAST,
     Nebius,
     _previous,
+    mw_added,
 )
 from data import ASSUMPTIONS_DIR, DISCLOSED_DIR
 
@@ -79,7 +80,7 @@ def test_history_ties_to_disclosed_figures() -> None:
     assert math.isnan(o.loc["ebitda_per_mw_year_usd_m", "2026Q2A"])
     # Formula bookkeeping: every driver formula starts at the first estimate; the plugs have
     # no formula; the per-MW outputs start at the first estimate too.
-    pasted = {"other_deferred_revenue_movements_usd_m", "financing_other_usd_m"}
+    pasted = {"mw_added_plan", "other_deferred_revenue_movements_usd_m", "financing_other_usd_m"}
     assert set(DRIVER_FORMULAS) == set(d.index) - pasted
     assert set(d.attrs["formula_starts"]) == set(DRIVER_FORMULAS)
     assert set(d.attrs["formula_starts"].values()) == {estimates[0]}
@@ -113,7 +114,8 @@ def test_forecast_roll_forwards_tie() -> None:
             + d.loc["funding_required_usd_m", cur]
         )
     for prev, cur in zip(cols[-len(estimates) - 1 : -1], estimates, strict=True):
-        added = a["mw_added_per_quarter"]
+        added = d.loc["mw_added_plan", cur]
+        assert added == mw_added(a, cur[:-1])
         assert d.loc["active_power_mw_end", cur] == d.loc["active_power_mw_end", prev] + added
         assert d.loc["arr_end_usd_m", cur] == pytest.approx(
             d.loc["arr_end_usd_m", prev] + added * a["arr_per_new_mw_year_usd_m"]
@@ -152,9 +154,12 @@ def test_sensitivities_move_the_right_way() -> None:
     s = model.extra_frames["sensitivities"]
     base = s.loc["base case"]
     assert math.isnan(base["value"])
+    # The flat pace governs the quarters the register does not schedule, so it moves the final
+    # year and leaves 2026 alone; the scheduled fourth quarter is what moves year-end 2026 ARR.
     more_mw = s.loc["mw_added_per_quarter = 300"]
-    assert more_mw["arr_end_2026_usd_m"] > base["arr_end_2026_usd_m"]
+    assert more_mw["arr_end_2026_usd_m"] == base["arr_end_2026_usd_m"]
     assert more_mw["revenue_final_year_usd_bn"] > base["revenue_final_year_usd_bn"]
+    assert s.loc["mw_added_2026q4 = 500", "arr_end_2026_usd_m"] > base["arr_end_2026_usd_m"]
     dearer = s.loc["capex_per_mw_usd_m = 35"]
     assert dearer["external_funding_usd_m"] >= base["external_funding_usd_m"]
     assert dearer["payback_net_of_prepayment_end"] > base["payback_net_of_prepayment_end"]
@@ -194,3 +199,24 @@ def test_guards(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match="not contiguous"):
         broken.build()
     assert set(OPENING_BALANCES) <= set(DRIVER_FORMULAS)
+
+
+def test_the_ramp_is_scheduled_where_the_register_says_so() -> None:
+    # The near quarters are scheduled in the register; the far ones use the flat pace. The
+    # schedule is what lets the model hold the company's revenue and ARR guidance together.
+    model = built()
+    d = model.drivers
+    a = load_assumptions("NBIS").set_index("name")["value"]
+    assert d.loc["mw_added_plan", "2026Q3E"] == a["mw_added_2026q3"]
+    assert d.loc["mw_added_plan", "2026Q4E"] == a["mw_added_2026q4"]
+    assert d.loc["mw_added_plan", "2027Q1E"] == a["mw_added_per_quarter"]
+    assert math.isnan(d.loc["mw_added_plan", "2026Q2A"])
+    revenue_2026 = sum(d.loc["revenue_usd_m", c] for c in d.columns if c.startswith("2026"))
+    assert (
+        a["revenue_guidance_2026_low_usd_m"]
+        <= revenue_2026
+        <= a["revenue_guidance_2026_high_usd_m"]
+    )
+    arr = d.loc["arr_end_usd_m", "2026Q4E"]
+    assert a["arr_guidance_ye2026_low_usd_m"] <= arr <= a["arr_guidance_ye2026_high_usd_m"]
+    assert mw_added(a.drop("mw_added_2026q3"), "2026Q3") == a["mw_added_per_quarter"]

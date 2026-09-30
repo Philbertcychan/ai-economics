@@ -317,42 +317,45 @@ Three differences from CoreWeave worth understanding:
   supplier deposits and other assets that grow with the build. The model carries it as a
   share of capex rather than of revenue, because that is what it moves with.
 
-With the register's proposed values (200 MW a quarter going live, $14m of ARR per new MW, a
+With the register's proposed values (50 MW going live in Q3 2026, 350 MW in Q4, then 200 MW a
+quarter; $14m of ARR per new MW, a
 45% EBITDA margin, $25m capex per MW, prepayments at 40% and debt at 40% of capex, 2% cost of
 debt), the model gives:
 
 | | 2025A | 2026E (H1 actual) | 2027E | 2028E |
 |---|---|---|---|---|
-| Revenue, $bn | 0.5 | 3.8 | 13.9 | 24.9 |
-| Adjusted EBITDA, $bn | -0.1 | 1.6 | 6.3 | 11.2 |
+| Revenue, $bn | 0.5 | 3.3 | 13.9 | 24.9 |
+| Adjusted EBITDA, $bn | -0.1 | 1.4 | 6.3 | 11.2 |
 | Capex, $bn | 4.1 | 18.1 | 20.0 | 20.0 |
-| Change in deferred revenue (prepayments, net), $bn | 1.6 | 7.6 | 8.0 | 8.0 |
-| Cash from operations, $bn | 0.4 | 7.9 | 9.2 | 12.8 |
-| Free cash flow, $bn | -3.7 | -10.3 | -10.8 | -7.2 |
+| Prepayments received, $bn | n/d | n/d | 8.0 | 8.0 |
+| Change in deferred revenue (prepayments less prepaid revenue recognised), $bn | 1.6 | 7.7 | 5.3 | 4.1 |
+| Cash from operations, $bn | 0.4 | 7.7 | 9.2 | 12.8 |
+| Free cash flow, $bn | -3.7 | -10.4 | -10.8 | -7.2 |
 | Debt raised, $bn | 4.1 | 8.4 | 8.0 | 8.0 |
 | ARR at year end, $bn | 1.25 | 8.6 | 19.8 | 31.0 |
 | Active power at year end, MW | 170 | 700 | 1,500 | 2,300 |
 | Debt at year end, $bn | 4.1 | 12.5 | 20.5 | 28.5 |
-| Cash at year end, $bn | 3.7 | 5.4 | 2.6 | 3.5 |
-| Net debt / annualised EBITDA at year end | n/m | 2.3x | 2.2x | 1.9x |
+| Cash at year end, $bn | 3.7 | 5.3 | 2.5 | 3.3 |
+| Net debt / annualised EBITDA at year end | n/m | 2.7x | 2.2x | 1.9x |
 
 Four readings:
 
-1. **The plan lands inside the ARR guidance and above the revenue guidance.** Year-end 2026
-   ARR of $8.6bn sits in the company's $7bn to $9bn range, but 2026 revenue of $3.8bn is above
-   its $3.0bn to $3.4bn. Both cannot hold with a straight-line ramp: the company's own numbers
-   imply that most of the year's new capacity bills only in the fourth quarter. The model
-   shows both guidance lines on the Outputs sheet so the reader sees the tension rather than
-   a reconciliation.
+1. **The ramp has to be back-loaded.** The company guides to $3.0bn to $3.4bn of 2026 revenue
+   and $7bn to $9bn of ARR at year end. With $1.0bn booked in the first half, a straight line
+   of 200 MW a quarter gives $3.8bn of revenue, above the range. Both hold only if little new
+   capacity bills in the third quarter and most arrives in the fourth: 50 MW then 350 MW gives
+   $3.3bn of revenue and $8.6bn of ARR. The split is inferred from the guidance, not disclosed,
+   and sits in the register as two scheduled quarters (`mw_added_2026q3`, `mw_added_2026q4`).
+   ARR is a year-end snapshot; revenue is what was earned on the way there.
 2. **Prepayments carry the funding.** Cash from operations is above EBITDA by the prepayments
    collected, so free cash flow of about -$10bn a year is covered by $8bn of debt at 40% of
-   capex and the $8bn of cash on hand. Cash troughs at $2.5bn in early 2028 and the base case
+   capex and the $8bn of cash on hand. Cash troughs at $2.3bn in early 2028 and the base case
    needs no outside money.
 3. **The cash floor depends on four things.** Ranked by the outside money each needs at the
-   edge of its range: the debt share of capex at 20% ($8.3bn), capex at $35m per MW
-   ($6.6bn), prepayments at 20% of capex ($6.2bn), and working capital at -20% of capex
-   ($3.6bn). Faster recognition of prepaid revenue (12% a quarter, $3.5bn) and a $10m ARR per
-   new MW ($2.9bn) come next. The cost of debt and the AI cloud share barely move it.
+   edge of its range: the debt share of capex at 20% ($8.5bn), capex at $35m per MW
+   ($6.7bn), prepayments at 20% of capex ($6.4bn), and working capital at -20% of capex
+   ($3.8bn). Faster recognition of prepaid revenue (12% a quarter, $3.6bn) and a $10m ARR per
+   new MW ($3.0bn) come next. The cost of debt and the AI cloud share barely move it.
 4. **A MW pays back in 2.6 years net of the prepayment, against the company's 1 year 10
    months.** The gap is the same kind as CoreWeave's: the company measures new deals at $20m
    to $25m of annual contract value per MW and at their own margin; the model measures the
