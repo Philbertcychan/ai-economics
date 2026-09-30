@@ -81,8 +81,10 @@ Track: bottlenecks, with fluency as the by-product. US first.
 - [x] Interconnection queues: LBNL's project-level Queued Up file (38,201 requests, CC BY 4.0) as
       `data/queues.py` and `scripts/pull_queues.py`; active capacity by region and type, capacity
       with an executed agreement, median months to connect by ISO, and capacity by proposed online
-      year on the grid page (2026-09-30). Still to do: large-load (data-centre) queues, which LBNL
-      does not cover; ERCOT and PJM publish theirs.
+      year on the grid page (2026-09-30). ERCOT's large-load figures (474 GW requested, 9.5 GW approved to
+      energize, 4.3 GW observed running, 2026-06 to 2026-08) are on the grid page as figures and
+      signals. Still to do: pull ERCOT's monthly Large Load Interconnection Status workbook for
+      the status split, and PJM's large-load forecast.
 - [ ] Demand side: announced data-centre campuses in the US with MW, sponsor, power source and
       status, each with a source; start from the nine campuses the data-centre research recorded
       on 2026-09-26 (Stargate Abilene, Hyperion, Colossus, Fairwater, Rainier and others; in the
