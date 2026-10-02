@@ -1,6 +1,6 @@
-# Refresh 2026-09-30T15:26:34Z
+# Refresh 2026-10-02T16:38:53Z
 
-7 companies: no new filings, 0 documents downloaded, models: 5 no-model, 1 unchanged, 1 changed, 0 errors. Finished 2026-09-30T15:26:40Z.
+7 companies: 1 new filing, 0 documents downloaded, models: 5 no-model, 2 unchanged, 0 errors. Finished 2026-10-02T16:38:58Z.
 
 EIA-860M: unchanged · 2026-08.
 
@@ -11,8 +11,9 @@ EIA-860M: unchanged · 2026-08.
 
 ## NBIS
 
-- New filings: none (262 tracked)
-- Model: changed - changed line items: revenue_growth_qoq, adjusted_ebitda_margin, ai_cloud_share_of_revenue, revenue_to_midpoint_arr, arr_per_active_mw_usd_m, ebitda_per_mw_year_usd_m, payback_years_per_mw, payback_years_per_mw_net_of_prepayment, prepayments_share_of_capex, free_cash_flow_usd_m, net_debt_usd_m, net_debt_to_ebitda
+- New filings (1 of 263 tracked):
+  - 6-K 2026-10-01 [0001104659-26-112824](https://www.sec.gov/Archives/edgar/data/1513845/000110465926112824/tm2626792d1_6k.htm)
+- Model: unchanged
 
 ## NVDA
 
