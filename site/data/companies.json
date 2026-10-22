@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-02T16:38:53Z",
+  "as_of": "2026-10-22T15:53:18Z",
   "companies": [
     {
       "ticker": "CRWV",
@@ -22,8 +22,8 @@
       "model_status": "built",
       "latest_filing": {
         "form": "6-K",
-        "date": "2026-10-01",
-        "url": "https://www.sec.gov/Archives/edgar/data/1513845/000110465926112824/tm2626792d1_6k.htm"
+        "date": "2026-10-22",
+        "url": "https://www.sec.gov/Archives/edgar/data/1513845/000110465926117978/tm2628078d1_6k.htm"
       },
       "has_data": true
     },
@@ -87,8 +87,8 @@
       "model_status": "no-model",
       "latest_filing": {
         "form": "10-Q",
-        "date": "2026-07-30",
-        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050705/meta-20260630.htm"
+        "date": "2026-10-22",
+        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026066773/meta-20260930.htm"
       },
       "has_data": true
     }

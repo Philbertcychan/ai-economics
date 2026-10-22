@@ -1,6 +1,6 @@
-# Refresh 2026-10-02T16:38:53Z
+# Refresh 2026-10-22T15:53:18Z
 
-7 companies: 1 new filing, 0 documents downloaded, models: 5 no-model, 2 unchanged, 0 errors. Finished 2026-10-02T16:38:58Z.
+7 companies: 2 new filings, 0 documents downloaded, models: 5 no-model, 2 unchanged, 0 errors. Finished 2026-10-22T15:53:23Z.
 
 EIA-860M: unchanged · 2026-08.
 
@@ -11,8 +11,8 @@ EIA-860M: unchanged · 2026-08.
 
 ## NBIS
 
-- New filings (1 of 263 tracked):
-  - 6-K 2026-10-01 [0001104659-26-112824](https://www.sec.gov/Archives/edgar/data/1513845/000110465926112824/tm2626792d1_6k.htm)
+- New filings (1 of 264 tracked):
+  - 6-K 2026-10-22 [0001104659-26-117978](https://www.sec.gov/Archives/edgar/data/1513845/000110465926117978/tm2628078d1_6k.htm)
 - Model: unchanged
 
 ## NVDA
@@ -37,7 +37,8 @@ EIA-860M: unchanged · 2026-08.
 
 ## META
 
-- New filings: none (57 tracked)
+- New filings (1 of 58 tracked):
+  - 10-Q 2026-10-22 [0001628280-26-066773](https://www.sec.gov/Archives/edgar/data/1326801/000162828026066773/meta-20260930.htm)
 - Model: no-model
 
 ## Site

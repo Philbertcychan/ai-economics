@@ -1,0 +1,35 @@
+{
+  "ticker": "MSFT",
+  "cik": "0000789019",
+  "pulled_at": "2026-10-22T15:53:20Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 4888108,
+      "sha256": "dd0308149a8e96497989ed7c690b5a49a00bef9ceafbb24638bda41e8ae938dd",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000789019.json",
+      "fetched_at": "2026-10-22T15:53:20Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 308479,
+      "sha256": "6e9c160d29ca37f86ebf630cd6b3803784e23d5d2d334053975be00c9e1690a0",
+      "source_url": "https://data.sec.gov/submissions/CIK0000789019-submissions-001.json",
+      "fetched_at": "2026-10-22T15:53:20Z"
+    },
+    {
+      "path": "submissions-002.json",
+      "bytes": 237745,
+      "sha256": "a8e9b1072aa20b7fa560fb3805f44529c29b849d69a83ebb47f99c596c3b114b",
+      "source_url": "https://data.sec.gov/submissions/CIK0000789019-submissions-002.json",
+      "fetched_at": "2026-10-22T15:53:20Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 185361,
+      "sha256": "a9a65d8640cde1fe6fd7cf0219d5b948f431bf4f8b7954de4386d62f7eaa2523",
+      "source_url": "https://data.sec.gov/submissions/CIK0000789019.json",
+      "fetched_at": "2026-10-22T15:53:20Z"
+    }
+  ]
+}
