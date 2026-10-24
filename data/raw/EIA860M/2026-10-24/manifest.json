@@ -1,0 +1,13 @@
+{
+  "source": "EIA860M",
+  "pulled_at": "2026-10-24T14:34:41Z",
+  "files": [
+    {
+      "path": "september_generator2026.xlsx",
+      "bytes": 14013970,
+      "sha256": "bcef74e1af991680731aeecfda967f5950db4ce739bb584edd8b8774c7e6da17",
+      "source_url": "https://www.eia.gov/electricity/data/eia860m/xls/september_generator2026.xlsx",
+      "fetched_at": "2026-10-24T14:34:41Z"
+    }
+  ]
+}
