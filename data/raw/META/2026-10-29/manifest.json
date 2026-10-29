@@ -1,0 +1,35 @@
+{
+  "ticker": "META",
+  "cik": "0001326801",
+  "pulled_at": "2026-10-29T17:26:38Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 2803690,
+      "sha256": "b0d0d92870b68488cec086cffd83514f2cc6c80d3e8c4f91e192b17ce3e7c946",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001326801.json",
+      "fetched_at": "2026-10-29T17:26:38Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 314274,
+      "sha256": "8c6bef6d56e554819de8da18ddb9c807a305db21a65d9fd33aa7929d90343b2a",
+      "source_url": "https://data.sec.gov/submissions/CIK0001326801-submissions-001.json",
+      "fetched_at": "2026-10-29T17:26:37Z"
+    },
+    {
+      "path": "submissions-002.json",
+      "bytes": 188137,
+      "sha256": "9756b32aa75265b8caa01e987fd6c449db808e9ed6d979131abd1edfdecbb150",
+      "source_url": "https://data.sec.gov/submissions/CIK0001326801-submissions-002.json",
+      "fetched_at": "2026-10-29T17:26:37Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 157546,
+      "sha256": "a2813acf7d9102fd82f405e7e5f5df5f5bb13bcf3f3f8c3caa04a348f13b1398",
+      "source_url": "https://data.sec.gov/submissions/CIK0001326801.json",
+      "fetched_at": "2026-10-29T17:26:37Z"
+    }
+  ]
+}
