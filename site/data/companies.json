@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-29T17:26:32Z",
+  "as_of": "2026-10-30T17:01:28Z",
   "companies": [
     {
       "ticker": "CRWV",
@@ -74,8 +74,8 @@
       "model_status": "no-model",
       "latest_filing": {
         "form": "10-Q",
-        "date": "2026-07-31",
-        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.htm"
+        "date": "2026-10-30",
+        "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000040/amzn-20260930.htm"
       },
       "has_data": true
     },

@@ -1,6 +1,6 @@
-# Refresh 2026-10-29T17:26:32Z
+# Refresh 2026-10-30T17:01:28Z
 
-7 companies: 2 new filings, 0 documents downloaded, models: 5 no-model, 2 unchanged, 0 errors. Finished 2026-10-29T17:26:38Z.
+7 companies: 1 new filing, 0 documents downloaded, models: 5 no-model, 2 unchanged, 0 errors. Finished 2026-10-30T17:01:33Z.
 
 EIA-860M: unchanged · 2026-09.
 
@@ -21,19 +21,18 @@ EIA-860M: unchanged · 2026-09.
 
 ## MSFT
 
-- New filings (1 of 132 tracked):
-  - 10-Q 2026-10-28 [0001193125-26-436133](https://www.sec.gov/Archives/edgar/data/789019/000119312526436133/msft-20260930.htm)
+- New filings: none (132 tracked)
 - Model: no-model
 
 ## GOOGL
 
-- New filings (1 of 45 tracked):
-  - 10-Q 2026-10-29 [0001652044-26-000084](https://www.sec.gov/Archives/edgar/data/1652044/000165204426000084/goog-20260930.htm)
+- New filings: none (45 tracked)
 - Model: no-model
 
 ## AMZN
 
-- New filings: none (114 tracked)
+- New filings (1 of 115 tracked):
+  - 10-Q 2026-10-30 [0001018724-26-000040](https://www.sec.gov/Archives/edgar/data/1018724/000101872426000040/amzn-20260930.htm)
 - Model: no-model
 
 ## META

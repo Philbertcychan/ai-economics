@@ -1,0 +1,28 @@
+{
+  "ticker": "GOOGL",
+  "cik": "0001652044",
+  "pulled_at": "2026-10-30T17:01:31Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 3249987,
+      "sha256": "ec4a3095d634583925b5ea450db8a5ed974dc48f6f1b4f594022310bc78d4032",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001652044.json",
+      "fetched_at": "2026-10-30T17:01:31Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 269830,
+      "sha256": "4455c88690c4cf6526a83ada9305ede53c500cebc4aa5c843f1f107f73b0ec97",
+      "source_url": "https://data.sec.gov/submissions/CIK0001652044-submissions-001.json",
+      "fetched_at": "2026-10-30T17:01:31Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 152289,
+      "sha256": "6eb3e5d221ac8d1215877e916701b1091757617f02ae14e6061e7bc4d0104433",
+      "source_url": "https://data.sec.gov/submissions/CIK0001652044.json",
+      "fetched_at": "2026-10-30T17:01:31Z"
+    }
+  ]
+}
