@@ -1,6 +1,6 @@
-# Refresh 2026-10-30T17:01:28Z
+# Refresh 2026-11-03T18:27:42Z
 
-7 companies: 1 new filing, 0 documents downloaded, models: 5 no-model, 2 unchanged, 0 errors. Finished 2026-10-30T17:01:33Z.
+7 companies: no new filings, 0 documents downloaded, models: 5 no-model, 2 unchanged, 0 errors. Finished 2026-11-03T18:27:47Z.
 
 EIA-860M: unchanged · 2026-09.
 
@@ -31,8 +31,7 @@ EIA-860M: unchanged · 2026-09.
 
 ## AMZN
 
-- New filings (1 of 115 tracked):
-  - 10-Q 2026-10-30 [0001018724-26-000040](https://www.sec.gov/Archives/edgar/data/1018724/000101872426000040/amzn-20260930.htm)
+- New filings: none (115 tracked)
 - Model: no-model
 
 ## META
