@@ -1,0 +1,28 @@
+{
+  "ticker": "NVDA",
+  "cik": "0001045810",
+  "pulled_at": "2026-11-12T18:57:04Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 4092966,
+      "sha256": "19ef503a5770f5660964b3c3aea6937579d9b359da344afe6a9adf59c63d26ff",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001045810.json",
+      "fetched_at": "2026-11-12T18:57:04Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 239281,
+      "sha256": "3bc4efde56260e6c3c0233c6cc2d1d3319f5b389db7bbcfb97d57f130442b880",
+      "source_url": "https://data.sec.gov/submissions/CIK0001045810-submissions-001.json",
+      "fetched_at": "2026-11-12T18:57:04Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 160083,
+      "sha256": "092e307ba8b409e49bd89a410eeb3134e7d193ea083eaf6e687539702b2ede07",
+      "source_url": "https://data.sec.gov/submissions/CIK0001045810.json",
+      "fetched_at": "2026-11-12T18:57:04Z"
+    }
+  ]
+}
