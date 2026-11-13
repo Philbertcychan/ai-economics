@@ -1,0 +1,28 @@
+{
+  "ticker": "CRWV",
+  "cik": "0001769628",
+  "pulled_at": "2026-11-13T18:31:42Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 569195,
+      "sha256": "db107413ed110bc97796948be9bc14f8ac78ba9601e2c628feef97850e05380f",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001769628.json",
+      "fetched_at": "2026-11-13T18:31:42Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 26175,
+      "sha256": "498b55e4d1952389de1c74620332aa530ea7c4f61e773841aa21435b5f59a123",
+      "source_url": "https://data.sec.gov/submissions/CIK0001769628-submissions-001.json",
+      "fetched_at": "2026-11-13T18:31:42Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 157253,
+      "sha256": "1c74624b9c322b67f33cdd81c0c8be40c7d3ddc8f14bdd970f860b7538504833",
+      "source_url": "https://data.sec.gov/submissions/CIK0001769628.json",
+      "fetched_at": "2026-11-13T18:31:42Z"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "ticker": "AMZN",
+  "cik": "0001018724",
+  "pulled_at": "2026-11-13T18:31:45Z",
+  "files": [
+    {
+      "path": "companyfacts.json",
+      "bytes": 4554378,
+      "sha256": "acddb7c0a6973a1fd08372de3b292298a34eae7f42a7eedc4bdebd3ac659c8fd",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001018724.json",
+      "fetched_at": "2026-11-13T18:31:45Z"
+    },
+    {
+      "path": "submissions-001.json",
+      "bytes": 316697,
+      "sha256": "aafe633fb5f9188077e09d58d8e7a378ee59a76e1abb500542e3c75a3235489e",
+      "source_url": "https://data.sec.gov/submissions/CIK0001018724-submissions-001.json",
+      "fetched_at": "2026-11-13T18:31:45Z"
+    },
+    {
+      "path": "submissions-002.json",
+      "bytes": 21839,
+      "sha256": "a81d2622f0f62790adb9cbbbe2044a19e1f02afc0e83b7388ba2d987207ceefb",
+      "source_url": "https://data.sec.gov/submissions/CIK0001018724-submissions-002.json",
+      "fetched_at": "2026-11-13T18:31:45Z"
+    },
+    {
+      "path": "submissions.json",
+      "bytes": 160388,
+      "sha256": "c2c36f85c91b5d57c0808db46c216d089401d3ad0c5b813ac828b8830481fd80",
+      "source_url": "https://data.sec.gov/submissions/CIK0001018724.json",
+      "fetched_at": "2026-11-13T18:31:45Z"
+    }
+  ]
+}
