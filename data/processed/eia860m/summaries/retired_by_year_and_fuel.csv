@@ -387,13 +387,14 @@ year,technology,units,nameplate_mw,net_summer_mw
 2025,Onshore Wind Turbine,11,21.9,20.0
 2025,Solar Photovoltaic,7,10.3,8.1
 2025,All Other,1,7.5,4.0
+2026,Natural Gas Steam Turbine,5,1347.9,1104.4
 2026,Natural Gas Fired Combustion Turbine,7,821.9,643.0
-2026,Natural Gas Steam Turbine,2,43.5,42.5
 2026,Landfill Gas,13,17.6,17.3
 2026,Batteries,1,10.0,5.0
 2026,Natural Gas Internal Combustion Engine,6,8.2,7.8
 2026,Petroleum Liquids,5,5.7,5.7
 2026,All Other,1,5.3,5.3
+2026,Conventional Hydroelectric,2,5.0,5.0
 2026,Wood/Wood Waste Biomass,1,5.0,4.7
 2026,Solar Photovoltaic,2,3.2,3.2
 2026,Onshore Wind Turbine,9,1.5,1.5

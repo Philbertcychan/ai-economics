@@ -840,8 +840,6 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 3989,City of Colorado Springs - (CO),492,South Plant (CO),A4,CO,WACM,Natural Gas Fired Combustion Turbine,NG,GT,40.9,25.0,(OP) Operating,OP,2023,6
 3989,City of Colorado Springs - (CO),492,South Plant (CO),A5,CO,WACM,Natural Gas Fired Combustion Turbine,NG,GT,40.9,25.0,(OP) Operating,OP,2023,6
 3989,City of Colorado Springs - (CO),492,South Plant (CO),A6,CO,WACM,Natural Gas Fired Combustion Turbine,NG,GT,40.6,25.0,(OP) Operating,OP,2023,6
-3989,City of Colorado Springs - (CO),494,Manitou Springs,1,CO,WACM,Conventional Hydroelectric,WAT,HY,2.5,2.5,(OP) Operating,OP,1939,5
-3989,City of Colorado Springs - (CO),494,Manitou Springs,2,CO,WACM,Conventional Hydroelectric,WAT,HY,2.5,2.5,(OP) Operating,OP,1927,5
 3989,City of Colorado Springs - (CO),494,Manitou Springs,3,CO,WACM,Conventional Hydroelectric,WAT,HY,0.6,0.5,(OP) Operating,OP,2006,3
 3989,City of Colorado Springs - (CO),495,Ruxton Park,1,CO,WACM,Conventional Hydroelectric,WAT,HY,1.0,1.0,(OP) Operating,OP,1925,5
 8751,Town of Holly - (CO),502,Holly,5,CO,WACM,Petroleum Liquids,DFO,IC,0.4,0.3,(SB) Standby/Backup: available for service but not normally used,SB,2000,6
@@ -1187,6 +1185,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 7140,Georgia Power Co,707,Goat Rock,6,AL,SOCO,Conventional Hydroelectric,WAT,HY,5.0,5.0,(OP) Operating,OP,1956,2
 7140,Georgia Power Co,707,Goat Rock,7,AL,SOCO,Conventional Hydroelectric,WAT,HY,9.3,9.3,(OP) Operating,OP,2005,6
 7140,Georgia Power Co,707,Goat Rock,8,AL,SOCO,Conventional Hydroelectric,WAT,HY,9.3,9.3,(OP) Operating,OP,2005,6
+7140,Georgia Power Co,708,Hammond,5,GA,SOCO,Batteries,MWH,BA,57.5,57.5,(OP) Operating,OP,2026,10
 7140,Georgia Power Co,710,Jack McDonough,3A,GA,SOCO,Petroleum Liquids,DFO,GT,41.8,32.0,(OP) Operating,OP,1971,5
 7140,Georgia Power Co,710,Jack McDonough,3B,GA,SOCO,Petroleum Liquids,DFO,GT,41.8,32.0,(OP) Operating,OP,1971,5
 7140,Georgia Power Co,710,Jack McDonough,4,GA,SOCO,Natural Gas Fired Combined Cycle,NG,CA,369.0,360.0,(OP) Operating,OP,2011,12
@@ -3139,8 +3138,8 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 17568,Cooperative Energy,2070,Moselle,GTG2,MS,MISO,Natural Gas Fired Combined Cycle,NG,CT,83.5,75.0,(OP) Operating,OP,2012,11
 10000,Evergy Metro,2079,Hawthorn,5,MO,SWPP,Conventional Steam Coal,SUB,ST,569.0,561.1,(OP) Operating,OP,1969,5
 10000,Evergy Metro,2079,Hawthorn,6,MO,SWPP,Natural Gas Fired Combined Cycle,NG,CT,170.0,131.6,(OP) Operating,OP,1997,6
-10000,Evergy Metro,2079,Hawthorn,7,MO,SWPP,Natural Gas Fired Combustion Turbine,NG,GT,82.2,78.3,(OP) Operating,OP,2000,5
-10000,Evergy Metro,2079,Hawthorn,8,MO,SWPP,Natural Gas Fired Combustion Turbine,NG,GT,82.2,79.1,(OP) Operating,OP,2000,7
+10000,Evergy Metro,2079,Hawthorn,7,MO,SWPP,Natural Gas Fired Combustion Turbine,NG,GT,82.2,89.3,(OP) Operating,OP,2000,5
+10000,Evergy Metro,2079,Hawthorn,8,MO,SWPP,Natural Gas Fired Combustion Turbine,NG,GT,82.2,90.1,(OP) Operating,OP,2000,7
 10000,Evergy Metro,2079,Hawthorn,9,MO,SWPP,Natural Gas Fired Combined Cycle,NG,CA,142.8,110.2,(OP) Operating,OP,2000,7
 10000,Evergy Metro,2081,Northeast (MO),11,MO,SWPP,Petroleum Liquids,DFO,GT,55.4,48.0,(OP) Operating,OP,1972,5
 10000,Evergy Metro,2081,Northeast (MO),12,MO,SWPP,Petroleum Liquids,DFO,GT,55.4,48.0,(OP) Operating,OP,1972,5
@@ -4956,9 +4955,6 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 5701,El Paso Electric Co,3456,Newman,CT2,TX,EPE,Natural Gas Fired Combined Cycle,NG,CT,85.0,67.0,(OP) Operating,OP,1975,8
 55937,Entergy Texas Inc.,3457,Lewis Creek,1,TX,MISO,Natural Gas Steam Turbine,NG,ST,271.4,250.1,(OP) Operating,OP,1970,12
 55937,Entergy Texas Inc.,3457,Lewis Creek,2,TX,MISO,Natural Gas Steam Turbine,NG,ST,271.4,249.2,(OP) Operating,OP,1971,5
-55937,Entergy Texas Inc.,3459,Sabine,1,TX,MISO,Natural Gas Steam Turbine,NG,ST,239.4,202.5,(OP) Operating,OP,1962,1
-55937,Entergy Texas Inc.,3459,Sabine,3,TX,MISO,Natural Gas Steam Turbine,NG,ST,473.4,369.3,(OP) Operating,OP,1966,12
-55937,Entergy Texas Inc.,3459,Sabine,4,TX,MISO,Natural Gas Steam Turbine,NG,ST,591.6,490.1,(OP) Operating,OP,1974,8
 55937,Entergy Texas Inc.,3459,Sabine,5,TX,MISO,Natural Gas Steam Turbine,NG,ST,507.4,439.5,(OP) Operating,OP,1979,12
 54888,NRG Texas Power LLC,3460,Cedar Bayou,1,TX,ERCO,Natural Gas Steam Turbine,NG,ST,765.0,746.0,(OP) Operating,OP,1970,12
 54888,NRG Texas Power LLC,3460,Cedar Bayou,2,TX,ERCO,Natural Gas Steam Turbine,NG,ST,765.0,749.0,(OP) Operating,OP,1972,3
@@ -11422,13 +11418,13 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 18518,Tenaska Gateway Partners Ltd,55132,Tenaska Gateway Generating Station,GTG2,TX,ERCO,Natural Gas Fired Combined Cycle,NG,CT,183.2,150.0,(OP) Operating,OP,2001,7
 18518,Tenaska Gateway Partners Ltd,55132,Tenaska Gateway Generating Station,GTG3,TX,ERCO,Natural Gas Fired Combined Cycle,NG,CT,183.2,138.0,(OP) Operating,OP,2001,7
 18518,Tenaska Gateway Partners Ltd,55132,Tenaska Gateway Generating Station,STG1,TX,ERCO,Natural Gas Fired Combined Cycle,NG,CA,390.0,381.0,(OP) Operating,OP,2001,7
-18981,Thomson Corp,55133,Thomson Reuters Campus Bldg A-D,3086,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
-18981,Thomson Corp,55133,Thomson Reuters Campus Bldg A-D,3087,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
-18981,Thomson Corp,55133,Thomson Reuters Campus Bldg A-D,3088,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
-18981,Thomson Corp,55133,Thomson Reuters Campus Bldg A-D,3089,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,6
-18981,Thomson Corp,55133,Thomson Reuters Campus Bldg A-D,3090,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,6
-18981,Thomson Corp,55133,Thomson Reuters Campus Bldg A-D,3091,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
-18981,Thomson Corp,55133,Thomson Reuters Campus Bldg A-D,3093,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
+18981,Omni JV LLC (Westbridge Print),55133,"Omni JV LLC (Westbridge Print), Building G",3086,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
+18981,Omni JV LLC (Westbridge Print),55133,"Omni JV LLC (Westbridge Print), Building G",3087,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
+18981,Omni JV LLC (Westbridge Print),55133,"Omni JV LLC (Westbridge Print), Building G",3088,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
+18981,Omni JV LLC (Westbridge Print),55133,"Omni JV LLC (Westbridge Print), Building G",3089,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,6
+18981,Omni JV LLC (Westbridge Print),55133,"Omni JV LLC (Westbridge Print), Building G",3090,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,6
+18981,Omni JV LLC (Westbridge Print),55133,"Omni JV LLC (Westbridge Print), Building G",3091,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
+18981,Omni JV LLC (Westbridge Print),55133,"Omni JV LLC (Westbridge Print), Building G",3093,MN,MISO,Petroleum Liquids,DFO,IC,2.0,1.6,(SB) Standby/Backup: available for service but not normally used,SB,1999,4
 20856,Wisconsin Power & Light Co,55135,Alliant Energy Neenah,CT01,WI,MISO,Natural Gas Fired Combustion Turbine,NG,GT,185.5,201.0,(OP) Operating,OP,2000,5
 20856,Wisconsin Power & Light Co,55135,Alliant Energy Neenah,CT02,WI,MISO,Natural Gas Fired Combustion Turbine,NG,GT,185.5,200.1,(OP) Operating,OP,2000,5
 16604,City of San Antonio - (TX),55137,Rio Nogales Power Project,CTG1,TX,ERCO,Natural Gas Fired Combined Cycle,NG,CT,223.5,165.5,(OP) Operating,OP,2002,5
@@ -11475,11 +11471,11 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 11269,Lower Colorado River Authority,55154,Lost Pines 1 Power Project,CTA,TX,ERCO,Natural Gas Fired Combined Cycle,NG,CT,202.5,169.0,(OP) Operating,OP,2001,5
 11269,Lower Colorado River Authority,55154,Lost Pines 1 Power Project,CTB,TX,ERCO,Natural Gas Fired Combined Cycle,NG,CT,202.5,169.0,(OP) Operating,OP,2001,5
 11269,Lower Colorado River Authority,55154,Lost Pines 1 Power Project,ST,TX,ERCO,Natural Gas Fired Combined Cycle,NG,CA,204.0,172.0,(OP) Operating,OP,2001,5
-57229,MM Albany Energy LLC,55155,MM Albany Energy,UNT1,NY,NYIS,Landfill Gas,LFG,IC,0.9,0.9,(OP) Operating,OP,1998,3
-57229,MM Albany Energy LLC,55155,MM Albany Energy,UNT2,NY,NYIS,Landfill Gas,LFG,IC,0.9,0.9,(OP) Operating,OP,1998,3
-57229,MM Albany Energy LLC,55155,MM Albany Energy,UNT3,NY,NYIS,Landfill Gas,LFG,IC,0.9,0.9,(OP) Operating,OP,2008,11
-57229,MM Albany Energy LLC,55155,MM Albany Energy,UNT4,NY,NYIS,Landfill Gas,LFG,IC,1.6,1.6,(OP) Operating,OP,2012,5
-57229,MM Albany Energy LLC,55155,MM Albany Energy,UNT5,NY,NYIS,Landfill Gas,LFG,IC,1.6,1.6,(OP) Operating,OP,2012,5
+67296,Northeastern Power Systems,55155,MM Albany Energy,UNT1,NY,NYIS,Landfill Gas,LFG,IC,0.9,0.9,(OP) Operating,OP,1998,3
+67296,Northeastern Power Systems,55155,MM Albany Energy,UNT2,NY,NYIS,Landfill Gas,LFG,IC,0.9,0.9,(OP) Operating,OP,1998,3
+67296,Northeastern Power Systems,55155,MM Albany Energy,UNT3,NY,NYIS,Landfill Gas,LFG,IC,0.9,0.9,(OP) Operating,OP,2008,11
+67296,Northeastern Power Systems,55155,MM Albany Energy,UNT4,NY,NYIS,Landfill Gas,LFG,IC,1.6,1.6,(OP) Operating,OP,2012,5
+67296,Northeastern Power Systems,55155,MM Albany Energy,UNT5,NY,NYIS,Landfill Gas,LFG,IC,1.6,1.6,(OP) Operating,OP,2012,5
 57231,MM Tulare Energy LLC,55160,MM Tulare Energy,UNT1,CA,CISO,Landfill Gas,LFG,IC,0.9,0.8,(SB) Standby/Backup: available for service but not normally used,SB,1998,5
 57231,MM Tulare Energy LLC,55160,MM Tulare Energy,UNT2,CA,CISO,Landfill Gas,LFG,IC,0.9,0.8,(SB) Standby/Backup: available for service but not normally used,SB,1998,5
 57232,MM Lopez Energy LLC,55161,MM Lopez Energy,UNT1,CA,CISO,Landfill Gas,LFG,IC,3.0,2.7,(OP) Operating,OP,1998,12
@@ -12380,7 +12376,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 18642,Tennessee Valley Authority,55694,Quantum Choctaw Power LLC,ST1,MS,TVA,Natural Gas Fired Combined Cycle,NG,CA,310.5,270.0,(OP) Operating,OP,2006,7
 7724,MRP San Joaquin Energy LLC.,55698,Hanford Energy Park Peaker,HEP1,CA,CISO,Natural Gas Fired Combustion Turbine,NG,GT,46.1,45.9,(OP) Operating,OP,2001,9
 7724,MRP San Joaquin Energy LLC.,55698,Hanford Energy Park Peaker,HEP2,CA,CISO,Natural Gas Fired Combustion Turbine,NG,GT,46.1,45.9,(OP) Operating,OP,2001,9
-1268,Bayswater Peaking Facility LLC,55699,Bayswater Peaking Facility LLC,1,NY,NYIS,Natural Gas Fired Combustion Turbine,NG,GT,60.5,75.7,(OP) Operating,OP,2002,6
+1268,Bayswater Peaking Facility LLC,55699,Bayswater Peaking Facility LLC,1,NY,NYIS,,,GT,60.5,75.7,(OP) Operating,OP,2002,6
 15500,Puget Sound Energy Inc,55700,Mint Farm Generating Station,1STG,WA,PSEI,Natural Gas Fired Combined Cycle,NG,CA,133.0,120.0,(OP) Operating,OP,2008,1
 15500,Puget Sound Energy Inc,55700,Mint Farm Generating Station,CTG1,WA,PSEI,Natural Gas Fired Combined Cycle,NG,CT,186.0,150.0,(OP) Operating,OP,2008,1
 40577,"American Mun Power-Ohio, Inc",55701,Fremont Energy Center,CA01,OH,PJM,Natural Gas Fired Combined Cycle,NG,CA,358.7,345.1,(OP) Operating,OP,2012,1
@@ -14809,7 +14805,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 62077,Sherbino II Wind Farm LLC,57415,Sherbino II,1,TX,ERCO,Onshore Wind Turbine,WND,WT,132.0,132.0,(OP) Operating,OP,2011,11
 60025,Greenbacker Renewable Energy Corporation,57417,Elk Wind Farm,NORD,IA,MISO,Onshore Wind Turbine,WND,WT,40.8,40.8,(OP) Operating,OP,2011,12
 5109,DTE Electric Company,57421,Gratiot Wind Park,1,MI,MISO,Onshore Wind Turbine,WND,WT,102.0,102.0,(OP) Operating,OP,2011,11
-56751,Yolo County of - (CA),57422,Yolo County Solar Project,1,CA,CISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2010,12
+68099,"Saint-Gobain Adfors America, Inc.",57422,Yolo County Solar Project,1,CA,CISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2010,12
 15399,Avangrid Power LLC,57424,Buffalo Ridge II LLC,1,SD,MISO,Onshore Wind Turbine,WND,WT,210.0,210.0,(OP) Operating,OP,2010,12
 64742,"Mountain Air Projects, LLC",57427,Ryegrass Windfarm,1,ID,IPCO,Onshore Wind Turbine,WND,WT,23.0,23.0,(OP) Operating,OP,2012,12
 64742,"Mountain Air Projects, LLC",57428,Hammett Hill Windfarm,1,ID,IPCO,Onshore Wind Turbine,WND,WT,23.0,23.0,(OP) Operating,OP,2012,12
@@ -18394,6 +18390,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 64778,"Strata Manager, LLC",60429,Tides Lane Farm,PV1,NC,CPLE,Solar Photovoltaic,SUN,PV,3.7,3.7,(OP) Operating,OP,2019,10
 60231,"SEC LHNY Solar One, LLC",60431,Tompkins Cortland Community College,TC3,NY,NYIS,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2015,5
 60453,Onward Energy,60432,Three Peaks Power,TPP,UT,PACE,Solar Photovoltaic,SUN,PV,80.0,80.0,(OP) Operating,OP,2016,12
+5416,"Duke Energy Carolinas, LLC",60434,Baxter Creek Solar,PV1,NC,DUK,Solar Photovoltaic,SUN,PV,30.0,30.0,(OP) Operating,OP,2026,10
 15470,"Duke Energy Indiana, LLC",60435,Crane Solar Facility,XXXXX,IN,MISO,Solar Photovoltaic,SUN,PV,17.0,17.0,(OP) Operating,OP,2017,1
 17650,Southern Power Co,60436,East Pecos Solar,1,TX,ERCO,Solar Photovoltaic,SUN,PV,118.5,118.5,(OP) Operating,OP,2017,4
 56990,NJR Clean Energy Ventures Corporation,60437,Bernards Solar,BERNS,NJ,PJM,Solar Photovoltaic,SUN,PV,2.9,2.9,(OP) Operating,OP,2016,9
@@ -20163,7 +20160,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 61521,"Pegasus Wind, LLC",61916,Pegasus Wind,PWEC,MI,MISO,Onshore Wind Turbine,WND,WT,48.0,48.0,(OP) Operating,OP,2019,12
 61521,"Pegasus Wind, LLC",61916,Pegasus Wind,PWEC2,MI,MISO,Onshore Wind Turbine,WND,WT,130.0,130.0,(OP) Operating,OP,2020,9
 61520,Kearsarge Oppenheim LLC,61917,Kearsarge Oppenheim CSG,OPPEN,NY,NYIS,Solar Photovoltaic,SUN,PV,1.4,1.4,(OP) Operating,OP,2018,7
-5248,Dominion Energy Inc.,61918,"Blackville Solar Farm, LLC",1,SC,SCEG,Solar Photovoltaic,SUN,PV,7.2,7.2,(OP) Operating,OP,2020,12
+59380,"Enel Green Power NA, Inc.",61918,"Blackville Solar Farm, LLC",1,SC,SCEG,Solar Photovoltaic,SUN,PV,7.2,7.2,(OP) Operating,OP,2020,12
 61518,Frontenac Holdco LLC,61919,"Frontenac Holdco LLC, CSG",FRONT,MN,MISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2019,3
 61523,225DD 8me LLC,61920,Galloway 1 Solar Farm,GSM01,TX,ERCO,Solar Photovoltaic,SUN,PV,250.0,250.0,(OP) Operating,OP,2021,10
 61527,"Tahoka Wind, LLC",61921,Tahoka Wind,TAH,TX,ERCO,Onshore Wind Turbine,WND,WT,300.0,300.0,(OP) Operating,OP,2018,12
@@ -20481,7 +20478,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 58970,"Ecoplexus, Inc",62210,Felton CSG PV1-5,FELT3,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2019,6
 58970,"Ecoplexus, Inc",62210,Felton CSG PV1-5,FELT4,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2019,6
 58970,"Ecoplexus, Inc",62210,Felton CSG PV1-5,FELT5,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2019,6
-58468,Dominion Renewable Energy,62211,Denmark Solar,35,SC,SCEG,Solar Photovoltaic,SUN,PV,6.0,6.0,(OP) Operating,OP,2020,12
+59380,"Enel Green Power NA, Inc.",62211,Denmark Solar,35,SC,SCEG,Solar Photovoltaic,SUN,PV,6.0,6.0,(OP) Operating,OP,2020,12
 61736,Gaines Solar,62216,Gaines Solar,41,SC,CPLE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2020,12
 11806,Massachusetts Mun Wholes Electric Co,62219,Ashburnham Energy Storage Project,AMLPB,MA,ISNE,Batteries,MWH,BA,3.0,3.0,(OP) Operating,OP,2019,3
 56201,Engie North America,62220,"East Fork Wind Project, LLC",WTGS,KS,SWPP,Onshore Wind Turbine,WND,WT,195.8,195.8,(OP) Operating,OP,2020,3
@@ -20589,10 +20586,10 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 61838,"Aulander Holloman Solar, LLC",62340,"Aulander Holloman Solar, LLC",HOLLO,NC,PJM,Solar Photovoltaic,SUN,PV,99.0,99.9,(OP) Operating,OP,2018,12
 67082,"Headwater Energy, LLC",62342,Washington Solar (SC),87,SC,CPLE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2023,3
 61864,Washington Solar II (SC),62344,Washington Solar II (SC),88,SC,CPLE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,7
-58468,Dominion Renewable Energy,62346,Trask East Solar,83,SC,SCEG,Solar Photovoltaic,SUN,PV,12.0,12.0,(OP) Operating,OP,2020,12
+59380,"Enel Green Power NA, Inc.",62346,Trask East Solar,83,SC,SCEG,Solar Photovoltaic,SUN,PV,12.0,12.0,(OP) Operating,OP,2020,12
 61866,Weaver Solar,62347,Weaver Solar,90,SC,CPLE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2021,12
 67082,"Headwater Energy, LLC",62352,Thomas Solar,81,SC,CPLE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,4
-58468,Dominion Renewable Energy,62353,Yemassee Solar,93,SC,SCEG,Solar Photovoltaic,SUN,PV,10.0,10.0,(OP) Operating,OP,2020,12
+59380,"Enel Green Power NA, Inc.",62353,Yemassee Solar,93,SC,SCEG,Solar Photovoltaic,SUN,PV,10.0,10.0,(OP) Operating,OP,2020,12
 57389,IKEA Property Inc,62355,IKEA Norfolk Rooftop PV System,569PV,VA,PJM,Solar Photovoltaic,SUN,PV,0.9,0.9,(OP) Operating,OP,2019,3
 61886,"Lockett Windfarm, LLC",62356,Lockett Windfarm,LOC,TX,ERCO,Onshore Wind Turbine,WND,WT,183.8,183.8,(OP) Operating,OP,2019,9
 61888,Gloversville Community Solar LLC,62357,Gloversville Landfill Solar,08158,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2021,5
@@ -20805,7 +20802,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 6455,"Duke Energy Florida, LLC",62541,Lake Placid Solar Power Plant,PV1,FL,FPC,Solar Photovoltaic,SUN,PV,45.0,45.0,(OP) Operating,OP,2019,12
 6455,"Duke Energy Florida, LLC",62542,Debary Solar Power Plant,PV1,FL,FPC,Solar Photovoltaic,SUN,PV,74.5,74.5,(OP) Operating,OP,2020,5
 6455,"Duke Energy Florida, LLC",62543,Trenton Solar Power Plant,PV1,FL,FPC,Solar Photovoltaic,SUN,PV,74.9,74.9,(OP) Operating,OP,2019,12
-58468,Dominion Renewable Energy,62544,Wilkinson Solar LLC,GEN1,NC,PJM,Solar Photovoltaic,SUN,PV,80.6,80.6,(OP) Operating,OP,2019,12
+59380,"Enel Green Power NA, Inc.",62544,Wilkinson Solar LLC,GEN1,NC,PJM,Solar Photovoltaic,SUN,PV,80.6,80.6,(OP) Operating,OP,2019,12
 60025,Greenbacker Renewable Energy Corporation,62545,Renew Solar ABC Sacramento LLC,SACRA,CA,BANC,Solar Photovoltaic,SUN,PV,1.7,1.7,(OP) Operating,OP,2020,11
 62048,Westlands Almond LLC,62546,Almond,ALMND,CA,CISO,Solar Photovoltaic,SUN,PV,19.9,19.9,(OP) Operating,OP,2023,9
 67268,Aqua,62547,Aquamarine,AQUAM,CA,CISO,Solar Photovoltaic,SUN,PV,250.0,250.0,(OP) Operating,OP,2021,9
@@ -22055,6 +22052,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 63393,VS Dedeaux LLC,63674,Dedeaux,DEDEA,CA,LDWP,Solar Photovoltaic,SUN,PV,0.9,0.9,(OP) Operating,OP,2019,12
 63394,"MSAP 13, LLC",63675,MSAP 13,TROYL,NY,NYIS,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2020,12
 65043,Madison Energy Investments LLC,63676,Spencer Solar CSG,SPENC,MA,ISNE,Solar Photovoltaic,SUN,PV,2.3,2.3,(OP) Operating,OP,2025,6
+65043,Madison Energy Investments LLC,63677,Sturbridge Road Solar (CSG),STURB,MA,ISNE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,10
 65164,CleanCapital Holdings,63678,Paulson Community (CSG),PAUL,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2020,4
 65164,CleanCapital Holdings,63679,Laurel Village (CSG),LAUR,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2020,4
 65164,CleanCapital Holdings,63680,Hertzberg Community (CSG),HERTZ,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2020,4
@@ -22150,8 +22148,8 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 65173,United States Solar Corporation,63742,USS Viceroy Solar LLC CSG,USVIC,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2021,1
 60531,Standard Solar,63743,USS Solar Way LLC CSG,SOLWY,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2020,11
 65173,United States Solar Corporation,63744,USS Hubers Solar LLC CSG,HUBER,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2021,1
-5248,Dominion Energy Inc.,63745,"Greensville County Solar Project, LLC",GVSO,VA,PJM,Solar Photovoltaic,SUN,PV,80.0,80.0,(OP) Operating,OP,2020,12
-5248,Dominion Energy Inc.,63746,"TWE Myrtle Solar Farm, LLC",MYSO,VA,PJM,Solar Photovoltaic,SUN,PV,15.0,15.0,(OP) Operating,OP,2020,6
+59380,"Enel Green Power NA, Inc.",63745,"Greensville County Solar Project, LLC",GVSO,VA,PJM,Solar Photovoltaic,SUN,PV,80.0,80.0,(OP) Operating,OP,2020,12
+59380,"Enel Green Power NA, Inc.",63746,"TWE Myrtle Solar Farm, LLC",MYSO,VA,PJM,Solar Photovoltaic,SUN,PV,15.0,15.0,(OP) Operating,OP,2020,6
 63441,Fogarty Solar LLC,63747,Fogarty CSG,GRA,NY,NYIS,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2021,3
 63442,Mount Hope Solar 2 LLC,63748,Mount Hope West,MHW,NY,NYIS,Solar Photovoltaic,SUN,PV,1.9,1.9,(OP) Operating,OP,2020,4
 63443,Mount Hope Solar 1 LLC,63749,Mount Hope East,MHE,NY,NYIS,Solar Photovoltaic,SUN,PV,1.9,1.9,(OP) Operating,OP,2019,10
@@ -22208,6 +22206,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 66039,"SC Oregon 2 Lessor Parent, LLC",63795,"Alkali Solar, LLC",2,OR,BPAT,Solar Photovoltaic,SUN,PV,10.0,10.0,(OP) Operating,OP,2020,6
 66039,"SC Oregon 2 Lessor Parent, LLC",63796,"West Hines Solar I, LLC",1,OR,BPAT,Solar Photovoltaic,SUN,PV,10.0,10.0,(OP) Operating,OP,2020,6
 61222,174 Power Global Corp.,63797,Ellis Solar LLC,GER01,TX,ERCO,Solar Photovoltaic,SUN,PV,80.0,80.0,(OP) Operating,OP,2023,10
+61222,174 Power Global Corp.,63798,Atlas,ATL01,AZ,AZPS,Solar Photovoltaic,SUN,PV,300.0,300.0,(OP) Operating,OP,2026,9
 61227,Nautilus Solar Solutions,63800,NY - CSG - Ellsworth II,23,NY,NYIS,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2019,9
 9324,Indiana Michigan Power Co,63801,St. Joseph Solar,1,IN,PJM,Solar Photovoltaic,SUN,PV,20.0,20.0,(OP) Operating,OP,2021,3
 63487,"Bronco Plains Wind, LLC",63803,"Bronco Plains Wind, LLC",WBOPL,CO,PSCO,Onshore Wind Turbine,WND,WT,300.0,299.0,(OP) Operating,OP,2020,9
@@ -22564,6 +22563,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 63784,"Azure Sky Wind Project, LLC",64164,"Azure Sky Wind Project, LLC Hybrid",ASWBE,TX,ERCO,Batteries,MWH,BA,120.0,120.0,(OP) Operating,OP,2023,12
 63784,"Azure Sky Wind Project, LLC",64164,"Azure Sky Wind Project, LLC Hybrid",ASWWT,TX,ERCO,Onshore Wind Turbine,WND,WT,350.2,350.2,(OP) Operating,OP,2024,8
 56201,Engie North America,64165,Priddy Wind Project,WTG1,TX,ERCO,Onshore Wind Turbine,WND,WT,302.4,302.4,(OP) Operating,OP,2022,1
+63792,Hornet Solar LLC,64167,Hornet Solar,GEN,NC,DUK,Solar Photovoltaic,SUN,PV,73.0,73.0,(OP) Operating,OP,2026,10
 63794,"Albemarle Beach Solar, LLC",64169,Albemarle Beach Solar,BEACH,NC,PJM,Solar Photovoltaic,SUN,PV,130.2,140.0,(OP) Operating,OP,2020,12
 61012,AES Distributed Energy,64170,"BWC Muddy Brook, LLC Hybrid",MBES,MA,ISNE,Batteries,MWH,BA,0.9,0.9,(OP) Operating,OP,2021,9
 61012,AES Distributed Energy,64170,"BWC Muddy Brook, LLC Hybrid",MBPV,MA,ISNE,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2021,9
@@ -23134,7 +23134,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 61012,AES Distributed Energy,64720,Knapp West(CSG),KNPPW,NY,ISNE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2021,12
 61012,AES Distributed Energy,64721,Rowe (CSG),RWEAV,NY,ISNE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2021,11
 61012,AES Distributed Energy,64722,Redman South Community Solar,RDMNS,NY,ISNE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2022,2
-64292,Revity Energy LLC,64723,Alton Road Solar,50835,RI,ISNE,Solar Photovoltaic,SUN,PV,13.9,13.9,(OP) Operating,OP,2019,12
+64292,"Revity Management, LLC",64723,Alton Road Solar,50835,RI,ISNE,Solar Photovoltaic,SUN,PV,13.9,13.9,(OP) Operating,OP,2019,12
 61012,AES Distributed Energy,64724,Townline Community Solar,TWNLN,NY,ISNE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2022,2
 61012,AES Distributed Energy,64725,Williams Rd,WLMRD,NY,ISNE,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2021,9
 61012,AES Distributed Energy,64726,West Haydenville PJ Community Solar,BESS,MA,ISNE,Batteries,MWH,BA,3.6,3.6,(OP) Operating,OP,2022,9
@@ -23634,10 +23634,11 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 6452,Florida Power & Light Co,65041,Elder Branch,1,FL,FPL,Solar Photovoltaic,SUN,PV,74.5,74.5,(OP) Operating,OP,2022,1
 6452,Florida Power & Light Co,65042,Grove,1,FL,FPL,Solar Photovoltaic,SUN,PV,74.5,74.5,(OP) Operating,OP,2022,1
 5248,Dominion Energy Inc.,65044,Dry Bridge Storage,DBES,VA,PJM,Batteries,MWH,BA,20.0,20.0,(OP) Operating,OP,2023,11
+64457,"VCP Realty, LLC",65045,Emery Shute Solar One,VCP14,ME,ISNE,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2026,9
 64457,"VCP Realty, LLC",65046,FedEx Middletown,VCP15,CT,ISNE,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2024,11
 64458,"Enfield Solar One, LLC",65047,Enfield Solar One,VCP07,CT,ISNE,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2024,4
 64468,Hubbard Wind LLC,65048,Hubbard Wind,HW001,TX,ERCO,Onshore Wind Turbine,WND,WT,300.0,300.0,(OP) Operating,OP,2021,11
-67786,Naturgy Solar Operation USA LLC,65050,Mark Center Solar Project,MRC1,OH,PJM,Solar Photovoltaic,SUN,PV,94.0,94.0,(OP) Operating,OP,2026,9
+67786,Naturgy Solar Operation USA LLC,65050,Mark Center Solar,MRC1,OH,PJM,Solar Photovoltaic,SUN,PV,94.0,94.0,(OP) Operating,OP,2026,9
 68048,"IPX Power USA, LLC",65053,Blythe Mesa Solar II,BMSES,CA,CISO,Batteries,MWH,BA,112.0,112.0,(OP) Operating,OP,2022,12
 68048,"IPX Power USA, LLC",65053,Blythe Mesa Solar II,IPBMS,CA,CISO,Solar Photovoltaic,SUN,PV,223.6,223.6,(OP) Operating,OP,2022,12
 64470,"71CFR WHAM8 Solar, LLC",65054,71 Charlotte Furnace Rd Hybrid(CSG),71CBA,MA,ISNE,Batteries,MWH,BA,1.0,1.0,(OP) Operating,OP,2021,12
@@ -23906,6 +23907,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 61012,AES Distributed Energy,65334,Platteview Solar LLC,PLTVW,NE,SWPP,Solar Photovoltaic,SUN,PV,81.0,81.0,(OP) Operating,OP,2024,5
 64655,"Appaloosa Run Wind, LLC",65335,Appaloosa Run Wind,WAPPA,TX,ERCO,Onshore Wind Turbine,WND,WT,171.8,171.8,(OP) Operating,OP,2022,12
 56990,NJR Clean Energy Ventures Corporation,65337,"Maybrook Solar, LLC (CSG)",MAYBK,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2023,2
+67192,"RWE Americas, LLC",65338,Union Ridge Solar,UNIS1,OH,PJM,Solar Photovoltaic,SUN,PV,108.0,108.0,(OP) Operating,OP,2026,10
 64872,"Distributed Solar Development, LLC",65339,MD - CS - Potomac Edison Co - GA25 TPE (,19002,MD,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2022,6
 64872,"Distributed Solar Development, LLC",65340,MD - CS - BGE - PR24 TPE,19003,MD,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2022,9
 65164,CleanCapital Holdings,65342,Gorham Solar 1 (CSG),GS1,ME,ISNE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2023,11
@@ -24073,6 +24075,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 64331,DTE Sustainable Generation,65497,Garden 1 Solar Park,GRDS1,MI,MISO,Solar Photovoltaic,SUN,PV,0.9,0.9,(OP) Operating,OP,2016,9
 64331,DTE Sustainable Generation,65498,Garden 2 Solar Park,GRDS2,MI,MISO,Solar Photovoltaic,SUN,PV,1.4,1.4,(OP) Operating,OP,2022,6
 64809,Doc Brown LLC,65499,Danville BESS 1,90909,VA,PJM,Batteries,MWH,BA,10.5,10.5,(OP) Operating,OP,2022,11
+66027,Orsted Wind Power North America LLC,65500,Revolution Wind,REVWD,RI,ISNE,Offshore Wind Turbine,WND,WS,715.0,715.0,(OP) Operating,OP,2026,10
 6455,"Duke Energy Florida, LLC",65501,Mule Creek Renewable Energy Center,PV1,FL,FPC,Solar Photovoltaic,SUN,PV,74.9,74.9,(OP) Operating,OP,2024,3
 64778,"Strata Manager, LLC",65502,Beaker,BEAKR,NC,CPLE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2019,12
 64778,"Strata Manager, LLC",65503,Belafonte,BELAF,NC,CPLE,Solar Photovoltaic,SUN,PV,3.4,3.4,(OP) Operating,OP,2018,12
@@ -25491,6 +25494,9 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 65646,"AFTW Storage, LLC",66619,Lakeview Battery Storage Facility,AFTW,CA,CISO,Batteries,MWH,BA,1.2,1.2,(OP) Operating,OP,2024,12
 65647,Resurgence Solar II,66620,Resurgence Solar II,GEN1,CA,CISO,Solar Photovoltaic,SUN,PV,48.0,48.0,(OP) Operating,OP,2023,9
 65647,Resurgence Solar II,66620,Resurgence Solar II,GEN2,CA,CISO,Batteries,MWH,BA,40.0,40.0,(OP) Operating,OP,2023,8
+55937,Entergy Texas Inc.,66621,Orange County Advanced Power Station,1A,TX,MISO,Natural Gas Fired Combined Cycle,NG,CT,453.0,396.6,(OP) Operating,OP,2026,10
+55937,Entergy Texas Inc.,66621,Orange County Advanced Power Station,1B,TX,MISO,Natural Gas Fired Combined Cycle,NG,CT,453.0,396.6,(OP) Operating,OP,2026,10
+55937,Entergy Texas Inc.,66621,Orange County Advanced Power Station,1C,TX,MISO,Natural Gas Fired Combined Cycle,NG,CA,400.0,365.0,(OP) Operating,OP,2026,10
 61980,Valta Energy,66622,9150 Hermosa Solar GM,VSPRC,CA,CISO,Solar Photovoltaic,SUN,PV,1.3,1.3,(OP) Operating,OP,2022,12
 65650,"Harvest Gold Solar Power, LLC",66623,Harvest Gold Solar,HGS,MS,MISO,Solar Photovoltaic,SUN,PV,99.0,99.0,(OP) Operating,OP,2024,8
 65651,"Double Back Diamond Solar Power, LLC",66624,Double Back Diamond,DBD,IL,MISO,Solar Photovoltaic,SUN,PV,592.8,592.8,(OP) Operating,OP,2024,11
@@ -25629,6 +25635,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 50123,"Leeward Asset Management, LLC",66775,Morrow Lake Solar,MLPV,TX,ERCO,Solar Photovoltaic,SUN,PV,200.0,200.0,(OP) Operating,OP,2026,1
 65760,"Solar DG NJ Brookdale, LLC",66776,Brookdale CC BTM at Lincroft,PV1,NJ,PJM,Solar Photovoltaic,SUN,PV,3.7,3.7,(OP) Operating,OP,2022,12
 65758,Helios Energy New York 15 LLC,66777,Geneseo Solar,GEN1,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2021,12
+65741,"Hart Solar Partners, LLC",66778,Hart Solar Project,HS1,MI,MISO,Solar Photovoltaic,SUN,PV,120.0,120.0,(OP) Operating,OP,2026,10
 65751,RE Papago LLC,66779,Papago Energy Storage,PPABA,AZ,AZPS,Batteries,MWH,BA,300.0,300.0,(OP) Operating,OP,2025,5
 17633,Southern Indiana Gas & Elec Co,66780,Posey Solar,1,IN,MISO,Solar Photovoltaic,SUN,PV,190.8,190.8,(OP) Operating,OP,2025,5
 65076,"HEN Infrastructure, L.L.C.",66782,Hamilton BESS,HAMIL,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2024,2
@@ -25696,7 +25703,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 65777,Urban Grid Solar,66844,Spring Grove Solar 2,SPRG2,VA,PJM,Solar Photovoltaic,SUN,PV,150.0,150.0,(OP) Operating,OP,2025,12
 56990,NJR Clean Energy Ventures Corporation,66845,Old Bridge Global Landfill CSG,OBGLD,NJ,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2023,10
 63991,"DG New York CS, LLC",66846,Jogee Road Solar,JOGEE,NY,NYIS,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2022,7
-65791,"Robin Hollow Solar, LLC",66855,Robin Hollow Solar,RSH40,RI,ISNE,Solar Photovoltaic,SUN,PV,40.7,40.6,(OP) Operating,OP,2023,12
+64292,"Revity Management, LLC",66855,Robin Hollow Solar,RSH40,RI,ISNE,Solar Photovoltaic,SUN,PV,40.7,40.6,(OP) Operating,OP,2023,12
 65793,"DG Empire Lumen 2023, LLC",66856,NY Sorrell Hill II CSG,NGSH2,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2024,5
 65788,Ben Milam Solar 1 LLC,66859,Orion I Solar Project,ORN1,TX,ERCO,Solar Photovoltaic,SUN,PV,200.0,200.0,(OP) Operating,OP,2024,8
 65789,"Marion County Solar Project, LLC",66860,Marion County Solar Project,USMNC,OH,PJM,Solar Photovoltaic,SUN,PV,100.0,100.0,(OP) Operating,OP,2026,3
@@ -25952,6 +25959,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 66009,"SR Panola III, LLC",67131,"SR Panola III, LLC",PANO3,MS,TVA,Solar Photovoltaic,SUN,PV,3.5,3.5,(OP) Operating,OP,2024,9
 66010,"SR Panola I, LLC",67132,"SR Panola I, LLC",PANO1,MS,TVA,Solar Photovoltaic,SUN,PV,4.8,4.8,(OP) Operating,OP,2024,7
 66011,"SR Monroe, LLC",67133,"SR Monroe, LLC",MONRO,TN,TVA,Solar Photovoltaic,SUN,PV,4.8,4.8,(OP) Operating,OP,2025,9
+66012,"SR Marshall, LLC",67134,"SR Marshall, LLC",MARSH,MS,TVA,Solar Photovoltaic,SUN,PV,4.8,4.8,(OP) Operating,OP,2026,10
 66013,"SR West Marshall, LLC",67135,"SR West Marshall, LLC",WMARS,MS,TVA,Solar Photovoltaic,SUN,PV,4.8,4.8,(OP) Operating,OP,2025,12
 65985,"EF NY CDG 010, LLC",67136,NY Attica 264 Maplewood Rd,20496,NY,NYIS,Solar Photovoltaic,SUN,PV,3.6,3.6,(OP) Operating,OP,2025,7
 64904,AES Clean Energy,67137,Great Cove Solar II,GC2,PA,PJM,Solar Photovoltaic,SUN,PV,150.0,150.0,(OP) Operating,OP,2023,12
@@ -26512,6 +26520,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 58649,"SunStrong Management, LLC",67646,Walldog,WALLD,IL,PJM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2024,11
 66305,"Rio Vista Executive Boat & RV Storage, LLC",67648,Rio Vista Solar,30200,CA,CISO,Solar Photovoltaic,SUN,PV,2.7,2.7,(OP) Operating,OP,2025,4
 61060,Cypress Creek Renewables,67654,Destiny Storage,DESTS,TX,ERCO,Batteries,MWH,BA,200.0,200.0,(OP) Operating,OP,2026,7
+61060,Cypress Creek Renewables,67666,Sundance (CO),SUNDN,CO,PSCO,Solar Photovoltaic,SUN,PV,74.9,74.9,(OP) Operating,OP,2026,10
 66303,PFMD LL Jessup LLC,67670,MD JESSUP 7950 OCEANO AVE,22337,MD,PJM,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2024,9
 66304,PFMD LL Baltimore LLC,67671,MD BALTIMORE 4851 HOLABIRD AVE,21376,MD,PJM,Solar Photovoltaic,SUN,PV,1.8,1.8,(OP) Operating,OP,2025,7
 6452,Florida Power & Light Co,67672,Cedar Trail,1,FL,FPL,Solar Photovoltaic,SUN,PV,74.5,74.5,(OP) Operating,OP,2024,11
@@ -26563,6 +26572,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 66267,"Solar DG IL 4, LLC",67720,Whiskey Acres,PV1,IL,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,5
 66338,Al Pastor BESS LLC,67721,Al Pastor Battery Storage Plant,ALPTR,TX,ERCO,Batteries,MWH,BA,100.3,100.3,(OP) Operating,OP,2024,11
 66336,"Wild Plains Wind Project, LLC",67722,WPWP,WPWP,KS,SWPP,Onshore Wind Turbine,WND,WT,307.2,307.2,(OP) Operating,OP,2025,2
+66344,Kingstree West 115 LLC,67723,Kingstree West 115,SOLAR,SC,CPLE,Solar Photovoltaic,SUN,PV,74.9,74.9,(OP) Operating,OP,2026,10
 20860,Wisconsin Public Service Corp,67724,Antigo-Forrest Street Solar Project,20243,WI,MISO,Solar Photovoltaic,SUN,PV,6.0,6.0,(OP) Operating,OP,2024,11
 20847,Wisconsin Electric Power Co,67725,"Auburn Solar WI, LLC",20245,WI,MISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2024,12
 20847,Wisconsin Electric Power Co,67726,"Bonduel Solar WI, LLC",20233,WI,MISO,Solar Photovoltaic,SUN,PV,7.5,7.5,(OP) Operating,OP,2023,12
@@ -26861,6 +26871,8 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 66601,"Ticon Solar, LLC",68115,Ticon Solar,TICON,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2024,11
 58135,Ecos Energy LLC,68116,Benz Solar 1,BENZ1,CT,ISNE,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2025,3
 58135,Ecos Energy LLC,68117,Benz Solar 2,BENZ2,CT,ISNE,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2025,3
+65869,Prologis Logistics Services Incorporated,68118,Addison 11-SLCHI404,CH404,IL,PJM,Solar Photovoltaic,SUN,PV,1.6,1.6,(OP) Operating,OP,2026,10
+65869,Prologis Logistics Services Incorporated,68130,Des Plaines 11-SLCHI211,CH211,IL,PJM,Solar Photovoltaic,SUN,PV,1.6,1.6,(OP) Operating,OP,2026,10
 65869,Prologis Logistics Services Incorporated,68131,Des Plaines 7-SLCHI819,CH819,IL,PJM,Solar Photovoltaic,SUN,PV,1.4,1.4,(OP) Operating,OP,2025,6
 65869,Prologis Logistics Services Incorporated,68136,Franklin Park 3-SLCHI803,CH803,IL,PJM,Solar Photovoltaic,SUN,PV,1.2,1.2,(OP) Operating,OP,2025,2
 65869,Prologis Logistics Services Incorporated,68142,Northlake 3-SLCHI303,CH303,IL,PJM,Solar Photovoltaic,SUN,PV,1.6,1.6,(OP) Operating,OP,2026,9
@@ -26870,6 +26882,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 5504,Vistra Corp,68147,Coffeen Solar BESS,2,IL,MISO,Batteries,MWH,BA,2.0,2.0,(OP) Operating,OP,2024,12
 5504,Vistra Corp,68148,Baldwin Solar BESS,1,IL,MISO,Solar Photovoltaic,SUN,PV,68.4,68.4,(OP) Operating,OP,2024,12
 5504,Vistra Corp,68148,Baldwin Solar BESS,2,IL,MISO,Batteries,MWH,BA,2.0,2.0,(OP) Operating,OP,2024,12
+65803,"Raven Storage, LLC",68149,Raven Storage,RAVEB,TX,ERCO,Batteries,MWH,BA,100.0,100.0,(OP) Operating,OP,2026,10
 64698,"Renewable Solar, Inc",68150,Allied Potato,19073,CA,CISO,Solar Photovoltaic,SUN,PV,1.2,1.2,(OP) Operating,OP,2025,5
 65869,Prologis Logistics Services Incorporated,68151,Mountain View Ind Park 1-sline001,IE001,CA,CISO,Solar Photovoltaic,SUN,PV,1.1,1.1,(OP) Operating,OP,2023,9
 66614,"Rush Solar Farm 1, LLC",68152,Rush Solar,RUSH1,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2024,11
@@ -26902,12 +26915,15 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 15474,Public Service Co of Oklahoma,68222,Flat Ridge 4,OP,KS,SWPP,Onshore Wind Turbine,WND,WT,134.0,134.0,(OP) Operating,OP,2025,6
 5416,"Duke Energy Carolinas, LLC",68223,Beaverdam Renewable Energy Center,67693,SC,DUK,Solar Photovoltaic,SUN,PV,40.8,42.0,(OP) Operating,OP,2026,3
 66653,"SR Adamsville, LLC",68224,SR Adamsville,ADAMV,TN,TVA,Solar Photovoltaic,SUN,PV,25.0,25.0,(OP) Operating,OP,2026,7
+66658,"SR Des Arc, LLC",68230,SR Des Arc,DESAR,AR,MISO,Solar Photovoltaic,SUN,PV,4.8,4.8,(OP) Operating,OP,2026,10
 65539,Pivot Energy,68232,St. Clair Solar 3,STCL3,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,6
 65539,Pivot Energy,68233,Kankakee Solar 3,KANK3,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,11
 65581,Grand Valley Power LLC,68234,Vinelands Power Plant,GEN1,CO,PSCO,Conventional Hydroelectric,WAT,HY,4.5,3.5,(OP) Operating,OP,2022,11
 65869,Prologis Logistics Services Incorporated,68235,Romeoville 34 - SLCHI234 - BSCHI234,C234B,IL,PJM,Solar Photovoltaic,SUN,PV,1.1,1.1,(OP) Operating,OP,2025,11
 65869,Prologis Logistics Services Incorporated,68237,South Bay Dis Ctr 20-SLLAX512,LA512,CA,CISO,Solar Photovoltaic,SUN,PV,1.3,1.3,(OP) Operating,OP,2026,8
 65869,Prologis Logistics Services Incorporated,68238,Commerce Distribution Center 4-SLLAX113,LA113,CA,CISO,Solar Photovoltaic,SUN,PV,1.2,1.2,(OP) Operating,OP,2026,8
+66669,"Solar Star 3, LLC",68240,Solar Star 3,SS3PV,CA,CISO,Solar Photovoltaic,SUN,PV,24.0,24.0,(OP) Operating,OP,2026,10
+66670,"Solar Star 4, LLC",68241,Solar Star 4,SS4PV,CA,CISO,Solar Photovoltaic,SUN,PV,24.0,24.0,(OP) Operating,OP,2026,10
 66675,DG Green Arrow LLC,68242,DG Green Arrow,GRARW,MN,MISO,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2025,3
 68049,"Nofar USA Energy Investments and Management, LLC",68244,"Gransolar Texas One, LLC",GRTX1,TX,ERCO,Solar Photovoltaic,SUN,PV,50.0,50.0,(OP) Operating,OP,2025,2
 68049,"Nofar USA Energy Investments and Management, LLC",68246,BT Jungmann,JUNGM,TX,ERCO,Solar Photovoltaic,SUN,PV,40.0,40.0,(OP) Operating,OP,2025,2
@@ -26929,6 +26945,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 66693,"Catalyze Oxnard 2600 Sakioka Drive Microgrid, LLC",68272,CA OXNARD 2600 Sakioka Dr,21387,CA,CISO,Solar Photovoltaic,SUN,PV,1.6,1.6,(OP) Operating,OP,2025,7
 66690,"Morris Ridge Solar Energy Center, LLC",68274,Morris Ridge Solar,MOR01,NY,NYIS,Solar Photovoltaic,SUN,PV,177.0,177.0,(OP) Operating,OP,2024,11
 6452,Florida Power & Light Co,68276,Swamp Cabbage,1,FL,FPL,Solar Photovoltaic,SUN,PV,74.5,74.5,(OP) Operating,OP,2026,1
+20421,Western Minnesota Mun Pwr Agny,68277,Brookings Solar,1,SD,SWPP,Solar Photovoltaic,SUN,PV,4.9,4.9,(OP) Operating,OP,2026,10
 63630,New Columbia Solar,68279,NCS FCPA LLC,10022,DC,PJM,Solar Photovoltaic,SUN,PV,1.1,1.1,(OP) Operating,OP,2020,5
 63630,New Columbia Solar,68280,NCS Paradise LLC,10021,DC,PJM,Solar Photovoltaic,SUN,PV,1.3,1.3,(OP) Operating,OP,2021,5
 66700,"BOCA bn, LLC",68281,Box Canyon (AZ),BOCA1,AZ,AZPS,Solar Photovoltaic,SUN,PV,300.0,300.0,(OP) Operating,OP,2025,6
@@ -26936,6 +26953,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 66703,"Green River Solar, LLC",68297,Green River Solar,4598,KY,MISO,Solar Photovoltaic,SUN,PV,200.0,200.0,(OP) Operating,OP,2025,5
 64904,AES Clean Energy,68301,Cabin Creek MD,CABCR,MD,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,8
 13781,Northern States Power Co - Minnesota,68318,Dakota Range Wind,DKR01,SD,MISO,Onshore Wind Turbine,WND,WT,304.0,304.0,(OP) Operating,OP,2022,1
+66726,Nimbus Wind Farm LLC,68319,Nimbus Wind Farm,NIM,AR,MISO,Onshore Wind Turbine,WND,WT,183.0,183.0,(OP) Operating,OP,2026,10
 66727,Blackwell Creek Solar LLC,68320,Blackwell Creek Solar,BC24,OR,PACW,Solar Photovoltaic,SUN,PV,1.4,1.4,(OP) Operating,OP,2024,12
 66717,Atlas VII LLC,68322,Atlas VII,ALT7A,AZ,CISO,Batteries,MWH,BA,180.0,180.0,(OP) Operating,OP,2025,10
 66717,Atlas VII LLC,68322,Atlas VII,ALT7B,AZ,CISO,Batteries,MWH,BA,120.0,120.0,(OP) Operating,OP,2025,10
@@ -26993,6 +27011,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 64904,AES Clean Energy,68389,AES Glengarry Farms Solar CSG,GLENG,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,4.9,(OP) Operating,OP,2026,9
 65043,Madison Energy Investments LLC,68390,118 Echo,ECOPV,MA,ISNE,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2023,7
 65043,Madison Energy Investments LLC,68391,3100 Valleyview Drive,VVDPV,OH,PJM,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2023,8
+65043,Madison Energy Investments LLC,68392,IL2 - W109,IL2PV,IL,PJM,Solar Photovoltaic,SUN,PV,4.9,4.9,(OP) Operating,OP,2026,10
 65043,Madison Energy Investments LLC,68393,North Stafford HS,NOSPV,VA,PJM,Solar Photovoltaic,SUN,PV,1.3,1.3,(OP) Operating,OP,2023,9
 65043,Madison Energy Investments LLC,68394,Waterboro,WBMPV,ME,ISNE,Solar Photovoltaic,SUN,PV,4.9,4.9,(OP) Operating,OP,2023,7
 65043,Madison Energy Investments LLC,68395,Wheeler Ridge 2,WR2PV,CA,CISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2023,11
@@ -27332,6 +27351,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67052,USS Cattail Solar LLC,68755,USS Cattail Solar,USCAT,IL,MISO,Solar Photovoltaic,SUN,PV,2.3,2.3,(OP) Operating,OP,2025,8
 67053,USS Ducks Solar LLC,68756,USS Ducks Solar CSG,USDUC,IL,MISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,11
 67054,USS Beard Solar LLC,68757,USS Beard Solar,USBRD,IL,MISO,Solar Photovoltaic,SUN,PV,3.5,3.5,(OP) Operating,OP,2026,1
+68048,"IPX Power USA, LLC",68758,Easley Solar,IPEA1,CA,CISO,Solar Photovoltaic,SUN,PV,290.0,290.0,(OP) Operating,OP,2026,10
 68048,"IPX Power USA, LLC",68758,Easley Solar,IPEA2,CA,CISO,Batteries,MWH,BA,350.0,350.0,(OP) Operating,OP,2026,6
 67059,Rak 2 Solar LLC,68764,Rak 2,170,NY,NYIS,Solar Photovoltaic,SUN,PV,3.5,3.5,(OP) Operating,OP,2023,12
 19436,Union Electric Co - (MO),68770,Boomtown Renewable Energy Center,BTREC,IL,MISO,Solar Photovoltaic,SUN,PV,150.0,150.0,(OP) Operating,OP,2024,12
@@ -27389,10 +27409,14 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 64366,Terra-Gen Operating Co-Hybrid,68846,Edwards Sanborn 1C,S6,CA,CISO,Solar Photovoltaic,SUN,PV,102.0,102.0,(OP) Operating,OP,2025,11
 67083,"1000 Mile Solar, LLC",68847,1000 Mile Solar,PV1,TX,SWPP,Solar Photovoltaic,SUN,PV,300.0,300.0,(OP) Operating,OP,2026,9
 66117,"Autoliv ASP, Inc.",68849,SF Auto O1,SFAO1,UT,WACM,Solar Photovoltaic,SUN,PV,3.4,3.4,(OP) Operating,OP,2023,12
+5109,DTE Electric Company,68850,Gratiot Solar Park,GRTSP,MI,MISO,Solar Photovoltaic,SUN,PV,50.0,50.0,(OP) Operating,OP,2026,10
+67095,"Bell 1 Solar, LLC",68851,Hermes Solar PV,HSPV1,TX,ERCO,Solar Photovoltaic,SUN,PV,100.4,100.0,(OP) Operating,OP,2026,10
+67096,"Bell 1 Storage, LLC",68852,Hermes Storage BESS,HSBE1,TX,ERCO,Batteries,MWH,BA,100.4,100.0,(OP) Operating,OP,2026,10
 67111,Angiola East LLC,68854,Angela Solar Project,ABESS,CA,CISO,Batteries,MWH,BA,40.0,20.0,(OP) Operating,OP,2026,5
 67111,Angiola East LLC,68854,Angela Solar Project,ANG1,CA,CISO,Solar Photovoltaic,SUN,PV,40.0,40.0,(OP) Operating,OP,2026,5
 67109,"Tyson Nick Solar Project, LLC",68856,Tyson Nick,1,TX,ERCO,Solar Photovoltaic,SUN,PV,90.5,90.0,(OP) Operating,OP,2025,10
 67108,"DG Richmond, LLC",68857,Richmond Solar,HM701,IL,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,7
+67114,Santa Teresa Solar,68866,Santa Teresa Solar,SAN,NM,EPE,Batteries,MWH,BA,150.0,150.0,(OP) Operating,OP,2026,10
 67114,Santa Teresa Solar,68866,Santa Teresa Solar,STS,NM,EPE,Solar Photovoltaic,SUN,PV,150.0,150.0,(OP) Operating,OP,2026,8
 67115,"Shallow Basket Energy, LLC",68868,Shallow Basket,SBBS1,NM,PNM,Batteries,MWH,BA,50.0,50.0,(OP) Operating,OP,2025,8
 67115,"Shallow Basket Energy, LLC",68868,Shallow Basket,SBPV1,NM,PNM,Solar Photovoltaic,SUN,PV,140.0,140.0,(OP) Operating,OP,2025,8
@@ -27434,6 +27458,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67153,Tesoro RV & Boat Storage,68908,Tesoro RV & Boat Storage,45067,CA,CISO,Solar Photovoltaic,SUN,PV,2.5,2.5,(OP) Operating,OP,2026,5
 67158,Padua 1,68912,Padua 1,12341,TX,ERCO,Batteries,MWH,BA,50.0,50.0,(OP) Operating,OP,2025,7
 67159,Padua 2,68913,Padua 2,12342,TX,ERCO,Batteries,MWH,BA,150.0,150.0,(OP) Operating,OP,2026,6
+67160,Padua 3,68914,Padua 3,12343,TX,ERCO,Batteries,MWH,BA,200.0,200.0,(OP) Operating,OP,2026,10
 67162,"Ferdinand Grid, LLC",68915,Ferdinand Energy Center,1,TX,ERCO,Batteries,MWH,BA,200.0,200.0,(OP) Operating,OP,2026,6
 65010,"SolAmerica Energy, LLC",68918,SAE Paris IL S1,S1,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,6
 65010,"SolAmerica Energy, LLC",68919,Macon County IL S1,S1,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,10
@@ -27442,6 +27467,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67164,"Anthony Vineyards, Inc.",68922,AVI Bakersfield,BAK,CA,CISO,Solar Photovoltaic,SUN,PV,2.2,2.2,(OP) Operating,OP,2022,6
 65654,Birch Creek Development,68927,"Adelite Solar, LLC",ADELI,MO,MISO,Solar Photovoltaic,SUN,PV,25.0,25.0,(OP) Operating,OP,2026,1
 66331,"Birch Creek Power, LLC",68928,"Richland Township Solar II, LLC",RICH2,IL,MISO,Solar Photovoltaic,SUN,PV,10.8,10.8,(OP) Operating,OP,2025,9
+65654,Birch Creek Development,68929,"Ruby Solar, LLC",RUBY,IL,MISO,Solar Photovoltaic,SUN,PV,50.0,50.0,(OP) Operating,OP,2026,10
 24211,Tucson Electric Power Co,68937,Roadrunner Reserve Phase 2,RDR2,AZ,TEPC,Batteries,MWH,BA,200.0,200.0,(OP) Operating,OP,2026,6
 65539,Pivot Energy,68941,BH CSG 3,BHC3,CO,WACM,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2023,5
 65539,Pivot Energy,68942,Chaberton Solar Catherine,CHAB,MD,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,5
@@ -27525,6 +27551,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 60584,Onyx Asset Services Group,69037,Riley III - Site 6 Community Solar,10651,KS,SWPP,Solar Photovoltaic,SUN,PV,2.1,2.1,(OP) Operating,OP,2025,3
 60584,Onyx Asset Services Group,69038,Riley III - Site 12 Community Solar,10638,KS,SWPP,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2025,1
 67006,"REC SHW, LLC",69039,Sutter Home Winery Westside,SHWST,CA,CISO,Solar Photovoltaic,SUN,PV,2.3,2.3,(OP) Operating,OP,2025,10
+15466,Public Service Co of Colorado,69040,Arroyo Solar,ARY1,CO,PSCO,Solar Photovoltaic,SUN,PV,335.0,335.0,(OP) Operating,OP,2026,10
 67231,"Iron Springs BESS, LLC",69041,Iron Springs BESS,ISBA,UT,PACE,Batteries,MWH,BA,80.0,80.0,(OP) Operating,OP,2026,4
 67232,"Solar DG NM Amalia, LLC",69042,Kit Carson Co-Op,AM-PV,NM,PNM,Solar Photovoltaic,SUN,PV,10.8,10.8,(OP) Operating,OP,2025,12
 67232,"Solar DG NM Amalia, LLC",69042,Kit Carson Co-Op,AMBES,NM,PNM,Batteries,MWH,BA,12.9,12.9,(OP) Operating,OP,2025,12
@@ -27539,6 +27566,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 65539,Pivot Energy,69051,Chaberton Solar Blackburn,CHBL,DE,PJM,Solar Photovoltaic,SUN,PV,3.0,3.0,(OP) Operating,OP,2025,12
 65539,Pivot Energy,69052,MDD109-NCBP BLDG 11-Manekin,MD11,MD,PJM,Solar Photovoltaic,SUN,PV,2.4,2.4,(OP) Operating,OP,2026,9
 65539,Pivot Energy,69053,ILL060-Sangamon-Atchison,IL60,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,8
+67218,"ATLAS SOLAR IV, LLC",69055,ATLAS SOLAR IV,ALTS4,AZ,CISO,Solar Photovoltaic,SUN,PV,300.0,300.0,(OP) Operating,OP,2026,10
 58509,"Affordable Solar Silver City, LLC",69061,ASG-4 Community Solar,ASG-4,NM,PNM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,12
 58509,"Affordable Solar Silver City, LLC",69062,ASG-8,ASG-8,NM,PNM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,10
 67237,"Appleseed Solar, LLC",69063,Appleseed Solar,APLS,IN,MISO,Solar Photovoltaic,SUN,PV,200.0,200.0,(OP) Operating,OP,2025,8
@@ -27585,7 +27613,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 17650,Southern Power Co,69101,Millers Branch Solar,MLB02,TX,ERCO,Solar Photovoltaic,SUN,PV,180.0,180.0,(OP) Operating,OP,2026,8
 58509,"Affordable Solar Silver City, LLC",69103,ASG-2 Community Solar,ASG-2,NM,PNM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,12
 58509,"Affordable Solar Silver City, LLC",69104,SLO-1 Community Solar,SLO-1,NM,PNM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,12
-58509,"Affordable Solar Silver City, LLC",69105,SLO-2,SLO-2,NM,PNM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,9
+58509,"Affordable Solar Silver City, LLC",69105,SLO-2 Community Solar,SLO-2,NM,PNM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,9
 58509,"Affordable Solar Silver City, LLC",69106,SLO-3 Community Solar,SLO-3,NM,EPE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,12
 58509,"Affordable Solar Silver City, LLC",69107,XCEL-1 Community Solar,XCL-1,NM,SWPP,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,3
 61419,"Luminace Solar MC, LLC",69109,CCBC Essex,ESSEX,MD,PJM,Solar Photovoltaic,SUN,PV,1.4,1.4,(OP) Operating,OP,2015,10
@@ -27648,6 +27676,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 65849,ClearGen LLC,69191,"GreenStruxure REP009, LLC",GEN,CA,CISO,Natural Gas Internal Combustion Engine,NG,IC,1.4,1.4,(OP) Operating,OP,2023,6
 66264,AETS OpCo Holdings LLC,69192,AETS Old Michigan Solar LLC,OLDMI,TX,ERCO,Solar Photovoltaic,SUN,PV,10.0,10.0,(OP) Operating,OP,2025,9
 65677,Dimension Energy LLC,69193,KaneSolar03 LLC,KANE3,IL,PJM,Solar Photovoltaic,SUN,PV,2.5,2.5,(OP) Operating,OP,2025,9
+64904,AES Clean Energy,69197,Halifax County Solar,HALIF,NC,PJM,Solar Photovoltaic,SUN,PV,80.0,80.0,(OP) Operating,OP,2026,10
 67337,"ESTX-PLD-HOUSTON2, LLC",69200,SAHARA BESS (SOHO BESS),SOHO1,TX,ERCO,Batteries,MWH,BA,204.4,204.4,(OP) Operating,OP,2026,7
 67337,"ESTX-PLD-HOUSTON2, LLC",69200,SAHARA BESS (SOHO BESS),SOHO2,TX,ERCO,Batteries,MWH,BA,204.3,204.3,(OP) Operating,OP,2026,7
 61194,Generate Capital,69201,KA361,11220,IL,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,1
@@ -27767,6 +27796,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67403,Regis Hidden Valley LLC,69335,Regis Hidden Valley,HIDD,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2026,2
 67399,Regis Gears Harris LLC,69336,Regis Gears Harris,GEARS,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2026,2
 67404,Regis Laureles LLC,69337,Regis Laureles,LAURE,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2026,2
+67405,Regis Leakey LLC,69338,Regis Leakey,LEAKY,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2026,10
 67406,Regis Lyssy LLC,69339,Regis Lyssy,LYSSY,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2026,2
 67408,Regis Medina Lake LLC,69341,Regis Medina Lake,MEDLA,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2026,4
 67409,Regis Milton LLC,69342,Regis Milton,MILT,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2026,3
@@ -27802,7 +27832,9 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67456,SMT Dallas III LLC,69367,SMT Dallas III BESS,SMTD3,TX,ERCO,Batteries,MWH,BA,10.0,10.0,(OP) Operating,OP,2026,1
 67457,Tinta Wita Energy LLC,69368,Tinta Wita 5 MW Solar PV System,PI01A,MN,MISO,Solar Photovoltaic,SUN,PV,4.5,4.5,(OP) Operating,OP,2024,5
 67418,RP Minnesota Solar LLC,69370,RP Minnesota Solar,CONEJ,CA,CISO,Solar Photovoltaic,SUN,PV,1.8,1.8,(OP) Operating,OP,2026,3
+67419,Middle Road Solar Partners LLC,69371,Middle Road Solar Partners,HALIF,PA,PJM,Solar Photovoltaic,SUN,PV,2.5,2.5,(OP) Operating,OP,2026,10
 67422,Liverpool Solar Partners,69374,Liverpool Solar Partners,LIVER,PA,PJM,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2025,4
+67423,Lysander III PV LLC,69375,Lysander III PV,LYSAN,NY,NYIS,Solar Photovoltaic,SUN,PV,2.4,2.4,(OP) Operating,OP,2026,10
 67424,Machias PV LLC,69376,Machias PV,MACHI,NY,NYIS,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,5
 67426,RP SCG Texas Solar LLC,69378,RP SCG Texas Solar,RIATA,TX,ERCO,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2025,1
 67429,NSF Chateaugay Site 1 LLC,69379,NSF Chateaugay Site 1,CHAT1,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,1
@@ -27882,6 +27914,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67494,On Energy Storage,69460,Winmil Clean Energy Center (BESS),WIBA1,TX,ERCO,Batteries,MWH,BA,12.0,12.0,(OP) Operating,OP,2025,3
 65715,Strata Clean Energy,69469,Justice Energy Storage,JES1,AZ,AZPS,Batteries,MWH,BA,150.0,150.0,(OP) Operating,OP,2026,5
 5109,DTE Electric Company,69471,Cold Creek Solar Park,CLCSP,MI,MISO,Solar Photovoltaic,SUN,PV,100.0,100.0,(OP) Operating,OP,2026,9
+67491,"NYSolar06, LLC",69472,NYSolar06,18198,NY,NYIS,Solar Photovoltaic,SUN,PV,3.5,3.5,(OP) Operating,OP,2026,10
 19436,Union Electric Co - (MO),69475,Split Rail Solar Energy LLC,SPTRL,MO,MISO,Solar Photovoltaic,SUN,PV,300.0,300.0,(OP) Operating,OP,2026,6
 61029,Upper Michigan Energy Resources Company,69476,Renegade Solar Energy LLC,RNGDE,MI,MISO,Solar Photovoltaic,SUN,PV,100.0,100.0,(OP) Operating,OP,2026,3
 15474,Public Service Co of Oklahoma,69478,Lazbuddie Wind Energy LLC,LZBDE,TX,SWPP,Onshore Wind Turbine,WND,WT,265.0,265.0,(OP) Operating,OP,2026,8
@@ -27930,6 +27963,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 60531,Standard Solar,69532,Pluma - SLT Las Cruces,SLTLC,NM,EPE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,12
 67512,"Solarity Aggregator, LLC",69536,"DMAT Denso - SEAT Solar Holdings, LLC",DMAT,TN,TVA,Solar Photovoltaic,SUN,PV,5.3,5.3,(OP) Operating,OP,2025,11
 50123,"Leeward Asset Management, LLC",69538,Twelvemile Solar 2,TS2,OK,SWPP,Solar Photovoltaic,SUN,PV,52.2,52.2,(OP) Operating,OP,2026,3
+67515,Rock Creek Solar LLC,69540,Rock Creek Solar,RCS01,IA,MISO,Solar Photovoltaic,SUN,PV,150.0,150.0,(OP) Operating,OP,2026,10
 65043,Madison Energy Investments LLC,69542,Fairfax Landfill,SP438,VA,PJM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,12
 65043,Madison Energy Investments LLC,69543,Great Valley Gernatt,P401,NY,NYIS,Solar Photovoltaic,SUN,PV,3.3,3.3,(OP) Operating,OP,2025,12
 65043,Madison Energy Investments LLC,69544,0 Middle,BA108,MA,ISNE,Batteries,MWH,BA,1.5,1.5,(OP) Operating,OP,2022,9
@@ -27942,7 +27976,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 60531,Standard Solar,69555,Citrine NJ - West Pkwy,WESTP,NJ,PJM,Solar Photovoltaic,SUN,PV,2.3,2.3,(OP) Operating,OP,2026,6
 60531,Standard Solar,69556,Pluma - Clovis Concrete North CSG,CLOCN,NM,SWPP,Solar Photovoltaic,SUN,PV,3.4,3.4,(OP) Operating,OP,2026,4
 60531,Standard Solar,69557,Pluma - Reynolds (CSG),REYNO,NM,PNM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,1
-60531,Standard Solar,69558,Pluma - SLT Grant,GRANT,NM,PNM,Solar Photovoltaic,SUN,PV,4.8,4.8,(OP) Operating,OP,2026,9
+60531,Standard Solar,69558,Pluma - SLT Grant (CSG),GRANT,NM,PNM,Solar Photovoltaic,SUN,PV,4.8,4.8,(OP) Operating,OP,2026,9
 60531,Standard Solar,69559,Pluma - SLT Hidalgo CSG,DALGO,NM,PNM,Solar Photovoltaic,SUN,PV,3.8,3.8,(OP) Operating,OP,2026,6
 60531,Standard Solar,69561,Sunrise Solar Lincoln DE (CSG),LINCO,DE,PJM,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2026,3
 67525,Chabot Las Positas Community College District,69563,Las Positas College,LPC1,CA,CISO,Solar Photovoltaic,SUN,PV,2.3,2.3,(OP) Operating,OP,2018,8
@@ -27960,6 +27994,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67035,Prologis Logistics Services Incorporated BESS,69575,BESS TX Panda - BSHOU004,BSOU4,TX,ERCO,Batteries,MWH,BA,10.0,10.0,(OP) Operating,OP,2025,11
 67035,Prologis Logistics Services Incorporated BESS,69576,Non-PLD US-El Paso - BSSAT004,BS004,TX,ERCO,Batteries,MWH,BA,9.9,9.9,(OP) Operating,OP,2025,5
 67192,"RWE Americas, LLC",69578,"Casey Fork Solar, LLC",CFSPV,IL,MISO,Solar Photovoltaic,SUN,PV,150.0,150.0,(OP) Operating,OP,2026,9
+67192,"RWE Americas, LLC",69579,"Honey Mesquite Wind, LLC",HMWT,TX,ERCO,Onshore Wind Turbine,WND,WT,180.5,180.5,(OP) Operating,OP,2026,10
 67530,"Heritage Energy Holdings, LLC",69580,Lone Wolfe Phase One,LW1,TX,ERCO,Solar Photovoltaic,SUN,PV,1.1,1.1,(OP) Operating,OP,2026,2
 67531,MEVS LLC,69581,MEVS Waterhouse,75503,ME,ISNE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,12
 67533,Marvin Composites,69583,Marvin Composites,DSL,ND,MISO,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,1996,1
@@ -27968,6 +28003,10 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67533,Marvin Composites,69583,Marvin Composites,NGSE,ND,MISO,Natural Gas Internal Combustion Engine,NG,IC,0.5,0.5,(SB) Standby/Backup: available for service but not normally used,SB,2024,8
 67535,"Kaufman Solar, LLC",69585,Kaufman Solar,5568,TX,ERCO,Solar Photovoltaic,SUN,PV,200.0,200.0,(OP) Operating,OP,2026,9
 67528,"Pekin Community High School, LLC",69587,Pekin Community High School,SOLAR,IL,PJM,Solar Photovoltaic,SUN,PV,1.4,0.5,(OP) Operating,OP,2025,6
+59122,The Medical Center Company,69593,MCCo BESS Generating Facility,1,OH,PJM,Batteries,MWH,BA,3.9,3.9,(OP) Operating,OP,2026,10
+59122,The Medical Center Company,69593,MCCo BESS Generating Facility,2,OH,PJM,Batteries,MWH,BA,3.9,3.9,(OP) Operating,OP,2026,10
+59122,The Medical Center Company,69593,MCCo BESS Generating Facility,3,OH,PJM,Batteries,MWH,BA,3.9,3.9,(OP) Operating,OP,2026,10
+59122,The Medical Center Company,69593,MCCo BESS Generating Facility,4,OH,PJM,Batteries,MWH,BA,3.9,3.9,(OP) Operating,OP,2026,10
 59122,The Medical Center Company,69593,MCCo BESS Generating Facility,B020,OH,PJM,Petroleum Liquids,DFO,IC,1.8,1.8,(SB) Standby/Backup: available for service but not normally used,SB,2012,10
 59122,The Medical Center Company,69593,MCCo BESS Generating Facility,B021,OH,PJM,Petroleum Liquids,DFO,IC,1.8,1.8,(SB) Standby/Backup: available for service but not normally used,SB,2012,10
 61194,Generate Capital,69596,Owens 1,11152,NY,NYIS,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2025,12
@@ -27984,6 +28023,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 65173,United States Solar Corporation,69613,USS Hampden Solar LLC,USHAM,CO,PSCO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,12
 65173,United States Solar Corporation,69614,USS High Plains Solar LLC,USHPL,CO,PSCO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,4
 65173,United States Solar Corporation,69615,USS Raptor Solar LLC,USRAP,CO,PSCO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,1
+65173,United States Solar Corporation,69616,USS Lyndon Solar LLC,USLYN,IL,PJM,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2026,10
 60571,"Onsite Partners, LLC",69617,Rice Lake II,RLII,WI,MISO,Solar Photovoltaic,SUN,PV,2.8,2.8,(OP) Operating,OP,2024,9
 67555,"Winema Solar Partners, LLC",69618,Winema Solar Partners,WISP1,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2024,3
 65869,Prologis Logistics Services Incorporated,69619,Prologis Edison 0503 - SLCNJ005 - Community Solar,CN005,NJ,PJM,Solar Photovoltaic,SUN,PV,1.4,1.0,(OP) Operating,OP,2026,4
@@ -27993,6 +28033,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67549,38DN Asset Management LLC,69624,Rose Hill Road Solar 1 - Spafford 1,SPAF1,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,5
 67549,38DN Asset Management LLC,69625,Moore Rd,MRPV,NY,NYIS,Solar Photovoltaic,SUN,PV,4.8,4.8,(OP) Operating,OP,2026,2
 6455,"Duke Energy Florida, LLC",69627,Jumper Creek Solar Plant,JCSP1,FL,FPC,Solar Photovoltaic,SUN,PV,74.9,74.9,(OP) Operating,OP,2026,4
+67560,"Big Muddy Solar Project, LLC",69629,Big Muddy Solar,BIGM1,IL,MISO,Solar Photovoltaic,SUN,PV,95.0,95.0,(OP) Operating,OP,2026,10
 65173,United States Solar Corporation,69630,USS Man Solar LLC,USMAN,IL,PJM,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2025,12
 67561,"Energen Renewables, LLC",69632,Alverno Hydro Plant,G1,MI,MISO,Conventional Hydroelectric,WAT,HY,0.5,0.5,(OP) Operating,OP,1960,1
 67561,"Energen Renewables, LLC",69632,Alverno Hydro Plant,G2,MI,MISO,Conventional Hydroelectric,WAT,HY,0.5,0.5,(OP) Operating,OP,1960,1
@@ -28122,6 +28163,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67755,Blackwater Rd Solar LLC,69824,Blackwater Rd Solar,26056,NH,ISNE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,12
 65677,Dimension Energy LLC,69826,Ohara CSG 1 LLC,OHAR1,PA,PJM,Solar Photovoltaic,SUN,PV,3.0,3.0,(OP) Operating,OP,2026,4
 65677,Dimension Energy LLC,69827,Mount Laurel Solar 2 LLC CSG,MTLA2,NJ,PJM,Solar Photovoltaic,SUN,PV,1.9,1.9,(OP) Operating,OP,2026,4
+65677,Dimension Energy LLC,69828,"Mexico PV, LLC (CSG)",MEXIC,NY,NYIS,Solar Photovoltaic,SUN,PV,4.5,4.5,(OP) Operating,OP,2026,10
 65677,Dimension Energy LLC,69829,Kanesolar01 LLC,KANE1,IL,PJM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,6
 65677,Dimension Energy LLC,69830,Hampden CSG 1 LLC,HMPD1,PA,PJM,Solar Photovoltaic,SUN,PV,1.8,1.8,(OP) Operating,OP,2026,6
 65677,Dimension Energy LLC,69831,Chaberton Solar Blue Hen LLC,BLUHN,DE,PJM,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2026,6
@@ -28136,6 +28178,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 65677,Dimension Energy LLC,69841,"Bluestar Solar Project, LLC",BLUST,IL,MISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,9
 65677,Dimension Energy LLC,69842,Carneys Point Solar 1 LLC,CARN1,NJ,PJM,Solar Photovoltaic,SUN,PV,3.0,3.0,(OP) Operating,OP,2026,8
 65677,Dimension Energy LLC,69843,Wild Cat Solar 22 LLC,WILD2,IL,MISO,Solar Photovoltaic,SUN,PV,2.3,2.3,(OP) Operating,OP,2026,6
+65677,Dimension Energy LLC,69844,"Horseshoe Solar Project, LLC (CSG)",HORSE,IL,MISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,10
 65677,Dimension Energy LLC,69845,CVE US IL TAMAROA 316 LLC,TAMAR,IL,MISO,Solar Photovoltaic,SUN,PV,3.6,3.6,(OP) Operating,OP,2026,6
 65677,Dimension Energy LLC,69846,"Gerstenschlager Family Solar 1, LLC (CSG)",GRST1,IL,MISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,6
 65677,Dimension Energy LLC,69847,Spillertown CSG 2 LLC,SPIL2,IL,MISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,8
@@ -28150,9 +28193,11 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 62836,Navisun LLC,69863,Galva Landfill,GALF,IL,PJM,Solar Photovoltaic,SUN,PV,3.7,3.7,(OP) Operating,OP,2025,12
 62759,Geronimo Power,69875,"Sycamore Creek Solar, LLC",SYCSL,OH,PJM,Solar Photovoltaic,SUN,PV,117.0,117.0,(OP) Operating,OP,2025,12
 61194,Generate Capital,69876,New Road,11205,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,3
+64260,Nextera Energy Resources,69879,Ninnescah Flats Solar,N3884,KS,SWPP,Solar Photovoltaic,SUN,PV,201.6,201.6,(OP) Operating,OP,2026,10
 67762,University of Montana,69880,University of Montana CHP,GTG1,MT,NWMT,Natural Gas Fired Combustion Turbine,NG,GT,1.8,1.8,(OP) Operating,OP,2025,12
 67762,University of Montana,69880,University of Montana CHP,GTG2,MT,NWMT,Natural Gas Fired Combustion Turbine,NG,GT,1.8,1.8,(OP) Operating,OP,2025,12
 67762,University of Montana,69880,University of Montana CHP,STG,MT,NWMT,Natural Gas Steam Turbine,NG,ST,2.5,2.0,(OP) Operating,OP,2025,12
+65869,Prologis Logistics Services Incorporated,69891,Torrance Dis Ctr 2 - SLLAX100,LA100,CA,CISO,Solar Photovoltaic,SUN,PV,1.4,1.4,(OP) Operating,OP,2026,10
 67773,"Dusty Rose Wind, LLC",69893,Dusty Rose Wind,5937,CO,PSCO,Onshore Wind Turbine,WND,WT,502.0,502.0,(OP) Operating,OP,2026,6
 67754,"Coast Energy Holdings, LLC",69896,7999 Gateway Solar,7999G,CA,CISO,Solar Photovoltaic,SUN,PV,4.6,4.6,(OP) Operating,OP,2026,9
 65869,Prologis Logistics Services Incorporated,69897,Midline Commerce Center - SLCNJ006,CN006,NJ,PJM,Solar Photovoltaic,SUN,PV,1.2,1.0,(OP) Operating,OP,2025,9
@@ -28191,12 +28236,14 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67785,DS Containers LLC,69953,DS Containers,DSC,IL,PJM,Solar Photovoltaic,SUN,PV,1.8,1.8,(OP) Operating,OP,2025,7
 67800,Kearsarge Southampton LLC,69954,Kearsarge Southampton,SOUTH,NY,ISNE,Solar Photovoltaic,SUN,PV,4.5,4.5,(OP) Operating,OP,2025,2
 67801,Kearsarge St Johnsville LLC,69955,Kearsarge St Johnsville,SJOHN,NY,ISNE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,10
+64366,Terra-Gen Operating Co-Hybrid,69956,Sanborn Hybrid 3,S8,CA,CISO,Solar Photovoltaic,SUN,PV,55.0,55.0,(OP) Operating,OP,2026,10
 60520,SoCore Energy LLC,69957,Illinois PV Adams 1A,PV,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,12
 60520,SoCore Energy LLC,69958,Illinois PV Adams 1B,PV,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,12
 60520,SoCore Energy LLC,69959,Illinois PV Adams 2A,PV,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,12
 60520,SoCore Energy LLC,69960,Illinois PV Adams 2B,PV,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,12
 60520,SoCore Energy LLC,69961,Illinois PV Peoria 2A,PV,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,12
 60520,SoCore Energy LLC,69962,Illinois PV Peoria 2B,PV,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,12
+67811,"Rumble Solar, LLC",69968,Rumble Solar,RUS,OK,SWPP,Solar Photovoltaic,SUN,PV,250.0,250.0,(OP) Operating,OP,2026,10
 61514,"Agilitas Energy, Inc.",69975,Telview ESS,TELV1,TX,ERCO,Batteries,MWH,BA,10.0,10.0,(OP) Operating,OP,2025,1
 61514,"Agilitas Energy, Inc.",69976,I-Eye ESS,IEYE1,TX,ERCO,Batteries,MWH,BA,10.0,10.0,(OP) Operating,OP,2025,12
 67818,"MPH Elwood, LLC",69979,MPH Elwood,GT8,IL,PJM,Natural Gas Fired Combustion Turbine,NG,GT,192.0,150.0,(OS) Out of service and NOT expected to return to service in next calendar year,OS,2001,8
@@ -28306,12 +28353,14 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 60281,"Altus Power America Management, LLC",70179,"FL Solar D1, LLC",1,FL,FMPP,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2023,11
 60281,"Altus Power America Management, LLC",70180,"FL Solar D2, LLC",1,FL,FPL,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2023,9
 65869,Prologis Logistics Services Incorporated,70181,Prologis - SLCNJ001 - Community Solar,CN001,NJ,PJM,Solar Photovoltaic,SUN,PV,3.2,3.2,(OP) Operating,OP,2026,9
+67915,Steger Road Solar 1 LLC,70182,Steger,PV1,IL,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,10
 67922,"WSD Coventry, LLC",70184,WSD Coventry,COVEN,RI,ISNE,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,12
 67913,"11601 Copenhagen Ct, LLC",70185,Copenhagen Ct,PV1,IL,PJM,Solar Photovoltaic,SUN,PV,3.5,3.5,(OP) Operating,OP,2026,9
 67881,"SREOG Partnership 2, LLC",70189,"Maxcy's Mill Solar, LLC",MAXCY,ME,ISNE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2022,10
 67881,"SREOG Partnership 2, LLC",70190,"Union Street Solar, LLC",UNION,ME,ISNE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,3
 67881,"SREOG Partnership 2, LLC",70191,"Waldoboro Solar, LLC",WALDO,ME,ISNE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2023,3
 67882,"SREOG Partnership 3, LLC",70192,"Crowley Solar, LLC",CRWLY,ME,ISNE,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,10
+65539,Pivot Energy,70201,Pivot Solar 50 LLC,PS50,CO,PSCO,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2026,10
 67300,"Onsite Partners Projectco, LLC",70208,PCC Solar Array,PENCC,OH,PJM,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2020,8
 67300,"Onsite Partners Projectco, LLC",70209,Vertiv Solar,VERTI,OH,PJM,Solar Photovoltaic,SUN,PV,1.1,1.1,(OP) Operating,OP,2024,6
 61944,MN8 Energy LLC,70211,Bluegrass Solar 2,BGS2,MD,PJM,Solar Photovoltaic,SUN,PV,40.0,40.0,(OP) Operating,OP,2022,10
@@ -28369,6 +28418,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67956,"SRC Partnership 12, LLC",70291,SV CSG Gardner 2 LLC,LUTZ2,IL,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2024,6
 67965,"1150th Sun, LLC",70292,1150th Sun,14591,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,6
 67967,Swanton MD Coopers Ln CSEGS Solar LLC,70293,Swanton Coopers ANEM,COOP1,MD,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,7
+67975,"Milltown Onsite Generation, LLC",70296,Milltown Onsite BESS,MTBAT,NJ,PJM,Batteries,MWH,BA,13.2,13.2,(OP) Operating,OP,2026,10
 67972,Four Seasons LI CSG LLC,70298,Four Seasons LI CSG,PV1,NY,NYIS,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2021,12
 65849,ClearGen LLC,70307,"Milk Street Solar, LLC",BATT,MA,ISNE,Batteries,MWH,BA,1.2,1.2,(OP) Operating,OP,2025,12
 65849,ClearGen LLC,70307,"Milk Street Solar, LLC",SOLAR,MA,ISNE,Solar Photovoltaic,SUN,PV,2.5,2.5,(OP) Operating,OP,2025,12
@@ -28405,6 +28455,7 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 68008,"Belvidere Landfill Solar 2 East, LLC",70390,IL - Ameresco - Belvidere East,BELVE,IL,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,9
 68009,"Belvidere Landfill Solar 2 West, LLC",70391,IL - Ameresco - Belvidere West,BELVW,IL,PJM,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2025,9
 68007,Lower Mine Road LLC,70392,NY - Ameresco - Southeast,SEAST,NY,NYIS,Solar Photovoltaic,SUN,PV,2.3,2.3,(OP) Operating,OP,2025,12
+68004,"SolAmerica Energy / Stephenson County IL S1, LLC",70393,Stephenson County IL S1 (CSG),S1,IL,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,10
 65849,ClearGen LLC,70394,San Luis Valley Regional Medical Center,SOLAR,CO,PSCO,Solar Photovoltaic,SUN,PV,1.3,1.3,(OP) Operating,OP,2009,11
 67207,TotalEnergies Renewables USA LLC,70396,Lincoln Public Schools,LPSBA,MA,ISNE,Batteries,MWH,BA,0.5,0.5,(OP) Operating,OP,2024,12
 67207,TotalEnergies Renewables USA LLC,70396,Lincoln Public Schools,LPSPV,MA,ISNE,Solar Photovoltaic,SUN,PV,1.0,1.0,(OP) Operating,OP,2024,12
@@ -28430,17 +28481,22 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 67082,"Headwater Energy, LLC",70434,"OWC Energy Holdings, LLC",29,CA,CISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2021,12
 68005,Peppertown Road Solar LLC,70438,VA - Ameresco - Mechanicsville,MECH1,VA,PJM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,6
 61194,Generate Capital,70444,Cottonwood - IL,11131,IL,MISO,Solar Photovoltaic,SUN,PV,4.9,4.9,(OP) Operating,OP,2026,8
+68043,"555 W 167th St Solar, LLC",70445,W 167th St,PV1,IL,PJM,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2026,10
 68040,Dragon's Breath Solar LLC PV,70446,Dragon's Breath Solar LLC PV,33699,IL,MISO,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,9
 68041,Ember Sun LLC PV,70447,Ember Sun LLC PV,45629,IL,MISO,Solar Photovoltaic,SUN,PV,3.0,3.0,(OP) Operating,OP,2026,9
+68042,"Keithsburg North Solar, LLC PV",70448,Keithsburg North Solar LLC PV,22258,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,10
 2507,City of Burbank Water and Power - (CA),70449,RITC Solar and Battery Rooftop System,RPV1,CA,LDWP,Solar Photovoltaic,SUN,PV,1.9,1.9,(OP) Operating,OP,2026,4
 2507,City of Burbank Water and Power - (CA),70449,RITC Solar and Battery Rooftop System,TSBT1,CA,LDWP,Batteries,MWH,BA,2.6,2.6,(OP) Operating,OP,2026,4
+68047,"9100 W Belmont Ave, LLC",70456,W Belmont Ave,PV1,IL,PJM,Solar Photovoltaic,SUN,PV,1.4,1.4,(OP) Operating,OP,2026,10
 65043,Madison Energy Investments LLC,70459,Green Acres PA,SP435,PA,PJM,Solar Photovoltaic,SUN,PV,20.0,20.0,(OP) Operating,OP,2026,9
+19436,Union Electric Co - (MO),70465,New Florence Renewable Energy Center,NFREC,MO,MISO,Solar Photovoltaic,SUN,PV,7.0,7.0,(OP) Operating,OP,2026,8
 65043,Madison Energy Investments LLC,70479,IL2 WI339,SP420,IL,MISO,Solar Photovoltaic,SUN,PV,3.0,3.0,(OP) Operating,OP,2025,10
 65043,Madison Energy Investments LLC,70480,IL2- WI114 Harper,SP422,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2025,10
 65043,Madison Energy Investments LLC,70481,IL2-WI384 Rodman,SP419,IL,MISO,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2025,10
 65043,Madison Energy Investments LLC,70482,Spring Run,SP403,VA,PJM,Solar Photovoltaic,SUN,PV,3.0,3.0,(OP) Operating,OP,2025,9
-65043,Madison Energy Investments LLC,70483,Mountain Point- Sharptown,SP241,MD,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,9
+65043,Madison Energy Investments LLC,70483,Mountain Point- Sharptown Community Solar,SP241,MD,PJM,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,9
 65043,Madison Energy Investments LLC,70484,St. Josephs Paterson,SP417,NJ,PJM,Solar Photovoltaic,SUN,PV,2.5,2.5,(OP) Operating,OP,2025,12
+68074,Welcome Solar III LLC,70496,Welcome Solar III,WEL03,PA,PJM,Solar Photovoltaic,SUN,PV,21.0,21.0,(OP) Operating,OP,2026,9
 68078,"ZNC Turkey Creek, LLC",70511,"ZNC Turkey Creek, LLC",MT-1,NC,DUK,Other Waste Biomass,OBG,GT,1.0,0.9,(OP) Operating,OP,2025,12
 68078,"ZNC Turkey Creek, LLC",70511,"ZNC Turkey Creek, LLC",MT-2,NC,DUK,Other Waste Biomass,OBG,GT,1.0,0.9,(OP) Operating,OP,2025,12
 68078,"ZNC Turkey Creek, LLC",70511,"ZNC Turkey Creek, LLC",MT-3,NC,DUK,Other Waste Biomass,OBG,GT,1.0,0.9,(OP) Operating,OP,2025,12
@@ -28483,3 +28539,15 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 61227,Nautilus Solar Solutions,70576,Goose Haven,3154,MD,PJM,Solar Photovoltaic,SUN,PV,1.7,1.7,(OP) Operating,OP,2025,8
 61227,Nautilus Solar Solutions,70577,Hanover 2,3154,MD,PJM,Solar Photovoltaic,SUN,PV,1.7,1.7,(OP) Operating,OP,2025,8
 61227,Nautilus Solar Solutions,70578,Carroll County MD Solar LLC,19132,MD,PJM,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2025,9
+65043,Madison Energy Investments LLC,70591,DG CS NY Lake Road,SP604,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,8
+65043,Madison Energy Investments LLC,70592,Rock Run,SP449,IL,MISO,Solar Photovoltaic,SUN,PV,2.0,2.0,(OP) Operating,OP,2026,10
+65043,Madison Energy Investments LLC,70593,Crisfield (PV),SP452,MD,PJM,Solar Photovoltaic,SUN,PV,1.5,1.5,(OP) Operating,OP,2026,8
+14401,City of Palo Alto - (CA),70598,Lytton Pump Station,CAT2,CA,CISO,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2014,9
+14401,City of Palo Alto - (CA),70599,Matadero Creek Pump Station,1,CA,CISO,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2018,8
+14401,City of Palo Alto - (CA),70600,Mayfield-Lucy Nixon School,GEN1,CA,CISO,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2013,2
+14401,City of Palo Alto - (CA),70601,Public Safety Building,KOD1,CA,CISO,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2025,9
+14401,City of Palo Alto - (CA),70602,Regional Water Quality Control Plant,CAT1,CA,CISO,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2014,4
+14401,City of Palo Alto - (CA),70603,San Francisiquito Pump Station,ONA1,CA,CISO,Petroleum Liquids,DFO,IC,1.0,1.0,(SB) Standby/Backup: available for service but not normally used,SB,2009,4
+61227,Nautilus Solar Solutions,70609,Barnes West,5948,NY,NYIS,Solar Photovoltaic,SUN,PV,5.0,5.0,(OP) Operating,OP,2026,2
+61227,Nautilus Solar Solutions,70610,St. Jacob,14240,IL,MISO,Solar Photovoltaic,SUN,PV,4.0,4.0,(OP) Operating,OP,2026,1
+65043,Madison Energy Investments LLC,70910,Willard ZPB 414,SP642,MA,ISNE,Batteries,MWH,BA,4.9,4.9,(OP) Operating,OP,2025,12

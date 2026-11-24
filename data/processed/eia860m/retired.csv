@@ -297,6 +297,8 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 3989,City of Colorado Springs - (CO),493,George Birdsall,1,CO,WACM,Natural Gas Steam Turbine,NG,ST,17.3,16.0,,,2025,12
 3989,City of Colorado Springs - (CO),493,George Birdsall,2,CO,WACM,Natural Gas Steam Turbine,NG,ST,18.8,16.0,,,2025,12
 3989,City of Colorado Springs - (CO),493,George Birdsall,3,CO,WACM,Natural Gas Steam Turbine,NG,ST,25.0,22.0,,,2025,12
+3989,City of Colorado Springs - (CO),494,Manitou Springs,1,CO,WACM,Conventional Hydroelectric,WAT,HY,2.5,2.5,,,2026,9
+3989,City of Colorado Springs - (CO),494,Manitou Springs,2,CO,WACM,Conventional Hydroelectric,WAT,HY,2.5,2.5,,,2026,9
 5036,City of Delta - (CO),496,Delta (CO),1,CO,WACM,Natural Gas Internal Combustion Engine,NG,IC,0.8,0.8,,,2014,5
 5036,City of Delta - (CO),496,Delta (CO),2,CO,WACM,Natural Gas Internal Combustion Engine,NG,IC,0.4,0.4,,,2014,5
 5036,City of Delta - (CO),496,Delta (CO),3,CO,WACM,Petroleum Liquids,DFO,IC,0.1,0.1,,,2014,5
@@ -2720,7 +2722,10 @@ entity_id,entity_name,plant_id,plant_name,generator_id,state,balancing_authority
 55983,Luminant Generation Company LLC,3455,Parkdale,1,TX,ERCO,Natural Gas Steam Turbine,NG,ST,79.6,87.0,,,2004,3
 55983,Luminant Generation Company LLC,3455,Parkdale,2,TX,ERCO,Natural Gas Steam Turbine,NG,ST,125.0,115.0,,,2004,3
 55983,Luminant Generation Company LLC,3455,Parkdale,3,TX,ERCO,Natural Gas Steam Turbine,NG,ST,136.0,125.0,,,2004,3
+55937,Entergy Texas Inc.,3459,Sabine,1,TX,MISO,Natural Gas Steam Turbine,NG,ST,239.4,202.5,,,2026,10
 55937,Entergy Texas Inc.,3459,Sabine,2,TX,MISO,Natural Gas Steam Turbine,NG,ST,239.4,204.4,,,2016,10
+55937,Entergy Texas Inc.,3459,Sabine,3,TX,MISO,Natural Gas Steam Turbine,NG,ST,473.4,369.3,,,2026,10
+55937,Entergy Texas Inc.,3459,Sabine,4,TX,MISO,Natural Gas Steam Turbine,NG,ST,591.6,490.1,,,2026,10
 54888,NRG Texas Power LLC,3460,Cedar Bayou,3,TX,ERCO,Natural Gas Steam Turbine,NG,ST,765.0,760.0,,,2007,7
 54779,AES Western Power LLC,3461,Deepwater,7,TX,,Natural Gas Steam Turbine,NG,ST,187.8,174.0,,,2005,11
 54888,NRG Texas Power LLC,3464,Greens Bayou,5,TX,ERCO,Natural Gas Steam Turbine,NG,ST,446.4,406.0,,,2017,12
